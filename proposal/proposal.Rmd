@@ -382,7 +382,7 @@ Similarly, suppose that probability distribution $F$ is described as follows:
 
 1. Define functions $f_1, ..., f_K$ such that 
 $f_k : [0, 1] \mapsto \mathcal{X}$ and $f_i(t) \neq f_j(t)$ $\forall i \in [K]$ 
-and $x \in [0, 1]$.
+and $t \in [0, 1]$.
 2. Sample labels
 $z_1, ..., z_n \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$.
 3. Sample $t_1, ..., t_n \stackrel{iid}{\sim} D$ where $D$ has support 
