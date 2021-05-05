@@ -596,9 +596,13 @@ We will motivate an approach by the following example.
 
 \begin{example}
 Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ with order statistics 
-$U_{(1)}, ..., U_{(n)}$. Then $\forall a \in (0, 1)$, $\exists N = N(\delta, a) < \infty$ such that $\forall n \geq N$, $P(\max_i U_{(i+1)} - U_{(i)} \leq a) \geq 1 - \delta / 2$. 
+$U_{(1)}, ..., U_{(n)}$. Then $\forall a \in (0, 1)$ and $\delta \in (0, 1)$, $\exists N = N(\delta, a) < \infty$ such that $\forall n \geq N$, 
 
-This can be shown by the fact that $U_{(i+1)} - U_{(i)} \sim Beta(1, n)$. Then 
+\begin{equation}
+P(\max_i U_{(i+1)} - U_{(i)} \leq a) \geq 1 - \delta / 2
+\end{equation}
+
+Where $N(\delta, a)$ is monotone increasing w.r.t. $\delta$ and $a$. To prove this, we start with the fact that $U_{(i+1)} - U_{(i)} \sim Beta(1, n)$. Then 
 
 \begin{equation}
 P(U_{(i+1)} - U_{(i)} \leq a) = 1 - (1 - a)^n
@@ -618,17 +622,34 @@ Setting $(1 - (1 - a)^{N_2})^{N_2} \geq 1 - \delta / 2$, we can solve for a fini
 If we extend this example such that \(n_1\) points are sampled uniformly
 from the segment \(f_1(t) = (t, 0)\) and \(n_2\) points are sampled
 uniformly from the segment \(f_2(t) = (t, a)\) for \(t \in [0, 1]\),
-then a sample of size \(N(\delta, a)\) is sufficient to satisfy
-\(P(\max_i \min_{i, j} X_{(i+1)} - X_{(i)} \leq \|X_i - Y_j\|) \geq 1 - \delta\)
+then a sample of size \(N(\delta, a)\) is sufficient to satisfy:
+
+\begin{equation}
+\begin{split}
+P(\max_i X_{(i+1)} - X_{(i)} \leq \min_{i, j} \|X_i - Y_j\|) \geq 1 - \delta \\
+P(\max_j Y_{(j+1)} - Y_{(j)} \leq \min_{i, j} \|X_i - Y_j\|) \geq 1 - \delta
+\end{split}
+\end{equation}
+
 for \(X_i\) in the first segment and \(Y_j\) in the second segment and
-\(X_{(i)}\) are order statistics in the first coordinate. If each
-segment corresponds to a community, this leads to the following two
-results: Single linkage clustering with \(K = 2\) will perform perfect
-community detection with probability at least \(1 - \delta\), and an
-\(\epsilon\)-neighborhood graph with \(\epsilon \in (0, a)\) will
-consists of at least 2 disjoint subgraphs such that no subgraph consists
-of members of two different communities (which is analogous to the SDP),
-with probability at least \(1 - \delta\).
+\(X_{(i)}\), \(Y_{(j)}\) are order statistics in the first coordinate.
+If each segment corresponds to a community, this leads to the following
+two results:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Single linkage clustering with \(K = 2\) will perform perfect
+  community detection with probability at least \(1 - \delta\).
+\item
+  An \(\epsilon\)-neighborhood graph with \(\epsilon \in (0, a)\) will
+  consists of at least 2 disjoint subgraphs such that no subgraph
+  consists of members of two different communities (analogous to the
+  SDP), with probability at least \(1 - \delta\).
+\end{enumerate}
+
+We can then further extend this to the case where points are drawn from
+unit segments with noise.
 
 \hypertarget{mainfold-learning}{%
 \subsubsection{Mainfold Learning}\label{mainfold-learning}}
@@ -640,7 +661,7 @@ above property still holds. Let
 \(f : [0, 1] \mapsto \mathbb{R}^d\) be a smooth function such that
 \(\int_0^1 \sqrt{1 - f'(t)} dt = 1\). Then
 \(U_{(i+1)} - U_{(i)} > \|f(U_{(i+1)}) - f(U_{(i)})\|\), so
-\(P(U_{(i+1)} - U_{(i)} < \alpha) \leq P(\|f(U_{(i+1)}) - f(U_{(i)})\| \leq a)\).
+\(P(U_{(i+1)} - U_{(i)} \leq \alpha) \leq P(\|f(U_{(i+1)}) - f(U_{(i)})\| \leq a)\).
 If the shortest distance between the two manifolds is \(a\), then the
 same \(N\) as before is sufficient, although perhaps a more lenient
 lower bound can be derived based on the shape of \(f_i(\cdot)\).
