@@ -1,0 +1,440 @@
+---
+output:
+  pdf_document:
+    includes:
+      before_body: title.sty
+    keep_tex: true
+    citation_package: natbib
+    number_sections: yes
+# output:
+#   bookdown::pdf_document2:
+#     citation_package: natbib
+#     number_citations: yes
+# output: html_document
+# output: rticles::rss_article
+fontsize: 11pt
+# geometry: "left=1in,right=1in,top=1in,bottom=1in"
+urlcolor: blue
+header-includes:
+- \usepackage{setspace}
+- \usepackage{float}
+- \usepackage{mathtools}
+- \usepackage{natbib}
+- \usepackage[linesnumbered,ruled,vlined]{algorithm2e} 
+- \setcitestyle{numbers,square,comma}
+- \usepackage{verbatim}
+- \usepackage{amsthm}
+- \usepackage{comment}
+bibliography: proposal.bib
+abstract: |
+  asdf
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      # eval = FALSE,
+                      comment = NA, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.pos = 'H', 
+                      fig.align = 'center', 
+                      fig.height = 3, 
+                      fig.width = 5, 
+                      fig.dpi = 300)
+
+options(xtable.comment = FALSE, 
+        xtable.table.placement = 'H')
+```
+
+\newcommand{\diag}{\text{diag}}
+\newcommand{\tr}{\text{Tr}}
+\newcommand{\blockdiag}{\text{blockdiag}}
+\newcommand{\indep}{\stackrel{\text{indep}}{\sim}}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+\newcommand{\Bernoulli}{\text{Bernoulli}}
+\newcommand{\Betadist}{\text{Beta}}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\theoremstyle{example}
+\newtheorem*{example}{Example}
+
+# Research Goal
+
+Typical clustering methods often work by assuming that each cluster is represented by some central point around which the data belonging to that cluster lie Such methods, including Lloyd's algorithm for $k$-means clustering \cite{1056489} and Gaussian Mixture Models \cite{doi:10.1198/016214502760047131}, involve iteratively updating the central points by averaging data belonging to each cluster and cluster memberships by comparing proximity to central points. The aim of our research is to explore clustering and community detection methods for which each cluster is represented not by a central point but by subspaces or manifolds. In addition, we aim to explore various applications of such methods and connect them to preexisting clustering and community detection problems. 
+
+# Literature Review
+
+## Subspace Clustering
+
+Subspace clustering, which assumes that points in $\mathbb{R}^d$ each lie on one of $K$ subspaces of $\mathbb{R}^d$, is an approach that has found a wide range of uses by the Statistics and Machine Learning communities, particularly within the field of Computer Vision \cite{5206547}. 
+
+Of particular interest is Sparse Subspace Clustering (SSC), which is performed by solving an optimization problem for each observed point in a sample. Given $X \in \mathbb{R}^{n \times d}$ with vectors $x_i^\top \in \mathbb{R}^d$ as rows of $X$, the optimization problem $c_i = \min\limits_{c} \|c\|_1$ subject to $x_i = X_{-i} c$ and $c^{(i)} = 0$ is solved for each $i \in [n]$. The solutions are collected into matrix $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}^\top$ to construct affinity matrix $B = |C| + |C^\top|$. If each $x_i$ lie perfectly on one of $K$ subspaces, $B$ is sparse such that $B_{ij} = 0$ $\forall x_i, x_j$ belonging to different subspaces. Then $B$ can describe a graph with at least $K$ disjoint subgraphs, and if the number of subgraphs is exactly $K$, each subgraph maps onto a subspace. 
+
+In practice, SSC is performed by solving the LASSO problems:
+
+\begin{equation} \label{eq:ssc}
+c_i = \arg\min_c \frac{1}{2} \|x_i - X_{-i} c \|_2^2 + \lambda \|c\|_1
+\end{equation}
+
+for some sparsity parameter $\lambda > 0$. The $c_i$ vectors are then collected into $C$ and $B$ as described before. If $X$ is noisy in that each $x_i$ does not lie exactly on one of $K$ subspaces but near it, the choice of $\lambda$ becomes important in guaranteeing the Subspace Detection Property (SDP) \cite{jmlr-v28-wang13}. 
+
+\begin{definition}[Subspace Detection Property] 
+Let $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ be noisy 
+points sampled from $K$ subspaces. Let $C$ and $B$ be constructed from the 
+solutions of LASSO problems as described in (\ref{eq:ssc}). If each column of 
+$C$ has nonzero norm and $B_{ij} = 0$ $\forall$ $x_i$ and $x_j$ sampled from 
+different subspaces, then $X$ obeys the Subspace Detection Property. 
+\end{definition}
+
+\begin{remark} 
+In practice, a noisy sample $X$ often does not obey SDP. 
+In such cases, $B$ is treated as an affinity matrix for a graph which 
+is then partitioned into $K$ subgraphs to obtain the clustering. On the other 
+hand, if $X$ does obey the SDP, $B$ describes a graph 
+with at least $K$ disconnected subgraphs. Ideally, when SDP holds, 
+there are exactly $K$ subgraphs which map to each subspace, 
+but it could be the case that some of the subspaces are represented by 
+multiple disconnected subgraphs. SDP is contingent 
+on choosing a sufficiently large sparsity parameter $\lambda$. 
+\end{remark}
+
+## (Generalized) Random Dot Product Graphs
+
+It has been shown by \citet{jmlr-v28-wang13} that given sufficiently low noise in $X$ and sufficiently low affinity between pairs of subspaces as measured by the cosine of the angle between subspaces, SDP holds for a specific range of $\lambda$. This provides theoretical justification for applying SSC to Random Dot Product Graphs (RDPG) \cite{athreya2017statistical} and Generalized Random Dot Product Graphs (GRDPG) \cite{rubindelanchy2017statistical} for which the data in the latent space lie on subspaces. 
+
+\begin{definition}[(Generalized) Random Dot Product Graph]
+Let $X \in \mathbb{R}^{n \times d}$ be a collection of $n$ points in $\mathcal{X} \subset \mathbb{R}^d$ such that $\forall x, y \in \mathcal{X}$, $x^\top y.\in [0, 1]$. $G = (V, E)$ is a Random Dot Product Graph if its adjacency matrix $A$ is drawn such that $A_{ij} \sim \text{Bernoulli}(x_i^\top x_j)$ for $i < j$, with $A_{ji} = A_{ij}$ and $A_{ii} = 0$ $\forall i, j \in [n]$. If on the other hand $A_{ij} \sim \text{Bernoulli}(x_i^\top I_{p, q} x_j)$ where $I_{p, q} = \text{blockdiag}(I_p, -I_q)$ and $p + q = d$, then $A$ is the adjacency matrix of a Generalized Random Dot Product Graph. These are denoted by $A \sim \text{RDPG}(X)$ and $A \sim \text{GRDPG}_{p, q}(X)$ respectively.
+
+In addition, let $F$ be a probability distribution with support $\mathcal{X}$, and $x_1, ..., x_n \stackrel{iid}{\sim} F$ with $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$. If $A$ is drawn from $X$ as before, then $(A, X) \sim \text{RDPG}(F, n)$ or $(A, X) \sim \text{GRDPG}_{p, q}(F, n)$. 
+\end{definition}
+
+\begin{definition}[Adjacency Spectral Embedding]
+Let $A \sim \text{RDPG}(X)$ for $X \in \mathcal{X} \subset \mathbb{R}^{n \times d}$. Let $A = V \Lambda V^\top$ be the approximate spectral decomposition of $A$ corresponding to the $d$ largest eigenvalues and their corresponding eigenvectors. Then the rows of $V \Lambda^{1/2}$ are the scaled Adjacency Spectral Embedding (ASE) of $A$, and the rows of $V$ are the unscaled ASE of $A$. 
+
+If $A \sim \text{GRDPG}_{p, q}(X)$, then let $A = V \Lambda V^\top$ be the approximate spectral decomposition of $A$ corresponding to the $p$ most positive and $q$ most negative eigenvalues of $A$ and their corresponding eigenvectors. Then the rows of $V |\Lambda|^{1/2}$ and $V$ are the scaled and unscaled ASE of $A$ respectively.
+\end{definition}
+
+\citeauthor{athreya2017statistical} showed that under mild conditions, if $(A_n, X_n) \sim \text{RDPG}(F, n)$, if $\hat{X}_n$ is the scaled ASE of $A_n$, for some sequence of orthogonal matrices $W_n$, 
+
+\begin{equation}
+\max_i \|(\hat{X}_n)_i - W_n (X_n)_i \| \stackrel{a.s.}{\to} 0
+\end{equation}
+
+Similarly, \citeauthor{rubindelanchy2017statistical} showed that for $(A_n, X_n) \sim \text{GRDPG}_{p, q}(F, n)$, 
+
+\begin{equation}
+\max_i \|(\hat{X}_n)_i - Q_n (X_n)_i \| \stackrel{a.s.}{\to} 0
+\end{equation}
+
+where $Q_n$ is a sequence of matrices in $\mathbb{O}(p, q)$, the indefinite orthogonal group of order $p, q$.
+
+Given sufficiently large sample size $n$, the scaled ASE of affinity matrix $A$ drawn from a RDPG or GRDPG will asymptotically approach the original latent positions $X$ with probability 1, up to a linear transformation (orthogonal transformation for the RDPG, a composition of an orthogonal transformation and scale transformation for the GRDPG). Thus if $X$ consists of points that lie on subspaces of $\mathbb{R}^d$, then both the scaled and unscaled ASE of $A \sim \text{RDPG}(X)$ or $A \sim \text{GRDPG}(X)$ will consist of points that lie near subspaces, with some noise that almost surely goes to $0$ as $n \to \infty$, motivating ASE followed by SSC as an asymptotically consistent method for community detection. The Popularity Adjusted Block Model (PABM) \cite{307cbeb9b1be48299388437423d94bf1} is a generative graph model with underlying communities such that each community lies on a subspace. \citet{noroozi2019estimation} showed that SSC is able to recover the subspaces and therefore perform community detection for the PABM given $P = X I_{p, q} X^\top$, the edge probability matrix, rather than $A$, the adjacency matrix. Combining the results of \citeauthor{rubindelanchy2017statistical} and \citeauthor{jmlr-v28-wang13}, it should be possible to recover the communities using $A$ as well.
+
+## Manifold Learning
+
+In addition to subspaces, \citet{trosset2020learning} showed that the ASE of a RDPG can be used to recover one-dimensional manifolds. Suppose $f : [0, 1] \mapsto \mathcal{X}$ such that $f$ is smooth and $\mathcal{X}$ represents a curve or one-dimensional manifold in $\mathbb{R}^d$. If $t_1, ..., t_n \stackrel{iid}{\sim} F$ such that $F$ has support $[0, 1]$, the latent positions are $x_i = f(t_i)$ with $y_i$ is its corresponding point in the scaled ASE, and $d_{\epsilon}(\cdot, \cdot)$ is the shortest path distance of an $\epsilon$-neighborhood graph. Under certain mild conditions, the shortest path distances of the $\epsilon$-neighborhood graph of the ASE approaches the arc lengths along $f$: 
+
+\begin{equation}
+d_{\epsilon}(y_i, y_j) \stackrel{p}{\to} \int_{t_i}^{t_j} \sqrt{1 - f'(t)} dt
+\end{equation}
+
+This suggests that if the latent positions of a RDPG consists of $K$ disjoint manifolds, the $\epsilon$-neighborhood graph will consist of $K$ disjoint subgraphs as $\epsilon \to 0$ and $n \to \infty$. 
+
+# Proposed Research
+
+## Subspace Clustering
+
+As discussed in \S 2.2, if the latent positions of a RDPG or GRDPG model are such that they lie on a small number of subspaces, ASE followed by SSC may be able to identify whether vertices of the graph $v_i, v_j$ belong to the same subspace or to different subspaces, and one such model that is consistent with this construction is the PABM. 
+
+### Popularity Adjusted Block Model
+
+We will first define the PABM.
+
+\begin{definition}[Popularity Adjusted Block Model]
+\label{pabm}
+Let $P \in [0, 1]^{n \times n}$ be a symmetric edge probability matrix for a 
+set of $n$ 
+vertices, $V$. Each vertex has a community label $1, ..., K$, and the rows and 
+columns of $P$ are arranged by community label such that $n_k \times n_l$ block 
+$P^{(kl)}$ describes the edge probabilities between vertices in communities 
+$k$ and $l$ ($P^{(lk)} = (P^{(kl)})^\top$). 
+Let graph $G = (V, E)$ be an undirected, unweighted graph such 
+that its corresponding adjacency matrix $A \in \{0, 1\}^{n \times n}$ is a 
+realization of $\Bernoulli(P)$, i.e., 
+$A_{ij} \indep \Bernoulli(P_{ij})$ for $i > j$ 
+($A_{ij} = A_{ji}$ and $A_{ii} = 0$). 
+
+If each block $P^{(kl)}$ can be written as the outer product of two vectors:
+
+\begin{equation} \label{eq:pabm}
+  P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top
+\end{equation}
+
+for a set of $K^2$ fixed vectors $\{\lambda^{(st)}\}_{s, t = 1}^K$ where each 
+$\lambda^{(st)}$ is a column vector 
+of dimension $n_s$, then graph $G$ and its corresponding adjacency matrix $A$ 
+is a realization of a popularity adjusted block model with parameters 
+$\{\lambda^{(st)}\}_{s, t = 1}^K$. 
+\end{definition}
+
+We will use the notation $A \sim \text{PABM}(\{\lambda^{(kl)}\}_K)$ to denote a random 
+adjacency matrix $A$ drawn from a PABM with parameters $\lambda^{(kl)}$ 
+consisting of $K$ underlying communities.
+
+It is trivial to show that the PABM, as well as all graphs such that the adjacency matrix is drawn such that $A_{ij} \sim Bernoulli(P_{ij})$, is a special case of the GRDPG. It can also be shown that the latent positions of the PABM under the GRDPG framework consists of $K$ $K$-dimensional subspaces in $\mathbb{R}^{K^2}$. While there is no unique latent configuration $X$ such that $X X^\top = P$, the edge probability $P$ for the PABM, they all have this subspace structure, and one in particular consists of *orthogonal* subspaces.
+
+\begin{theorem}[Connecting the PABM to the GRDPG for $K = 2$]
+\label{theorem1}  
+Let 
+
+$$X = \begin{bmatrix} 
+\lambda^{(11)} & \lambda^{(12)} & 0 & 0 \\ 
+0 & 0 & \lambda^{(21)} & \lambda^{(22)} 
+\end{bmatrix}$$
+
+$$U = \begin{bmatrix} 1 & 0 & 0 & 0 \\
+0 & 0 & 1 / \sqrt{2} & 1 / \sqrt{2} \\
+0 & 0 & 1 / \sqrt{2} & - 1 / \sqrt{2} \\
+0 & 1 & 0 & 0 \end{bmatrix}$$
+
+where each $\lambda^{(kl)}$ is a vector as in Definition 1. 
+Then $A \sim GRDPG_{3, 1}(X U)$ and $A \sim PABM(\{(\lambda^{(kl)}\}_2)$ are 
+equivalent.
+\end{theorem}
+
+\begin{theorem}[Generalization to $K > 2$] 
+\label{theorem2}
+There exists a block diagonal matrix 
+$X \in \mathbb{R}^{n \times K^2}$ defined by PABM parameters 
+$\{\lambda^{(kl)}\}_K$ and orthonormal matrix 
+$U \in \mathbb{R}^{K^2 \times K^2}$ that is fixed 
+for each $K$ such that $A \sim GRDPG_{K (K+1) / 2, K (K-1) / 2}(XU)$ and 
+$A \sim PABM(\{(\lambda^{(kl)}\})_K)$ are equivalent.
+\end{theorem}
+
+\begin{proof}
+Define the following matrices from $\{\lambda^{(kl)}\}_K$: 
+
+$$\Lambda^{(k)} = 
+\begin{bmatrix} \lambda^{(k,1)} & \cdots & \lambda^{(k, K)} \end{bmatrix}
+\in \mathbb{R}^{n_k \times K}$$
+
+\begin{equation} \label{eq:xy}
+X = \blockdiag(\Lambda^{(1)}, ..., \Lambda^{(K)}) \in \mathbb{R}^{n \times K^2}
+\end{equation}
+
+$$L^{(k)} = \blockdiag(\lambda^{(1k)}, ..., \lambda^{(Kk)}) \in 
+\mathbb{R}^{n \times K}$$
+
+$$Y = \begin{bmatrix} L^{(1)} & \cdots & L^{(K)} \end{bmatrix} \in 
+\mathbb{R}^{n \times K^2}$$
+
+Then $P = X Y^\top$.
+
+Similar to the $K = 2$ case, we have $Y = X \Pi$ for a permutation matrix
+$\Pi$, resulting in $P = X \Pi X^\top$.  
+The permutation described by $\Pi$ has $K$ fixed points, which correspond to 
+$K$ eigenvalues equal to $1$ with corresponding eigenvectors $e_k$ where 
+$k = r (K + 1) + 1$ for $r = 0, ..., K - 1$. It also has 
+$\binom{K}{2} = K (K - 1) / 2$ cycles of order $2$. Each cycle corresponds to 
+a pair of eigenvalues $+1$ and $-1$ and a pair of eigenvectors 
+$(e_s + e_t) / \sqrt{2}$ and $(e_s - e_t) / \sqrt{2}$.
+
+Then $\Pi$ has $K (K + 1) / 2$ eigenvalues equal to $1$ and $K (K - 1) / 2$ 
+eigenvalues equal to $-1$. $\Pi$ has the decomposed form 
+
+\begin{equation} \label{eq:permutation}
+\Pi = U I_{K (K + 1) / 2, K (K - 1) / 2} U^\top
+\end{equation}
+
+The edge probability matrix then can be written as:
+
+\begin{equation} \label{eq:pabm-grdpg}
+P = X U I_{p, q} (X U)^\top
+\end{equation}
+
+\begin{equation} \label{eq:p}
+p = K (K + 1) / 2
+\end{equation}
+
+\begin{equation} \label{eq:q}
+q = K (K - 1) / 2
+\end{equation}
+
+and we can describe the PABM with $K$ communities as a GRDPG with latent 
+positions $X U$ with signature $\big( K (K + 1) / 2, K (K - 1) / 2 \big)$.
+\end{proof}
+
+\begin{example}[$K = 3$] Using the same notation as in Theorem \ref{theorem2}:
+
+$$X = \begin{bmatrix} 
+\lambda^{(11)} & \lambda^{(12)} & \lambda^{(13)} & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & \lambda^{(21)} & \lambda^{(22)} & \lambda^{(23)} & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & \lambda^{(31)} & \lambda^{(32)} & \lambda^{(33)}
+\end{bmatrix}$$
+
+$$Y = \begin{bmatrix} 
+\lambda^{(11)} & 0 & 0 & \lambda^{(12)} & 0 & 0 & \lambda^{(13)} & 0 & 0 \\
+0 & \lambda^{(21)} & 0 & 0 & \lambda^{(22)} & 0 & 0 & \lambda^{(23)} & 0 \\
+0 & 0 & \lambda^{(31)} & 0 & 0 & \lambda^{(32)} & 0 & 0 & \lambda^{(33)}
+\end{bmatrix}$$
+
+Then $P = X Y^\top$ and $Y = X \Pi$ where $\Pi$ is a permutation matrix 
+consisting of $3$ fixed points and $3$ cycles of order 2:
+
+$$\Pi = \begin{bmatrix} 
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}$$
+
+* Positions 1, 5, 9 are fixed.
+
+* The cycles of order 2 are $(2, 4)$, $(3, 7)$, and $(6, 8)$.
+    
+Therefore, we can decompose $\Pi = U I_{6, 3} U^\top$ where the first three 
+columns of $U$ consist of $e_1$, $e_5$, and $e_9$ corresponding to the fixed 
+positions $1$, $5$, and $9$, the next three columns consist of eigenvectors 
+$(e_k + e_l) / \sqrt{2}$, and the last three columns consist of eigenvectors 
+$(e_k - e_l) / \sqrt{2}$, where pairs $(k, l)$ correspond to the cycles of 
+order 2 described above.
+
+The latent positions are the rows of  
+$$XU = \begin{bmatrix}
+  \lambda^{(11)} & 0 & 0 & 
+  \lambda^{(12)} / \sqrt{2} & \lambda^{(13)} / \sqrt{2} & 0 & 
+  \lambda^{(12)} / \sqrt{2} & \lambda^{(13)} / \sqrt{2} & 0 \\
+  0 & \lambda^{(22)} & 0 & 
+  \lambda^{(21)} / \sqrt{2} & 0 & \lambda^{(23)} / \sqrt{2} & 
+  -\lambda^{(21)} / \sqrt{2} & 0 & \lambda^{(23)} / \sqrt{2} \\
+  0 & 0 & \lambda^{(33)} & 
+  0 & \lambda^{(31)} / \sqrt{2} & \lambda^{(32)} / \sqrt{2} & 
+  0 & -\lambda^{(31)} / \sqrt{2} & -\lambda^{(32)} / \sqrt{2}
+\end{bmatrix}$$
+\end{example}
+
+This leads to the following theorem.
+
+\begin{theorem}
+\label{osc}
+Let $P = V \Lambda V^\top$ be the spectral decomposition of the edge probability matrix of a PABM. Define $B = n V V^\top$. Then $B_{ij} = 0$ $\forall i, j$ in different communities. 
+\end{theorem}
+
+If $\hat{V}$ is the *unscaled* ASE of $A$, Theorem \ref{osc} and results from  \citeauthor{rubindelanchy2017statistical} together imply $n \hat{V} \hat{V}^\top \stackrel{a.s.}{\to} 0$, leading to the following result:
+
+\begin{algorithm}[t]
+  \DontPrintSemicolon
+  \SetAlgoLined
+  \KwData{Adjacency matrix $A$, number of communities $K$}
+  \KwResult{Community assignments $1, ..., K$}
+    Compute the eigenvectors of $A$ that correspond to the $K (K+1) / 2$ most 
+    positive eigenvalues and $K (K-1) / 2$ most negative eigenvalues. Construct 
+    $V$ using these eigenvectors as its columns.\;
+    Compute $B = |n V V^\top|$, applying $|\cdot|$ entry-wise.\;
+    Construct graph $G$ using $B$ as its similarity matrix.\;
+    Partition $G$ into $K$ disconnected subgraphs  
+    (e.g., using edge thresholding or spectral clustering).\;
+    Map each partition to the community labels $1, ..., K$.\;
+  \caption{Orthogonal Spectral Clustering.}
+\end{algorithm}
+
+\begin{theorem}
+\label{theorem4} 
+Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC 
+(Alg. 1). Then $\forall$ pairs $(i, j)$ belonging to different communities 
+and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
+
+\begin{equation} \label{eq:thm4}
+\max_{i, j} |n (\hat{v}_n^{(i)})^\top \hat{v}_n^{(j)}| = 
+O_P \Big( \frac{(\log n)^c}{\sqrt{n \rho_n}} \Big)
+\end{equation}
+
+This provides the result that $\forall i, j$ in different communities, 
+$\hat{B}_n^{(ij)} \stackrel{a.s.}{\to} 0$.
+\end{theorem}
+
+Since every ASE of the PABM consists of subspaces and as $n \to \infty$ each point of the ASE approaches its subspace almost surely, SSC should also work for PABM community detection. Combining this with the results by \citeauthor{jmlr-v28-wang13}, which state that if the points lie sufficiently close to their respective subspaces and the cosine of the angles between subspaces is sufficiently small, SDP will hold. We show that the unscaled ASE exhibits exactly these conditions for sufficiently large $n$.
+
+\begin{theorem}
+\label{theorem5}
+Let $P_n$ describe the edge probability matrix of the PABM with 
+$n$ vertices, and let $A_n \sim \Bernoulli(P_n)$.  Let $\hat{V}_n$ be the 
+matrix of eigenvectors of $A_n$ corresponding to the $K (K + 1) / 2$ most
+positive and $K (K - 1) / 2$ most negative eigenvalues. Then 
+$\exists \lambda > 0$ and $N \in \mathbb{N}$ such that when $n > N$, 
+$\sqrt{n} \hat{V}_n$ obeys the subspace detection property with probability 1.
+\end{theorem}
+
+## Manifold Clustering
+
+We would like to extend subspace clustering to manifold clustering. The problem setup is as follows: Suppose that in the latent space $\mathcal{X} \subset \mathbb{R}^d$, sample $X$ of $n$ points lie on a union of $K$ disjoint manifolds with each manifold corresponding to a community. If $A \sim \text{RDPG}(X)$, we wish to recover the community labels (up to permutation) from $A$. 
+
+Similarly, suppose that probability distribution $F$ is described as follows:
+
+1. Define functions $f_1, ..., f_K$ such that 
+$f_k : [0, 1] \mapsto \mathcal{X}$ and $f_i(t) \neq f_j(t)$ $\forall i \in [K]$ 
+and $x \in [0, 1]$.
+2. Sample labels
+$z_1, ..., z_n \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$.
+3. Sample $t_1, ..., t_n \stackrel{iid}{\sim} D$ where $D$ has support 
+$[0, 1]$. 
+4. Set latent positions $x_i = f_{z_i}(t_i)$ and 
+$X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$.
+
+Then if $(A, X) \sim \text{RDPG}(F, n)$ and we observe $A$, we wish to recover hidden labels $z_1, ..., z_n$.
+
+### Affine Subspaces
+
+We will motivate an approach by the following example.
+
+\begin{example}
+Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ with order statistics 
+$U_{(1)}, ..., U_{(n)}$. Then $\forall a \in (0, 1)$, $\exists N = N(\delta, a) < \infty$ such that $\forall n \geq N$, $P(\max_i U_{(i+1)} - U_{(i)} \leq a) \geq 1 - \delta / 2$. 
+
+This can be shown by the fact that $U_{(i+1)} - U_{(i)} \sim Beta(1, n)$. Then 
+
+\begin{equation}
+P(U_{(i+1)} - U_{(i)} \leq a) = 1 - (1 - a)^n
+\end{equation}
+
+and 
+
+\begin{equation}
+\label{eq:unsolvable}
+P(\max_i U_{(i+1)} - U_{(i)} \leq a) \geq (P(U_{(i+1)} - U_{(i)} \leq a))^n = (1 - (1 - a)^n)^n
+\end{equation}
+
+This expression is monotone increasing $\forall n \geq N_1$ for some $N_1 < \infty$. 
+Setting $(1 - (1 - a)^{N_2})^{N_2} \geq 1 - \delta / 2$, we can solve for a finite ${N_2}$. Then $N = \max(N_1, N_2)$.
+\end{example}
+
+If we extend this example such that $n_1$ points are sampled uniformly from the segment $f_1(t) = (t, 0)$ and $n_2$ points are sampled uniformly from the segment $f_2(t) = (t, a)$ for $t \in [0, 1]$, then a sample of size $N(\delta, a)$ is sufficient to satisfy $P(\max_i \min_{i, j} X_{(i+1)} - X_{(i)} \leq \|X_i - Y_j\|) \geq 1 - \delta$ for $X_i$ in the first segment and $Y_j$ in the second segment and $X_{(i)}$ are order statistics in the first coordinate. If each segment corresponds to a community, this leads to the following two results: Single linkage clustering with $K = 2$ will perform perfect community detection with probability at least $1 - \delta$, and an $\epsilon$-neighborhood graph with $\epsilon \in (0, a)$ will consists of at least 2 disjoint subgraphs such that no subgraph consists of members of two different communities (which is analogous to the SDP), with probability at least $1 - \delta$.
+
+### Mainfold Learning
+
+If instead of sampling uniformly from line segments of unit length, we sample uniformly from a 1 dimensional manifolds of unit length, the above property still holds. Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ and $f : [0, 1] \mapsto \mathbb{R}^d$ be a smooth function such that $\int_0^1 \sqrt{1 - f'(t)} dt = 1$. Then $U_{(i+1)} - U_{(i)} > \|f(U_{(i+1)}) - f(U_{(i)})\|$, so $P(U_{(i+1)} - U_{(i)} < \alpha) \leq P(\|f(U_{(i+1)}) - f(U_{(i)})\| \leq a)$. If the shortest distance between the two manifolds is $a$, then the same $N$ as before is sufficient, although perhaps a more lenient lower bound can be derived based on the shape of $f_i(\cdot)$. 
+
+# Summary
+
+# Estimated Timeline of Completion
+
+Literature review: August 2021
+
+Complete proofs of main theorems: January 2022
+
+Simulations and real data analyses: March 2022
+
+Dissertation completion: April 2022
+
+\newpage
+
+# References
