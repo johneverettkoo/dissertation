@@ -440,7 +440,7 @@ We can then further extend this to the case where points are drawn from unit seg
 
 ### Mainfold Learning
 
-If instead of sampling uniformly from line segments of unit length, we sample uniformly from a 1 dimensional manifolds of unit length, the above property still holds. Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ and $f : [0, 1] \mapsto \mathbb{R}^d$ be a smooth function such that $\int_0^1 \sqrt{1 - f'(t)} dt = 1$. Then $U_{(i+1)} - U_{(i)} > \|f(U_{(i+1)}) - f(U_{(i)})\|$, so $P(U_{(i+1)} - U_{(i)} \leq \alpha) \leq P(\|f(U_{(i+1)}) - f(U_{(i)})\| \leq a)$. If the shortest distance between the two manifolds is $a$, then the same $N$ as before is sufficient, although perhaps a more lenient lower bound can be derived based on the shape of $f_i(\cdot)$. 
+If instead of sampling uniformly from line segments of unit length, we sample uniformly from a 1 dimensional manifolds of unit length, the above property still holds. Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ and $f : [0, 1] \mapsto \mathbb{R}^d$ be a smooth function such that $\int_0^1 \sqrt{1 - f'(t)} dt = 1$ and $\int_u^v \sqrt{1 - f'(t)} dt = \|u - v\|$. Then $U_{(i+1)} - U_{(i)} > \|f(U_{(i+1)}) - f(U_{(i)})\|$, so $P(U_{(i+1)} - U_{(i)} \leq \alpha) \leq P(\|f(U_{(i+1)}) - f(U_{(i)})\| \leq a)$. If the shortest distance between the two manifolds is $a$, then the same $N$ as before is sufficient, although perhaps a more lenient lower bound can be derived based on the shape of $f_i(\cdot)$. 
 
 
 
