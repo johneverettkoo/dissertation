@@ -591,9 +591,6 @@ $\hat{B}_n^{(ij)} \stackrel{a.s.}{\to} 0$.
   \caption{Orthogonal Spectral Clustering.}
 \end{algorithm}
 
-\hypertarget{subspace-clustering}{%
-\subsubsection{Subspace Clustering}\label{subspace-clustering}}
-
 In addition to OSC, since the communities are subspaces in the latent
 space, we can leverage existing methods for subspace clustering. Of
 particular interest is Sparse Subspace Clustering (SSC), which is
@@ -619,7 +616,7 @@ c_i = \arg\min_c \frac{1}{2} \|x_i - X_{-i} c \|_2^2 + \lambda \|c\|_1
 
 for some sparsity parameter \(\lambda > 0\). The \(c_i\) vectors are
 then collected into \(C\) and \(B\) as described before. If \(X\) is
-noisy in that each \(x_i\) does not lie exactly on one of \(K\)
+noisy such that each \(x_i\) does not lie exactly on one of \(K\)
 subspaces but near it, the choice of \(\lambda\) becomes important in
 guaranteeing the Subspace Detection Property (SDP)
 \cite{jmlr-v28-wang13}.
