@@ -430,17 +430,23 @@ Then if $(A, X) \sim \text{RDPG}(F, n)$ and we observe $A$, we wish to recover h
 
 ### Affine Segments
 
+In this section, we will consider latent positions sampled uniformly from parallel unit length segments.
+
+\begin{example}
+Let $U_1, ..., U_{n_1}, V_1, ..., V_{n_2} \iid Uniform(0, 1)$, $f_1(t) = (t, 0)$, and $f_2(t) = (t, a)$. $X_i = f_1(U_i)$ and $Y_j = f_2(V_j)$ $\forall i \in [n_1]$ and $j \in [n_2]$. If we observe $X_1, ..., X_{n_1}, Y_1, ..., Y_{n_2}$, what approach will allow us to group the observations by segment?
+\end{example}
+
 We will motivate an approach by the following example.
 
 \begin{example}
-Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ with order statistics 
+Let $U_1, ..., U_n \iid Uniform(0, 1)$ with order statistics 
 $U_{(1)}, ..., U_{(n)}$. Then $\forall a \in (0, 1)$ and $\delta \in (0, 1)$, $\exists N = N(\delta, a) < \infty$ such that $\forall n \geq N$, 
 
 \begin{equation}
 P(\max_i U_{(i+1)} - U_{(i)} \leq a) \geq 1 - \delta / 2
 \end{equation}
 
-Where $N(\delta, a)$ is monotone increasing w.r.t. $\delta$ and $a$. To prove this, we start with the fact that $U_{(i+1)} - U_{(i)} \sim Beta(1, n)$. Then 
+Where $N(\delta, a)$ is monotone increasing with respect to $\delta$ and $a$. To prove this, we start with the fact that $U_{(i+1)} - U_{(i)} \sim Beta(1, n)$. Then 
 
 \begin{equation}
 P(U_{(i+1)} - U_{(i)} \leq a) = 1 - (1 - a)^n
@@ -460,13 +466,11 @@ Setting $(1 - (1 - a)^{N_2})^{N_2} \geq 1 - \delta / 2$, we can solve for a fini
 If we extend this example such that $n_1$ points are sampled uniformly from the segment $f_1(t) = (t, 0)$ and $n_2$ points are sampled uniformly from the segment $f_2(t) = (t, a)$ for $t \in [0, 1]$, then a sample of size $N(\delta, a)$ is sufficient to satisfy:
 
 \begin{equation}
-\begin{split}
-P(\max_i X_{(i+1)} - X_{(i)} \leq \min_{i, j} \|X_i - Y_j\|) \geq 1 - \delta \\
-P(\max_j Y_{(j+1)} - Y_{(j)} \leq \min_{i, j} \|X_i - Y_j\|) \geq 1 - \delta
-\end{split}
+P(\max_i X_{(i+1)} - X_{(i)} \leq a \leq \min_{i, j} \|X_i - Y_j\|) 
+\geq 1 - \delta / 2
 \end{equation}
 
-for $X_i$ in the first segment and $Y_j$ in the second segment and $X_{(i)}$, $Y_{(j)}$ are order statistics in the first coordinate. If each segment corresponds to a community, this leads to the following two results: 
+and similar for $P(\max_j Y_{(j+1)} - Y_{(j)} \leq \min_{i, j} \|X_i - Y_j\|)$, for $X_i$ in the first segment and $Y_j$ in the second segment and $X_{(i)}$, $Y_{(j)}$ are order statistics in the first coordinate. If each segment corresponds to a community, this leads to the following two results: 
 
 1. Single linkage clustering with $K = 2$ will perform perfect community detection with probability at least $1 - \delta$.
 
