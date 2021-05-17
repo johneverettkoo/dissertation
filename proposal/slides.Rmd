@@ -44,10 +44,11 @@ set.seed(314159)
 * Preliminaries
   * Block Models and Community Detection
   * (Generalized) Random Dot Product Graphs
-* Connecting Block Models to (G)RDPG Models
-  * Popularity Adjusted Block Model
+  * Connecting Block Models to the (G)RDPG
+* The Popularity Adjusted Block Model
+  * Connecting the PABM to the GRDPG
   * Subspace Clustering
-* Community Detection in the (G)RDPG
+* Community Detection for the (G)RDPG
 
 # Preliminaries
 
@@ -414,7 +415,7 @@ Remarks:
 * For large $n$, we can identify $\lambda$ for SDP (Wang and Xu, 2016).
 * SDP does not guarantee community detection.
 
-# Generalizations to Community Detection for the (G)RDPG
+# General Community Detection for the (G)RDPG
 
 ## Generative Model
 
@@ -477,12 +478,12 @@ as.data.frame(data.matrix) %>%
         axis.ticks = element_blank())
 ```
 
-$\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
+Then $\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
 $\exists N(a, \delta, K) < \infty$ such that when $\min_k n_k \geq N$, 
 with probability at least $1 - \delta$,
 
 1. Single linkage clustering will produce perfect community detection.
-2. An $\epsilon$-neighborhood graph with $\epsilon \in (0, a)$ will consist of 
+2. An $\epsilon$-neighborhood graph with $\epsilon \leq a$ will consist of 
 at least $K$ disjoint subgraphs such that no subgraph contains members of two 
 different communities.
 
@@ -515,14 +516,14 @@ as.data.frame(data.matrix) %>%
         axis.ticks = element_blank())
 ```
 
-Then $\forall a \in (0, 1)$, $\delta \in (0, 1)$, $K \geq 2$, and $\xi \leq a / 3$, 
+Then $\forall a \in (0, 1)$, $\delta \in (0, 1)$, $K \geq 2$, $\xi \leq a / 3$, 
 $\exists N(a, \delta, K, \xi) < \infty$ such that when $\min_k n_k \geq N$, 
 with probability at least $1 - \delta$,
 
 1. Single linkage will produce perfect community detection.
-2. An $\epsilon$-neighborhood graph will consist of at least $K$ sub-graphs with no subgraph containing vertices of two communities.
+2. An $\epsilon$-neighborhood graph will consist of at least $K$ sub-graphs with no subgraph containing vertices from multiple communities.
 
-This also holds for noisy points sampled on one-dimensional manifolds such that the manifolds are distance at least $a$ apart.
+This also holds for noisy points sampled from one-dimensional manifolds such that the manifolds are distance at least $a$ apart.
 
 ## Future Work
 
