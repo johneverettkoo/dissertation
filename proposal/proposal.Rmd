@@ -78,9 +78,9 @@ The aim of our research is to develop consistent community detection techniques 
 
 Let $G = (V, E)$ be an undirected, unweighted graph with no self-loops and $n$ vertices. Denote $A \in \{0, 1\}^{n \times n}$ as the adjacency matrix for $G$ such that $A_{ij} = 1$ if there exists an edge between vertices $i$ and $j$ and $A_{ij} = 0$ otherwise. Because $G$ is symmetric and contains no self-loops, $A_{ij} = A_{ji}$ and $A_{ii} = 0$ for $i, j \in [n]$. We further restrict our analyses to independent Bernoulli graphs. Let $P \in [0, 1]^{n \times n}$ be a symmetric matrix of edge probabilities. Graph $G$ is sampled from $P$ by drawing $A_{ij} \indep \Bernoulli(P_{ij})$ for each $1 \leq i < j \leq n$ ($A_{ji} = A_{ij}$ and $A_{ii} = 0$). Finally, we denote $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top \in \mathbb{R}^{n \times d}$ as the sample $x_1, ..., x_n \in \mathbb{R}^d$ and $z_1, ..., z_n \in [K]$ as their corresponding (hidden) labels. 
 
-# Literature Review
+# Preliminaries
 
-## Generative Graph Models and Community Detection
+## Block Models
 
 Generative models for independent Bernoulli graphs involve defining the edge probability matrix $P$ whose $ij$^th^ entry is the probability of an edge between vertices $i$ and $j$ for each $i, j \in [n]$. In order to motivate community detection methods, we restrict the generative model such that for each pair of vertices, the probability of an edge between the vertices is conditioned on their labels. One such model is the Stochastic Block Model (SBM) \cite{doi:10.1080/0022250X.1971.9989788}: Given $K$ communities and each vertex belonging to one community, the SBM restricts $P$ to $K (K + 1) / 2$ unique entries such that $P_{ij} = p_{z_i z_j}$ where $p_{kl} = p_{lk}$ is the probability of an edge between each vertex in community $k$ to each vertex in community $l$. The homogeneous SBM further restricts $P$ to two unique entries: $P_{ij} = p$ if $z_i = z_j$ and $P_{ij} = q$ otherwise. Several generalizations of the SBM have been introduced since, including the Degree Corrected Block Model (DCBM) and the Popularity Adjusted Block Model (PABM). Like the SBM, these models involve imposing some restriction on $P$ based on community labels (and possibly other factors).
 
@@ -148,13 +148,11 @@ d_{\epsilon}(y_i, y_j) \stackrel{p}{\to} \int_{t_i}^{t_j} \sqrt{\sum_r^d \Big( \
 
 \citet{athreya2020estimation} extended this further by generating a RDPG from a mixture of distributions on a curve. In their example, points were sampled from a mixture of two Beta distributions on the Hardy-Weinberg curve to construct the latent positions of a RDPG, with the goal of recovering the hidden mixture distribution from an observed graph. 
 
-# Proposed Research
+# The Popularity Adjusted Block Model
 
-## Connecting Existing Generative Graph Models to the RDPG and GRDPG
+As discussed in \S 2.1, all Bernoulli graph models can be expressed as a RDPG or GRDPG model, and in particular, the (associative) SBM is a RDPG with a very specific structure in the latent space. A similar result has been shown for the DCBM \cite{lyzinski2014}. We can also extend this to the PABM. In \S 3.3.1, we show that the PABM is equivalent to the GRDPG model for which the communities correspond to subspaces in the latent configuration. We further show that while the latent configuration is not unique, there exists one in particular for which the subspaces are orthogonal. This leads to two straightforward methods for community detection, one involving computing inner products in the ASE and another which is a slight modification of an existing algorithm for subspace clustering. Finally, we will briefly explore alternative, non-spectral-based methods for community detection in the ASE involving Expectation Maximization, MCMC sampling, and Mean Field Variational Inference. 
 
-As discussed in \S 2.1, all Bernoulli graph models can be expressed as a RDPG or GRDPG model, and in particular, the (associative) SBM is a RDPG with a very specific structure in the latent space. A similar result has been shown for the DCBM \cite{lyzinski2014}. We have also extended this to the PABM. In \S 3.3.1, we show that the PABM is equivalent to the GRDPG model for which the communities correspond to subspaces in the latent configuration. We further show that while the latent configuration is not unique, there exists one in particular for which the subspaces are orthogonal. This leads to two straightforward methods for community detection, one involving computing inner products in the ASE and another which is a slight modification of an existing algorithm for subspace clustering. Finally, we will briefly explore alternative, non-spectral-based methods for community detection in the ASE involving Expectation Maximization, MCMC sampling, and Mean Field Variational Inference. 
-
-### Popularity Adjusted Block Model
+## Connecting the PABM to the GRDPG
 
 We first define the PABM.
 
@@ -367,7 +365,7 @@ $\hat{B}_n^{(ij)} \stackrel{a.s.}{\to} 0$.
   \caption{Orthogonal Spectral Clustering.}
 \end{algorithm}
 
-Since the communities are subspaces in the latent space, we can also use existing methods for subspace clustering on the ASE. Of particular interest is Sparse Subspace Clustering (SSC), which is performed by solving an optimization problem for each observed point in a sample. Given $X \in \mathbb{R}^{n \times d}$ with vectors $x_i^\top \in \mathbb{R}^d$ as rows of $X$, the optimization problem $c_i = \min\limits_{c} \|c\|_1$ subject to $x_i = X_{-i} c$ and $c^{(i)} = 0$ is solved for each $i \in [n]$. The solutions are collected into matrix $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}^\top$ to construct affinity matrix $B = |C| + |C^\top|$. If each $x_i$ lie perfectly on one of $K$ subspaces, $B$ is sparse such that $B_{ij} = 0$ $\forall x_i, x_j$ belonging to different subspaces. Then $B$ can describe a graph with at least $K$ disjoint subgraphs, and if the number of subgraphs is exactly $K$, each subgraph maps onto a subspace. 
+Since the communities are subspaces in the latent space, we can also use existing methods for subspace clustering on the ASE. Of particular interest is Sparse Subspace Clustering (SSC), which is performed by solving an optimization problem for each observed point in a sample. Given $X \in \mathbb{R}^{n \times d}$ with vectors $x_i^\top \in \mathbb{R}^d$ as rows of $X$, the optimization problem $c_i = \arg\min\limits_{c} \|c\|_1$ subject to $x_i = X_{-i} c$ and $c^{(i)} = 0$ is solved for each $i \in [n]$. The solutions are collected into matrix $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}^\top$ to construct affinity matrix $B = |C| + |C^\top|$. If each $x_i$ lie perfectly on one of $K$ subspaces, $B$ is sparse such that $B_{ij} = 0$ $\forall x_i, x_j$ belonging to different subspaces. Then $B$ can describe a graph with at least $K$ disjoint subgraphs, and if the number of subgraphs is exactly $K$, each subgraph maps onto a subspace. 
 
 In practice, SSC is performed by solving the LASSO problems:
 
@@ -408,7 +406,7 @@ $\exists \lambda > 0$ and $N < \infty$ such that when $n > N$,
 $\sqrt{n} \hat{V}_n$ obeys the subspace detection property with probability 1.
 \end{theorem}
 
-#### Alternative Approaches to Community Detection
+## Alternative Approaches to Community Detection
 
 So far, we connected the PABM to the GRDPG and used this to motivate community detection methods based on the ASE of the adjacency matrix sampled from the PABM. In this section, we will explore non-spectral methods for community detection. 
 
@@ -436,7 +434,7 @@ The log-likelihood is
 
 While direct maximization of the likelihood or log-likelihood is NP-complete, it is possible to apply an Expectation Maximization (EM) algorithm to this problem. To set this up,
 
-## Proposed Generative Graph Models 
+# Generalizations
 
 In the previous sections, we connected well-known and highly restricted generative graph models to the RDPG and GRDPG to show that highly structured latent configurations generate graphs consistent with these models: The latent space for the SBM consists of $K$ point masses, the latent space for the DCBM consists of $K$ rays emanating from the origin, and the latent space for the PABM consists of $K$ $K$-dimensional subspaces. In the following sections, we explore additional structured latent configurations corresponding to community structure and develop methods for community detection based on the consistency of the ASE and the structural forms of the latent configurations. 
 
@@ -456,7 +454,7 @@ $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$.
 
 Then if $(A, X) \sim \text{RDPG}(F, n)$ and we observe $A$, we wish to recover hidden labels $z_1, ..., z_n$.
 
-### Affine Segments
+## Affine Segments
 
 In this section, we will consider latent positions sampled uniformly from parallel unit length segments.
 
@@ -557,7 +555,7 @@ and similar for $P(\max_j Y_{(j+1)} - Y_{(j)} \leq \min_{i, j} \|X_i - Y_j\|)$, 
 
 We can then further extend this to the case where points are drawn from unit segments with noise. 
 
-### Mainfold Learning
+## Manifolds
 
 If instead of sampling uniformly from line segments of unit length, we sample uniformly from a 1 dimensional manifolds of unit length, the above property still holds. Let $U_1, ..., U_n \stackrel{iid}{\sim} Uniform(0, 1)$ and $f : [0, 1] \mapsto \mathbb{R}^d$ be a smooth function such that $\int_u^v \sqrt{\sum_k (df_k / dt)^2} dt = \|u - v\|$. Then $U_{(i+1)} - U_{(i)} \geq \|f(U_{(i+1)}) - f(U_{(i)})\|$, so $P(U_{(i+1)} - U_{(i)} \leq \alpha) \leq P(\|f(U_{(i+1)}) - f(U_{(i)})\| \leq a)$. If the shortest distance between the two manifolds defined by $f_1$ and $f_2$ with the same restriction is $a$, then the same $N$ as before is sufficient, although perhaps a more lenient lower bound can be derived based on the shape of $f_k(\cdot)$. 
 
@@ -569,7 +567,7 @@ Literature review: August 2021
 
 Complete proofs of main theorems: January 2022
 
-Simulations and real data analyses: March 2022
+Simulations, real data analyses, R package: March 2022
 
 Dissertation completion: April 2022
 

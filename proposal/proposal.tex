@@ -198,12 +198,11 @@ Finally, we denote
 as the sample \(x_1, ..., x_n \in \mathbb{R}^d\) and
 \(z_1, ..., z_n \in [K]\) as their corresponding (hidden) labels.
 
-\hypertarget{literature-review}{%
-\section{Literature Review}\label{literature-review}}
+\hypertarget{preliminaries}{%
+\section{Preliminaries}\label{preliminaries}}
 
-\hypertarget{generative-graph-models-and-community-detection}{%
-\subsection{Generative Graph Models and Community
-Detection}\label{generative-graph-models-and-community-detection}}
+\hypertarget{block-models}{%
+\subsection{Block Models}\label{block-models}}
 
 Generative models for independent Bernoulli graphs involve defining the
 edge probability matrix \(P\) whose \(ij\)\textsuperscript{th} entry is
@@ -328,32 +327,29 @@ Hardy-Weinberg curve to construct the latent positions of a RDPG, with
 the goal of recovering the hidden mixture distribution from an observed
 graph.
 
-\hypertarget{proposed-research}{%
-\section{Proposed Research}\label{proposed-research}}
-
-\hypertarget{connecting-existing-generative-graph-models-to-the-rdpg-and-grdpg}{%
-\subsection{Connecting Existing Generative Graph Models to the RDPG and
-GRDPG}\label{connecting-existing-generative-graph-models-to-the-rdpg-and-grdpg}}
+\hypertarget{the-popularity-adjusted-block-model}{%
+\section{The Popularity Adjusted Block
+Model}\label{the-popularity-adjusted-block-model}}
 
 As discussed in \S 2.1, all Bernoulli graph models can be expressed as a
 RDPG or GRDPG model, and in particular, the (associative) SBM is a RDPG
 with a very specific structure in the latent space. A similar result has
-been shown for the DCBM \cite{lyzinski2014}. We have also extended this
-to the PABM. In \S 3.3.1, we show that the PABM is equivalent to the
-GRDPG model for which the communities correspond to subspaces in the
-latent configuration. We further show that while the latent
-configuration is not unique, there exists one in particular for which
-the subspaces are orthogonal. This leads to two straightforward methods
-for community detection, one involving computing inner products in the
-ASE and another which is a slight modification of an existing algorithm
-for subspace clustering. Finally, we will briefly explore alternative,
+been shown for the DCBM \cite{lyzinski2014}. We can also extend this to
+the PABM. In \S 3.3.1, we show that the PABM is equivalent to the GRDPG
+model for which the communities correspond to subspaces in the latent
+configuration. We further show that while the latent configuration is
+not unique, there exists one in particular for which the subspaces are
+orthogonal. This leads to two straightforward methods for community
+detection, one involving computing inner products in the ASE and another
+which is a slight modification of an existing algorithm for subspace
+clustering. Finally, we will briefly explore alternative,
 non-spectral-based methods for community detection in the ASE involving
 Expectation Maximization, MCMC sampling, and Mean Field Variational
 Inference.
 
-\hypertarget{popularity-adjusted-block-model}{%
-\subsubsection{Popularity Adjusted Block
-Model}\label{popularity-adjusted-block-model}}
+\hypertarget{connecting-the-pabm-to-the-grdpg}{%
+\subsection{Connecting the PABM to the
+GRDPG}\label{connecting-the-pabm-to-the-grdpg}}
 
 We first define the PABM.
 
@@ -589,7 +585,7 @@ interest is Sparse Subspace Clustering (SSC), which is performed by
 solving an optimization problem for each observed point in a sample.
 Given \(X \in \mathbb{R}^{n \times d}\) with vectors
 \(x_i^\top \in \mathbb{R}^d\) as rows of \(X\), the optimization problem
-\(c_i = \min\limits_{c} \|c\|_1\) subject to \(x_i = X_{-i} c\) and
+\(c_i = \arg\min\limits_{c} \|c\|_1\) subject to \(x_i = X_{-i} c\) and
 \(c^{(i)} = 0\) is solved for each \(i \in [n]\). The solutions are
 collected into matrix
 \(C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}^\top\) to
@@ -653,7 +649,7 @@ $\sqrt{n} \hat{V}_n$ obeys the subspace detection property with probability 1.
 \end{theorem}
 
 \hypertarget{alternative-approaches-to-community-detection}{%
-\paragraph{Alternative Approaches to Community
+\subsection{Alternative Approaches to Community
 Detection}\label{alternative-approaches-to-community-detection}}
 
 So far, we connected the PABM to the GRDPG and used this to motivate
@@ -688,11 +684,10 @@ The log-likelihood is
 
 While direct maximization of the likelihood or log-likelihood is
 NP-complete, it is possible to apply an Expectation Maximization (EM)
-algorithm to this problem.
+algorithm to this problem. To set this up,
 
-\hypertarget{proposed-generative-graph-models}{%
-\subsection{Proposed Generative Graph
-Models}\label{proposed-generative-graph-models}}
+\hypertarget{generalizations}{%
+\section{Generalizations}\label{generalizations}}
 
 In the previous sections, we connected well-known and highly restricted
 generative graph models to the RDPG and GRDPG to show that highly
@@ -738,7 +733,7 @@ Then if \((A, X) \sim \text{RDPG}(F, n)\) and we observe \(A\), we wish
 to recover hidden labels \(z_1, ..., z_n\).
 
 \hypertarget{affine-segments}{%
-\subsubsection{Affine Segments}\label{affine-segments}}
+\subsection{Affine Segments}\label{affine-segments}}
 
 In this section, we will consider latent positions sampled uniformly
 from parallel unit length segments.
@@ -816,8 +811,8 @@ two results:
 We can then further extend this to the case where points are drawn from
 unit segments with noise.
 
-\hypertarget{mainfold-learning}{%
-\subsubsection{Mainfold Learning}\label{mainfold-learning}}
+\hypertarget{manifolds}{%
+\subsection{Manifolds}\label{manifolds}}
 
 If instead of sampling uniformly from line segments of unit length, we
 sample uniformly from a 1 dimensional manifolds of unit length, the
@@ -843,7 +838,7 @@ Literature review: August 2021
 
 Complete proofs of main theorems: January 2022
 
-Simulations and real data analyses: March 2022
+Simulations, real data analyses, R package: March 2022
 
 Dissertation completion: April 2022
 
