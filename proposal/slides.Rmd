@@ -1,8 +1,8 @@
 ---
 title: Community Detection Methods for the Generalized Random Dot Product Graph Model
-subtitle: Dissertation Proposal Defense
+subtitle: Dissertation Proposal
 author: John Koo
-date: 'TBD'
+date: 'June 2021'
 output: 
   beamer_presentation:
     fig_crop: no
@@ -20,6 +20,7 @@ header-includes:
 - \usepackage{verbatim}
 - \usepackage{amsthm}
 - \usepackage{comment}
+- \setbeamertemplate{itemize items}[circle]
 ---
 
 ```{r setup, include=FALSE}
@@ -39,18 +40,39 @@ source('~/dev/pabm-grdpg/functions.R')
 set.seed(314159)
 ```
 
+# Introduction
+
+## Community Detection for Networks
+
+How can we cluster the nodes of a network?
+
+Statistical inference (parametric approach):
+
+1. Define a generative model 
+$G \mid z_1, ..., z_n, \vec{\theta} \sim P(\vec{z}, \vec{\theta})$.
+2. Develop a method for obtaining estimators $f(G) = \hat{z}_1, ..., \hat{z}_n$.
+3. Identify asymptotic properties of estimators and prove consistency.
+
 ## Overview
 
-* Preliminaries
-  * Block Models and Community Detection
-  * (Generalized) Random Dot Product Graphs
-  * Connecting Block Models to the (G)RDPG
-* The Popularity Adjusted Block Model
-  * Connecting the PABM to the GRDPG
-  * Subspace Clustering
-* Community Detection for the (G)RDPG
+1. Probability Models for Networks
+    * Block Models and Community Structure
+    * (Generalized) Random Dot Product Graphs
+    * Connecting Block Models to the (G)RDPG
 
-# Preliminaries
+\vspace*{.5\baselineskip}
+
+2. Popularity Adjusted Block Model
+    * Connecting the PABM to the GRDPG
+    * Subspace Clustering for Community Detection
+
+\vspace*{.5\baselineskip}
+
+3. Community Detection for the (G)RDPG
+    * Manifold Clustering
+    * Manfolds as (G)RDPG Latent Configurations
+
+# Probability Models for Networks
 
 ## Bernoulli Graphs
 
@@ -62,27 +84,30 @@ set.seed(314159)
 
 ::: columns
 
-:::: {.column width=67%}
+:::: {.column width=62.5%}
+
+Let $G = (V, E)$ be an undirected and unweighted graph with $|V| = n$.
+
+$G$ is described by adjacency matrix $A$ such that
+$A_{ij} = \begin{cases} 
+1 & \exists \text{ edge between } i \text{ and } j \\
+0 & \text{else}
+\end{cases}$
 
 $A \sim BernoulliGraph(P)$ iff
 
-* $G = (V, E)$
-  * Undirected, unweighted, no self-loops
-  * $|V| = n$
-  * $|E| \leq n (n - 1) / 2$
-* Adjacency matrix $A \in \{0, 1\}^{n \times n}$
-  * $A_{ij} = \begin{cases} 
-  1 & \exists \text{ edge between } i \text{ and } j \\
-  0 & \text{else}
-  \end{cases}$
-* Edge probability matrix $P \in [0, 1]^{n \times n}$
-* $A_{ij} \stackrel{indep}{\sim} Bernoulli(P_{ij})$ for $i < j$
+* $P \in [0, 1]^{n \times n}$ describes edge probabilities between pairs of 
+vertices.
+* $A_{ij} \stackrel{ind}{\sim} Bernoulli(P_{ij})$ for each $i < j$.
+* $A_{ji} = A_{ij}$ and $A_{ii} = 0$.
+
+Example: If $G$ is an Erdos-Renyi graph, then $P_{ij} = \theta$.
 
 ::::
 
-:::: {.column width=33%}
+:::: {.column width=37.5%}
 
-```{r, fig.height = 2, fig.width = 1.5}
+```{r, fig.height = 2, fig.width = 2}
 n <- 2 ** 5
 p <- 1 / log(n)
 P <- matrix(p, nrow = n, ncol = n)
@@ -96,19 +121,31 @@ qgraph::qgraph(A, vsize = 4)
 
 ## Block Models
 
-* $A \sim BernoulliGraph(P)$
-  * (Hidden) labels $z_1, ..., z_n \in [K]$
-  * $P_{ij} = f(z_i, z_j, \cdot)$
+Suppose each vertex $v_1, ..., v_n$ has hidden labels $z_1, ..., z_n \in [K]$,  
+and each $P_{ij}$ depends on labels $z_i$ and $z_j$.  
+Then $A \sim BernoulliGraph(P)$ is a *block model*.
 
-* Example: Stochastic Block Model with two communities
-    * $K = 2$
-  * $P_{ij} = \begin{cases} 
-  p & z_i = z_j = 1 \\
-  q & z_i = z_j = 2 \\
-  r & z_i \neq z_j
-  \end{cases}$
+Example: Stochastic Block Model with two communities
 
-```{r, fig.height = 1.5, fig.width = 4}
+::: columns
+
+:::: column
+
+* $z_1, ..., z_n \in \{1, 2\}$
+* $P_{ij} = \begin{cases} 
+p & z_i = z_j = 1 \\
+q & z_i = z_j = 2 \\
+r & z_i \neq z_j
+\end{cases}$
+
+* To make this an assortative SBM, set $p q > r^2$.
+* In this example, $p = 1/2$, $q = 1/4$, and $r = 1/8$.
+
+::::
+
+:::: column
+
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
 n1 <- 2 ** 5
 n2 <- 2 ** 5
 n <- n1 + n2
@@ -122,111 +159,104 @@ P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
 A <- draw.graph(P)
 qgraph::qgraph(A, vsize = 4, groups = factor(z))
 ```
+
+::::
+
+:::
   
 ## Block Models
 
-* Erdos-Renyi Model (1959)
-  * $P_{ij} = \theta$
-  * Not a block model
-* Stochastic Block Model (Lorrain and White, 1971)
-  * $P_{ij} = \theta_{z_i z_j}$
-  * $K (K + 1) / 2$ parameters $\theta_{kl}$
-* Degree Corrected Block Model (Karrer and Newman, 2011)
-  * $P_{ij} = \theta_{z_i z_j} \omega_i \omega_j$
-  * $K (K + 1) / 2 + n$ parameters $\theta_{kl}$, $\omega_i$
-* Popularity Adjusted Block Model (Sengupta and Chen, 2017)
-  * $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
-  * $K n$ parameters $\lambda_{ik}$
+Erdos-Renyi Model (1959)
+
+* $P_{ij} = \theta$
+* Not a block model
+
+Stochastic Block Model (Lorrain and White, 1971)
+
+* $P_{ij} = \theta_{z_i z_j}$
+* $K (K + 1) / 2$ parameters $\theta_{kl}$
+
+Degree Corrected Block Model (Karrer and Newman, 2011)
+
+* $P_{ij} = \theta_{z_i z_j} \omega_i \omega_j$
+* $K (K + 1) / 2 + n$ parameters $\theta_{kl}$, $\omega_i$
+
+Popularity Adjusted Block Model (Sengupta and Chen, 2017)
+
+* $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
+* $K n$ parameters $\lambda_{ik}$
   
 ## Hierarchy of Block Models
 
-* PABM $\to$ DCBM: $\lambda_{ik} = \sqrt{\theta_{z_i k}} \omega_i$
-* DCBM $\to$ SBM: $\omega_i = 1$
-* SBM $\to$ Erdos-Renyi: $\theta_{kl} = \theta$
+PABM $\to$ DCBM: $\lambda_{ik} = \sqrt{\theta_{z_i k}} \omega_i$
+
+DCBM $\to$ SBM: $\omega_i = 1$
+
+SBM $\to$ Erdos-Renyi: $\theta_{kl} = \theta$
 
 \begin{center}
-```{r, out.width = '150px'}
+```{r, out.width = '125px'}
 knitr::include_graphics('noroozi-pensky-hierarchy.png')
 ```
 
-\tiny{Majid Noroozi and Marianna Pensky. "The Hierarchy of Block Models". March 2021.}
+\tiny{Majid Noroozi and Marianna Pensky, 2021}
 \end{center}
-
-## Community Detection in Block Models
-
-Likelihood
-
-$$L = \prod_{i<j} \prod_{k, l}^K 
-\big(p_{k, l, i, j}^{A_{ij}} 
-(1 - p_{k, l, i, j})^{1 - A_{ij}} \big)^{z_{ik} z_{jl}}$$
-
-* Example: DCBM ($p_{k, l, i, j} = \theta_{kl} \omega_i \omega_j$)
-
-$$L = \prod_{i<j} \prod_{k, l}^K 
-\big((\theta_{kl} \omega_i \omega_j)^{A_{ij}} 
-(1 - \theta_{kl} \omega_i \omega_j)^{1 - A_{ij}} \big)^{z_{ik} z_{jl}}$$
-
-* ML method for community detection: $\hat{\vec{z}} = \arg\max_{\vec{z}} L$
-
-* NP-complete
-  * Expectation-Maximization
-  * Bayesian methods
-  * **Spectral methods**
 
 ## (Generalized) Random Dot Product Graph Model
 
-* Random Dot Product Graph $A \sim RDPG(X)$
-  * Latent vectors $x_1, ..., x_n \in \mathcal{X} \subset \mathbb{R}^d$
-    * $\mathcal{X} = \{x, y : 0 \leq x^\top y \leq 1\}$
-  * Data matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$
-  * Edge probability matrix $P = X X^\top$
-  * Adjacency matrix $A \sim BernoulliGraph(P)$
+Random Dot Product Graph $A \sim RDPG(X)$  
+(Young and Scheinerman, 2007)
 
-* Generalized Random Dot Product Graph $A \sim GRDPG_{p, q}(X)$
-  * Latent vectors $x_1, ..., x_n \in \mathcal{X} \subset \mathbb{R}^d$
-    * $\mathcal{X} = \{x, y : 0 \leq x^\top I_{p, q} y \leq 1\}$
-    * $I_{p, q} = blockdiag(I_p, -I_q)$
-    * $p + q = d$
-  * Data matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$
-  * Edge probability matrix $P = X I_{pq} X^\top$
-  * Adjacency matrix $A \sim BernoulliGraph(P)$
+* Latent vectors $x_1, ..., x_n \in \mathbb{R}^d$ such that 
+$x_i^\top x_j \in [0, 1]$
+* $A \sim BernoulliGraph(X X^\top)$ where 
+$X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$
 
-* If $X_1, ..., X_n \stackrel{iid}{\sim} F$, then $(A, X) \sim RDPG(F, n)$ or 
-$(A, X) \sim GRDPG_{p, q}(F, n)$
+Generalized Random Dot Product Graph $A \sim GRDPG_{p, q}(X)$  
+(Rubin-Delanchy, Cape, Tang, Priebe, 2020)
+
+* Latent vectors $x_1, ..., x_n \in \mathbb{R}^{p+q}$ such that 
+$x_i^\top I_{p, q} x_j \in [0, 1]$ and $I_{p, q} = blockdiag(I_p, -I_q)$
+* $A \sim BernoulliGraph(X I_{p, q} X^\top)$ where 
+$X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$
+
+If latent vectors $X_1, ..., X_n \stackrel{iid}{\sim} F$, then we write 
+$(A, X) \sim RDPG(F, n)$ or $(A, X) \sim GRDPG_{p, q}(F, n)$.
 
 ## (Generalized) Random Dot Product Graph Model
 
 ### Recovery/Estimation
 
-* Want to estimate $X$ given $A$
-  * Alternatively, recover some property of $X$ given $A$ 
-    * Interpoint distances
-    * Inner products
-    * Angles
+Want to estimate $X$ given $A$, or alternatively, 
+interpoint distances, inner products, or angles.
 
-* Adjacency Spectral Embedding
-  * Given embedding dimension $d$, 
-  $A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$
-    * If RDPG, use $d$ greatest eigenvalues
-    * If GRDPG, use $p$ most positive and $q$ most negative eigenvalues
-    * $\hat{V} \in \mathbb{R}^{n \times d}$
-    * $\hat{\Lambda} \in \mathbb{R}^{d \times d}$
-  * RDPG: $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$
-  * GRDPG: $\hat{X} = \hat{V} |\hat{\Lambda}|^{1/2}$
+### Adjacency Spectral Embedding
 
-* RDPG: $\max\limits_i \|\hat{X}_i - W_n X_i \| \stackrel{a.s.}{\to} 0$
-(Athreya et al.)
-* GRDPG: 
+To embed in $\mathbb{R}^d$, 
+
+1. Compute $A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$ 
+where $\hat{\Lambda} \in \mathbb{R}^{d \times d}$ and 
+$\hat{V} \in \mathbb{R}^{n \times d}$.  
+For RDPG, use $d$ greatest eigenvalues;  
+for GRDPG, use $p$ most positive and $q$ most negative eigenvalues.
+
+2. For RDPG, let $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$;  
+for GRDPG, let $\hat{X} = \hat{V} |\hat{\Lambda}|^{1/2}$.
+
+\vspace*{.5\baselineskip}
+
+RDPG: $\max\limits_i \|\hat{X}_i - W_n X_i \| \stackrel{a.s.}{\to} 0$
+(Athreya et al., 2018)  
+GRDPG: 
 $\max\limits_i \|\hat{X}_i - Q_n X_i \| \stackrel{a.s.}{\to} 0$
-(Rubin-Delanchy et al.)
+(Rubin-Delanchy et al., 2020)
 
 ## Connecting Block Models to the (G)RDPG Model
 
-* All $G$ with $A \sim BernoulliGraph(P)$ are RDPG (if $P$ is 
-positive semidefinite) or GRDPG
-  * Includes all block models
+All $G$ with $A \sim BernoulliGraph(P)$ are RDPG (if $P$ is 
+positive semidefinite) or GRDPG (includes all block models).
 
-* Example: SBM
+Example: Assortative SBM
 
 $$X = \begin{bmatrix} 
 \sqrt{p} & 0 \\
@@ -256,14 +286,20 @@ plot(X.hat, asp = 1, col = z, xlab = NA, ylab = NA)
 
 ## Connecting Block Models to the (G)RDPG Model
 
-```{r, out.width = '20%', fig.height = 2.5, fig.width = 2.5}
+::: columns
+
+:::: column
+
+```{r, out.width = '50%', fig.height = 2.5, fig.width = 2.5}
 par(mar = rep(1.75, 4))
 P.eigen = eigen(P)
 X <- P.eigen$vectors[, 1:2] %*% diag(P.eigen$values[1:2] ** .5)
 plot(X, asp = 1, col = z, xlab = NA, ylab = NA, main = 'SBM: Point masses')
 ```
 
-```{r, out.width = '20%', fig.height = 2.5, fig.width = 2.5}
+\vspace*{.5\baselineskip}
+
+```{r, out.width = '50%', fig.height = 2.5, fig.width = 2.5}
 par(mar = rep(1.75, 4))
 omega <- rbeta(n, 1, 1)
 dc.matrix <- omega %*% t(omega)
@@ -274,7 +310,13 @@ plot(X.dcbm, asp = 1, col = z, xlab = NA, ylab = NA, main = 'DCBM: Rays')
 
 ```
 
-```{r, out.width = '33%', fig.height = 4, fig.width = 4}
+::::
+
+:::: column
+
+\vspace*{0\baselineskip}
+
+```{r, out.width = '100%', fig.height = 4, fig.width = 4}
 par(mar = rep(1.75, 4))
 Pz <- generate.P.beta(n)
 P <- Pz$P
@@ -283,24 +325,32 @@ X <- embedding(P)
 pairs(X, col = z, asp = 1, pch = '.', main = 'PABM: Orthogonal subspaces')
 ```
 
+::::
+
+:::
+
 # Popularity Adjusted Block Model
 
-## Popularity Adjusted Block Model (Reparameterization)
+## Popularity Adjusted Block Model
+
+Definition based on Noroozi, Rimal, and Pensky (2020).
 
 $A \sim PABM(\{\lambda^{(kl)}\}_K)$ iff 
 
-* w.l.o.g., organize $P$ such that each block 
+1. w.l.o.g., organize $P$ such that each block 
 $P^{(kl)} \in [0, 1]^{n_k \times n_l}$ contains edge 
-probabilities between communities $k$ and $l$
-* Popularity vectors $\lambda^{(kl)} \in \mathbb{R}^{n_k}$ 
-are the popularity parameters of members of community $k$ to community $l$
-* $\{\lambda^{(kl)}\}_K$ is the set of $K^2$ popularity vectors
-* $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$
-* $A \sim BernoulliGraph(P)$
+probabilities between communities $k$ and $l$.
+2. Organize parameters as vectors such that 
+$\lambda^{(kl)} \in \mathbb{R}^{n_k}$ 
+are the popularity parameters of members of community $k$ to community $l$.  
+$\{\lambda^{(kl)}\}_K$ is the set of $K^2$ popularity vectors.
+3. Then we can write each block of $P$ as 
+$P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
+4. Sample $A \sim BernoulliGraph(P)$.
 
 ## Connecting the PABM to the GRDPG ($K = 2$)
 
-Theorem: $A \sim PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to 
+**Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to 
 $A \sim GRDPG_{3, 1}(X U)$ for $X$ constructed from $\{\lambda^{(kl)}\}_2$ and 
 $U \in \mathbb{O}(4)$
 
@@ -343,14 +393,14 @@ $$P = (X U) I_{3, 1} (X U)^\top$$
 
 ## Connecting the PABM to the GRDPG
 
-**Theorem**: $A \sim PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
+**Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
 $A \sim GRDPG_{p, q}(X U)$ such that
 
 * $p = K (K + 1) / 2$
 * $q = K (K - 1) / 2$
 * $U$ is orthogonal and predetermined for each $K$
-* $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$
-* $\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
+* $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$  
+$\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
 to different communities, $x_i^\top x_j = 0$.
 
 **Remark**: Non-uniqueness of the latent configuration  
@@ -359,23 +409,21 @@ $\forall Q \in \mathbb{O}(p, q)$
 
 ## Orthogonal Spectral Clustering
 
-**Theorem**: If $P = V \Lambda V^\top$ and $B = n V V^\top$, then $B_{ij} = 0$ 
-$\forall i, j$ in different communities.
+**Theorem** (KTT): 
+If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
+then $B_{ij} = 0$ $\forall i, j$ in different communities.
 
-Orthogonalized Spectral Clustering algorithm: 
+Orthogonal Spectral Clustering algorithm: 
 
 1. Compute the eigenvectors of $A$ that correspond to the $K (K+1)/2$ most 
 positive and $K (K-1) / 2$ most negative eigenvalues to construct $V$.
 2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
 3. Construct graph $G$ using $B$ as its similarity matrix.
 4. Partition $G$ into $K$ disconnected subgraphs (e.g., using edge thresholding 
-or spectral clustering).
-5. Map each partition to the community labels $1, ..., K$.
+or spectral clustering). Map each partition to the community labels $1, ..., K$.
 
-## Orthogonal Spectral Clustering
-
-**Theorem**: Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity 
-matrix from OSC. 
+**Theorem** (KTT): 
+Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC. 
 Then $\forall$ pairs $(i, j)$ belonging to different communities 
 and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
 
@@ -406,7 +454,7 @@ $c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
 
 ## Sparse Subspace Clustering
 
-**Theorem**: 
+**Theorem** (KTT): 
 
 Let 
 
@@ -457,13 +505,13 @@ the latent configurations via ASE.
 Let $U_1, ..., U_{n_1}, U_{n_1 + 1}, ..., U_{n} \stackrel{iid}{\sim} Uniform(0, \cos \frac{\pi}{2} a)$, $f_1(t) = (t, 0)$, and $f_2(t) = (t, a)$. $X_i = f_1(U_i)$ for $i \leq n_1$ and $X_j = f_2(U_j)$ for $n_1 + 1 \leq j \leq n$. If we observe $X_1, ..., X_{n_1}, X_{n_1+1}, ..., X_{n}$, what approach will allow us to group the observations by segment?
 
 ```{r fig.height = 3, out.width = '50%'}
-set.seed(1)
+set.seed(123456)
 
-n1 <- 2 ** 6
-n2 <- 2 ** 6
+n1 <- 2 ** 7
+n2 <- 2 ** 7
 n <- n1 + n2
 
-a <- .6
+a <- .5
 
 X <- cbind(runif(n1, 0, cos(pi / 2 * a)), rep(0, n1))
 Y <- cbind(runif(n2, 0, cos(pi / 2 * a)), rep(a, n2))
@@ -543,7 +591,7 @@ This also holds for noisy points sampled from one-dimensional manifolds such tha
 
 :::: {.column width=33%}
 
-```{r, fig.height = 2, fig.width = 3, out.width = '100%'}
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
 par(mar = rep(1, 4))
 plot(data.matrix, col = z * 2, asp = 1, xlab = NA, ylab = NA,
      main = 'Latent configuration')
@@ -553,19 +601,19 @@ plot(data.matrix, col = z * 2, asp = 1, xlab = NA, ylab = NA,
 
 :::: {.column width=33%}
 
-```{r, fig.height = 2, fig.width = 3, out.width = '100%'}
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
 par(mar = rep(1, 4))
 P <- data.matrix %*% t(data.matrix)
 A <- draw.graph(P)
 qgraph::qgraph(A, groups = factor(z))
-title('Sampled graph')
+title('RDPG')
 ```
 
 ::::
 
 :::: {.column width=33%}
 
-```{r, fig.height = 2, fig.width = 3, out.width = '100%'}
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
 par(mar = rep(1, 4))
 A.eigen <- eigen(A)
 Xhat <- A.eigen$vectors[, 1:2] %*% diag(sqrt(A.eigen$values[1:2]))
@@ -588,6 +636,8 @@ produces the correct conditions for sufficiently large $n$.
 
 # Additional Slides
 
+## Parameter Estimation
+
 ## Indefinite Orthogonal Group
 
 $$\mathbb{O}(p, q) = \{Q : Q I_{p, q} Q^\top = I_{p, q}\}$$
@@ -596,6 +646,27 @@ $$\mathbb{O}(p, q) = \{Q : Q I_{p, q} Q^\top = I_{p, q}\}$$
 * If $A \sim GRDPG_{p, q}(X)$, then $A \sim GRDPG_{p, q}(X Q)$
 * $(Q x)^\top (Q y) = x^\top Q^\top Q y \neq x^\top y$
 * $\|Q\| \neq 1$ $\implies$ $\|Q x - Q y\| \neq \|x - y\|$
+
+## Community Detection in Block Models
+
+Likelihood
+
+$$L = \prod_{i<j} \prod_{k, l}^K 
+\big(p_{k, l, i, j}^{A_{ij}} 
+(1 - p_{k, l, i, j})^{1 - A_{ij}} \big)^{z_{ik} z_{jl}}$$
+
+Example: DCBM ($p_{k, l, i, j} = \theta_{kl} \omega_i \omega_j$)
+
+$$L = \prod_{i<j} \prod_{k, l}^K 
+\big((\theta_{kl} \omega_i \omega_j)^{A_{ij}} 
+(1 - \theta_{kl} \omega_i \omega_j)^{1 - A_{ij}} \big)^{z_{ik} z_{jl}}$$
+
+* ML method for community detection: $\hat{\vec{z}} = \arg\max_{\vec{z}} L$
+
+* NP-complete
+  * Expectation-Maximization
+  * Bayesian methods
+  * Spectral methods
 
 ## Expectation Maximization for the PABM
 
@@ -608,22 +679,25 @@ $$\begin{split}
 + & \sum_i \sum_k z_{ik} \log \pi_k
 \end{split}$$
 
-* E-step
-  * $\gamma_{ik} = P(Z_i = k \mid \{\pi_l\}, \{\lambda_{jl}\})$
-  * $\log \gamma_{ik} \propto 
-  \log \pi_k + 
-  \sum_{j \neq i} \sum_l \pi_{jl} (A_{ij} \log \lambda_{il} \lambda_{jk} + 
-  (1 - A_{ij}) \log(1 - \lambda_{il} \lambda_{jk}))$
-* M-step
-  * $\pi_k = \frac{1}{n} \sum_i \gamma_{ik}$
-  * $\{\lambda_{ik}\} = \arg\max_{\{\lambda_{ik}\}} E_Z[\log L]$
+E-step
+
+* $\gamma_{ik} = P(Z_i = k \mid \{\pi_l\}, \{\lambda_{jl}\})$
+* $\log \gamma_{ik} \propto 
+\log \pi_k + 
+\sum_{j \neq i} \sum_l \pi_{jl} (A_{ij} \log \lambda_{il} \lambda_{jk} + 
+(1 - A_{ij}) \log(1 - \lambda_{il} \lambda_{jk}))$
+
+M-step
+
+* $\pi_k = \frac{1}{n} \sum_i \gamma_{ik}$
+* $\{\lambda_{ik}\} = \arg\max_{\{\lambda_{ik}\}} E_Z[\log L]$
 
 ## MCMC Sampling for the PABM
 
 Priors:
 
 * $Z_i \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$
-* $\lambda_{ik} \stackrel{indep}{\sim} Beta(a_{ik}, b_{ik})$
+* $\lambda_{ik} \stackrel{ind}{\sim} Beta(a_{ik}, b_{ik})$
 
 Full joint distribution:
 
