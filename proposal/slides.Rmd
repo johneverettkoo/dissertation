@@ -60,7 +60,11 @@ set.seed(314159)
 }
 </style>
 
-$A \sim BernoulliGraph(P)$ iff:
+::: columns
+
+:::: {.column width=67%}
+
+$A \sim BernoulliGraph(P)$ iff
 
 * $G = (V, E)$
   * Undirected, unweighted, no self-loops
@@ -74,13 +78,21 @@ $A \sim BernoulliGraph(P)$ iff:
 * Edge probability matrix $P \in [0, 1]^{n \times n}$
 * $A_{ij} \stackrel{indep}{\sim} Bernoulli(P_{ij})$ for $i < j$
 
-```{r, fig.height = 1, fig.width = 2}
+::::
+
+:::: {.column width=33%}
+
+```{r, fig.height = 2, fig.width = 1.5}
 n <- 2 ** 5
 p <- 1 / log(n)
 P <- matrix(p, nrow = n, ncol = n)
 A <- draw.graph(P)
 qgraph::qgraph(A, vsize = 4)
 ```
+
+::::
+
+:::
 
 ## Block Models
 
@@ -126,7 +138,7 @@ qgraph::qgraph(A, vsize = 4, groups = factor(z))
   * $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
   * $K n$ parameters $\lambda_{ik}$
   
-## Heirarchy of Block Models
+## Hierarchy of Block Models
 
 * PABM $\to$ DCBM: $\lambda_{ik} = \sqrt{\theta_{z_i k}} \omega_i$
 * DCBM $\to$ SBM: $\omega_i = 1$
@@ -134,10 +146,10 @@ qgraph::qgraph(A, vsize = 4, groups = factor(z))
 
 \begin{center}
 ```{r, out.width = '150px'}
-knitr::include_graphics('noroozi-pensky-heirarchy.png')
+knitr::include_graphics('noroozi-pensky-hierarchy.png')
 ```
 
-\tiny{Majid Noroozi and Marianna Pensky. "The Heirarchy of Block Models". March 2021.}
+\tiny{Majid Noroozi and Marianna Pensky. "The Hierarchy of Block Models". March 2021.}
 \end{center}
 
 ## Community Detection in Block Models
@@ -268,7 +280,7 @@ Pz <- generate.P.beta(n)
 P <- Pz$P
 z <- Pz$clustering
 X <- embedding(P)
-pairs(X, col = z, asp = 1, pch = '.', main = 'PABM: Subspaces')
+pairs(X, col = z, asp = 1, pch = '.', main = 'PABM: Orthogonal subspaces')
 ```
 
 # Popularity Adjusted Block Model
@@ -336,12 +348,14 @@ $A \sim GRDPG_{p, q}(X U)$ such that
 
 * $p = K (K + 1) / 2$
 * $q = K (K - 1) / 2$
-* $U$ is orthogonal
-* $X$ is block diagonal
+* $U$ is orthogonal and predetermined for each $K$
+* $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$
+* $\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
+to different communities, $x_i^\top x_j = 0$.
 
-* Non-uniqueness: 
-$A \sim GRDPG_{p, q}(X U) \implies A \sim GRDPG_{p, q}(X U Q)$ for 
-$Q \in \mathbb{O}(p, q)$
+**Remark**: Non-uniqueness of the latent configuration  
+$A \sim GRDPG_{p, q}(X U) \implies A \sim GRDPG_{p, q}(X U Q)$ 
+$\forall Q \in \mathbb{O}(p, q)$
 
 ## Orthogonal Spectral Clustering
 
@@ -349,9 +363,6 @@ $Q \in \mathbb{O}(p, q)$
 $\forall i, j$ in different communities.
 
 Orthogonalized Spectral Clustering algorithm: 
-
-* Input: Adjacency matrix $A$, number of communities $K$
-* Output: Community assignments $1, ..., K$
 
 1. Compute the eigenvectors of $A$ that correspond to the $K (K+1)/2$ most 
 positive and $K (K-1) / 2$ most negative eigenvalues to construct $V$.
@@ -386,7 +397,7 @@ Sparse Subspace Clustering algorithm:
 1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
 subject to $x_i = X_{-i} c$ and $c_i^{(i)} = 0$.
 2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$
-3. Construct affinity matrix $B = |C| + C^\top|$
+3. Construct affinity matrix $B = |C| + |C^\top|$
 
 * If $X$ obeys the Subspace Detection Property, then $B$ is sparse such that 
 $B_{ij} = 0$ if $i$ and $j$ belong to different communities and $\|c_i\| > 0$.
@@ -448,11 +459,11 @@ Let $U_1, ..., U_{n_1}, U_{n_1 + 1}, ..., U_{n} \stackrel{iid}{\sim} Uniform(0, 
 ```{r fig.height = 3, out.width = '50%'}
 set.seed(1)
 
-n1 <- 2 ** 5
-n2 <- 2 ** 5
+n1 <- 2 ** 6
+n2 <- 2 ** 6
 n <- n1 + n2
 
-a <- .1
+a <- .6
 
 X <- cbind(runif(n1, 0, cos(pi / 2 * a)), rep(0, n1))
 Y <- cbind(runif(n2, 0, cos(pi / 2 * a)), rep(a, n2))
@@ -463,27 +474,27 @@ z <- c(rep(1, n1), rep(2, n2))
 as.data.frame(data.matrix) %>% 
   dplyr::mutate(label = factor(z)) %>% 
   ggplot() + 
-  geom_segment(aes(x = 0, xend = 1, y = 0, yend = 0), size = .1) + 
-  geom_segment(aes(x = 0, xend = 1, y = a, yend = a), size = .1) + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = 0, yend = 0), size = .1) + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = a, yend = a), size = .1) + 
   geom_point(aes(x = V1, y = V2, colour = label)) + 
   labs(x = NULL, y = NULL, colour = NULL) + 
   guides(colour = FALSE) + 
-  xlim(-.1, 1.1) + 
+  xlim(-.1, cos(pi / 2 * a) + .1) + 
   ylim(-a, 2 * a) + 
   scale_colour_brewer(palette = 'Set1') + 
-  coord_fixed() + 
+  # coord_fixed() + 
   # ggthemes::theme_few() + 
   theme_void() + 
   theme(axis.text = element_blank(),
         axis.ticks = element_blank())
 ```
 
-Then $\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
+$\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
 $\exists N(a, \delta, K) < \infty$ such that when $\min_k n_k \geq N$, 
 with probability at least $1 - \delta$,
 
 1. Single linkage clustering will produce perfect community detection.
-2. An $\epsilon$-neighborhood graph with $\epsilon \leq a$ will consist of 
+2. Any $\epsilon$-neighborhood graph with $\epsilon \leq a$ will consist of 
 at least $K$ disjoint subgraphs such that no subgraph contains members of two 
 different communities.
 
@@ -494,22 +505,23 @@ Starting with the parallel segments as before, suppose instead of observing $X_1
 $\max_i \|\xi_i\| = \xi \leq a / 3$.
 
 ```{r fig.height = 3, out.width = '50%'}
-xi1 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
+# xi1 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
+xi1 <- rep(0, n)
 xi2 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
 
 as.data.frame(data.matrix) %>% 
   dplyr::mutate(V1 = V1 + xi1, V2 = V2 + xi2) %>% 
   dplyr::mutate(label = factor(z)) %>% 
   ggplot() + 
-  geom_segment(aes(x = 0, xend = 1, y = 0, yend = 0), size = .1) + 
-  geom_segment(aes(x = 0, xend = 1, y = a, yend = a), size = .1) + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = 0, yend = 0), size = .1) + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = a, yend = a), size = .1) + 
   geom_point(aes(x = V1, y = V2, colour = label)) + 
   labs(x = NULL, y = NULL, colour = NULL) + 
   guides(colour = FALSE) + 
-  xlim(-.1, 1.1) + 
+  xlim(-.1, cos(pi / 2 * a) + .1) + 
   ylim(-a, 2 * a) + 
   scale_colour_brewer(palette = 'Set1') + 
-  coord_fixed() + 
+  # coord_fixed() + 
   # ggthemes::theme_few() + 
   theme_void() + 
   theme(axis.text = element_blank(),
@@ -521,9 +533,48 @@ $\exists N(a, \delta, K, \xi) < \infty$ such that when $\min_k n_k \geq N$,
 with probability at least $1 - \delta$,
 
 1. Single linkage will produce perfect community detection.
-2. An $\epsilon$-neighborhood graph will consist of at least $K$ sub-graphs with no subgraph containing vertices from multiple communities.
+2. Any $\epsilon$-neighborhood graph will consist of at least $K$ sub-graphs with no subgraph containing vertices from multiple communities.
 
 This also holds for noisy points sampled from one-dimensional manifolds such that the manifolds are distance at least $a$ apart.
+
+## Recovery from the Adjacency Matrix
+
+::: columns
+
+:::: {.column width=33%}
+
+```{r, fig.height = 2, fig.width = 3, out.width = '100%'}
+par(mar = rep(1, 4))
+plot(data.matrix, col = z * 2, asp = 1, xlab = NA, ylab = NA,
+     main = 'Latent configuration')
+```
+
+::::
+
+:::: {.column width=33%}
+
+```{r, fig.height = 2, fig.width = 3, out.width = '100%'}
+par(mar = rep(1, 4))
+P <- data.matrix %*% t(data.matrix)
+A <- draw.graph(P)
+qgraph::qgraph(A, groups = factor(z))
+title('Sampled graph')
+```
+
+::::
+
+:::: {.column width=33%}
+
+```{r, fig.height = 2, fig.width = 3, out.width = '100%'}
+par(mar = rep(1, 4))
+A.eigen <- eigen(A)
+Xhat <- A.eigen$vectors[, 1:2] %*% diag(sqrt(A.eigen$values[1:2]))
+plot(Xhat, col = z * 2, asp = 1, main = 'ASE')
+```
+
+::::
+
+:::
 
 ## Future Work
 
@@ -532,12 +583,74 @@ produces the correct conditions for sufficiently large $n$.
 2. Extend results to non-uniform distributions.
 3. Extend results to multidimensional manifolds.
 4. Relax condition for the minimum distance between manifolds.
-5. Explore additional clustering techniques for these latent configurations.
+5. Explore more robust clustering techniques for these latent configurations.
+6. Extend results to the GRDPG.
 
 # Additional Slides
 
+## Indefinite Orthogonal Group
+
+$$\mathbb{O}(p, q) = \{Q : Q I_{p, q} Q^\top = I_{p, q}\}$$
+
+* $Q^\top Q \neq I$
+* If $A \sim GRDPG_{p, q}(X)$, then $A \sim GRDPG_{p, q}(X Q)$
+* $(Q x)^\top (Q y) = x^\top Q^\top Q y \neq x^\top y$
+* $\|Q\| \neq 1$ $\implies$ $\|Q x - Q y\| \neq \|x - y\|$
+
 ## Expectation Maximization for the PABM
+
+Full data log-likelihood
+
+$$\begin{split}
+\log L = & 
+\sum_{i < j} \sum_{k, l} z_{ik} z_{jl} (A_{ij} \log \lambda_{il} \lambda_{jk} +
+(1 - A_{ij}) \log(1 - \lambda_{il} \lambda_{jk})) \\
++ & \sum_i \sum_k z_{ik} \log \pi_k
+\end{split}$$
+
+* E-step
+  * $\gamma_{ik} = P(Z_i = k \mid \{\pi_l\}, \{\lambda_{jl}\})$
+  * $\log \gamma_{ik} \propto 
+  \log \pi_k + 
+  \sum_{j \neq i} \sum_l \pi_{jl} (A_{ij} \log \lambda_{il} \lambda_{jk} + 
+  (1 - A_{ij}) \log(1 - \lambda_{il} \lambda_{jk}))$
+* M-step
+  * $\pi_k = \frac{1}{n} \sum_i \gamma_{ik}$
+  * $\{\lambda_{ik}\} = \arg\max_{\{\lambda_{ik}\}} E_Z[\log L]$
 
 ## MCMC Sampling for the PABM
 
+Priors:
+
+* $Z_i \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$
+* $\lambda_{ik} \stackrel{indep}{\sim} Beta(a_{ik}, b_{ik})$
+
+Full joint distribution:
+
+$$\begin{split}
+\log p & = constant \\
+& + \sum_{i < j} \sum_k \sum_l z_{ik} z_{jl} 
+(A_{ij} \log \lambda_{il} \lambda_{jk} + 
+(1 - A_{ij}) \log (1 - \lambda_{il} \lambda_{jk})) \\
+& + \sum_k \sum_i z_{ik} \log \pi_k \\
+& + \sum_i \sum_k (a_{ik} - 1) \log \lambda_{ik} + (b_{ik} - 1) \log (1 - \lambda_{ik})
+\end{split}$$
+
 ## Variational Inference for the PABM
+
+Mean Field Variational Inference
+
+* Minimize $d_{KL}(p || q)$
+  * $p$ is the joint distribution
+  * $q$ is a density of some form
+* Restrict 
+$q(\vec{z}, \{\lambda_{ik}\}) = 
+\Big(\prod_i q_{z_i}(z_i) \Big) \Big(\prod_{i, k} q_{\lambda_{ik}}(\lambda_{ik})\Big)$
+* Iterative solution: 
+$q_{\theta_i}^{(t+1)} \propto \exp(E_{\theta_{-i}^{(t)}}[\log p])$
+
+* Approximate solution for the PABM
+  * $Z_i \mid \{a'_{ik}\}, \{b'_{ik}\} \sim Categorical(\pi'_1, ..., \pi'_K)$
+  * $\lambda_{ik} \mid 
+  \{a'_{-i, -k}\}, \{b'_{-i, -k}\}, \{\pi'_k\} \sim Beta(a'_{ik}, b'_{ik})$
+  * Iteratively update $\{\pi'_K\}, \{a'_{ik}\}, \{b'_{ik}\}$ until convergence
