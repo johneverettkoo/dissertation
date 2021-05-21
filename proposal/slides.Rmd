@@ -65,6 +65,7 @@ $G \mid z_1, ..., z_n, \vec{\theta} \sim P(\vec{z}, \vec{\theta})$.
 2. Popularity Adjusted Block Model
     * Connecting the PABM to the GRDPG
     * Subspace Clustering for Community Detection
+    * Orthogonal Spectral Clustering
 
 \vspace*{.5\baselineskip}
 
@@ -94,12 +95,13 @@ $A_{ij} = \begin{cases}
 0 & \text{else}
 \end{cases}$
 
-$A \sim BernoulliGraph(P)$ iff
+$A_{ji} = A_{ij}$ and $A_{ii} = 0$ $\forall i, j \in [n]$.
 
-* $P \in [0, 1]^{n \times n}$ describes edge probabilities between pairs of 
+$A \sim BernoulliGraph(P)$ iff:
+
+1. $P \in [0, 1]^{n \times n}$ describes edge probabilities between pairs of 
 vertices.
-* $A_{ij} \stackrel{ind}{\sim} Bernoulli(P_{ij})$ for each $i < j$.
-* $A_{ji} = A_{ij}$ and $A_{ii} = 0$.
+2. $A_{ij} \stackrel{ind}{\sim} Bernoulli(P_{ij})$ for each $i < j$.
 
 Example: If $G$ is an Erdos-Renyi graph, then $P_{ij} = \theta$.
 
@@ -351,10 +353,11 @@ $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
 ## Connecting the PABM to the GRDPG ($K = 2$)
 
 **Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to 
-$A \sim GRDPG_{3, 1}(X U)$ for $X$ constructed from $\{\lambda^{(kl)}\}_2$ and 
-$U \in \mathbb{O}(4)$
+$A \sim GRDPG_{3, 1}(X U)$ for block diagonal $X$ 
+constructed from $\{\lambda^{(kl)}\}_2$ and 
+predetermined $U \in \mathbb{O}(4)$.
 
-Proof:
+Proof: Decompose $P$ as follows
 
 $$X = \begin{bmatrix}
 \lambda^{(11)} & \lambda^{(12)} & 0 & 0 \\
@@ -366,7 +369,10 @@ $$Y = \begin{bmatrix}
 0 & \lambda^{(21)} & 0 & \lambda^{(22)}
 \end{bmatrix}$$
 
-$$P = X Y^\top$$
+$$P = X Y^\top = \begin{bmatrix}
+\lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
+\lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)} (\lambda^{(22)})^\top
+\end{bmatrix}$$
 
 ## Connecting the PABM to the GRDPG ($K = 2$)
 
@@ -401,56 +407,66 @@ $A \sim GRDPG_{p, q}(X U)$ such that
 * $U$ is orthogonal and predetermined for each $K$
 * $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$  
 $\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
-to different communities, $x_i^\top x_j = 0$.
+to different communities, then $x_i^\top x_j = 0$.
 
-**Remark**: Non-uniqueness of the latent configuration  
+**Remark** (non-uniqueness of the latent configuration):  
 $A \sim GRDPG_{p, q}(X U) \implies A \sim GRDPG_{p, q}(X U Q)$ 
 $\forall Q \in \mathbb{O}(p, q)$
 
-## Orthogonal Spectral Clustering
-
-**Theorem** (KTT): 
-If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
-then $B_{ij} = 0$ $\forall i, j$ in different communities.
-
-Orthogonal Spectral Clustering algorithm: 
-
-1. Compute the eigenvectors of $A$ that correspond to the $K (K+1)/2$ most 
-positive and $K (K-1) / 2$ most negative eigenvalues to construct $V$.
-2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
-3. Construct graph $G$ using $B$ as its similarity matrix.
-4. Partition $G$ into $K$ disconnected subgraphs (e.g., using edge thresholding 
-or spectral clustering). Map each partition to the community labels $1, ..., K$.
-
-**Theorem** (KTT): 
-Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC. 
-Then $\forall$ pairs $(i, j)$ belonging to different communities 
-and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
-
-$$
-\max_{i, j} \hat{B}^{(ij)} = 
-O_P \Big( \frac{(\log n)^c}{\sqrt{n \rho_n}} \Big)
-$$
-
 ## Sparse Subspace Clustering
 
-* $X$ is block diagonal and $U$ is orthogonal $\implies$ each community 
-corresponds to a subspace in $\mathbb{R}^d$.
-* Subspace property holds even with linear transformation 
+**Corollary**: $X$ is block diagonal by community and 
+$U$ is orthogonal $\implies$ 
+each community corresponds to a subspace in $\mathbb{R}^{K^2}$.
+
+Subspace property holds even with linear transformation 
 $Q \in \mathbb{O}(p, q)$.
-* If $P = V \Lambda V^\top$, then $V$ consists of *orthogonal* subspaces.
 
 Sparse Subspace Clustering algorithm:
 
 1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
-subject to $x_i = X_{-i} c$ and $c_i^{(i)} = 0$.
-2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$
-3. Construct affinity matrix $B = |C| + |C^\top|$
+subject to $x_i = X c$ and $c_i^{(i)} = 0$.
+2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$.
+3. Construct affinity matrix $B = |C| + |C^\top|$.
 
-* If $X$ obeys the Subspace Detection Property, then $B$ is sparse such that 
+If $X$ obeys the *Subspace Detection Property*, then $B$ is sparse such that 
 $B_{ij} = 0$ if $i$ and $j$ belong to different communities and $\|c_i\| > 0$.
-* Step (1) of SSC typically performed via LASSO: 
+
+Step (1) of SSC typically performed via LASSO: 
 $c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
+
+## Sparse Subspace Clustering
+
+Noroozi et al. observed that the rank of $P$ is $K^2$ 
+and the columns of $P$ belonging to each community has rank $K$ 
+to justify SSC for the PABM.
+
+$$\arg\min_{c_i} \|c_i\|_1 \text{ subject to } A_{\cdot, i} = A c_i
+\text{ and } c_i^{(i)} = 0$$
+
+They were able to show that this obeys SDP if we replace $A$ with $P$.
+
+GRDPG-based approach: Apply SSC to the ASE of $A$.
+
+$$\arg\min_{c_i} \|c_i\|_1 \text{ subject to } 
+\hat{x}_i = \hat{X} c_i \text{ and } c_i^{(i)} = 0$$
+$$A \approx \hat{X} I_{p, q} \hat{X}^\top$$
+
+## Sparse Subspace Clustering
+
+Wang and Xu (2016): If data matrix $X$ consists of points lying close to 
+low-dimensional subspaces such that:
+
+1. Each point's distance to its subspace is sufficiently small.
+2. The cosine of the angles between pairs of subspaces is sufficiently small.
+3. The points corresponding to each subspace cover a sufficient amount of 
+that subspace.
+
+Then SDP holds with probability 1. 
+
+**Theorem** (KTT): 
+If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
+then $B_{ij} = 0$ $\forall i, j$ in different communities.
 
 ## Sparse Subspace Clustering
 
@@ -458,9 +474,8 @@ $c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
 
 Let 
 
-* $P_n$ describe the edge probability matrix of the PABM with 
-$n$ vertices
-* $A_n \sim BernoulliGraph(P_n)$
+* $P_n$ describe the edge probability matrix of the PABM with $n$ vertices, and 
+$A_n \sim BernoulliGraph(P_n)$.
 * $\hat{V}_n$ be the matrix of eigenvectors of $A_n$ corresponding to the 
 $K (K + 1) / 2$ most positive and $K (K - 1) / 2$ most negative eigenvalues. 
 
@@ -474,6 +489,30 @@ Remarks:
 * For large $n$, we can identify $\lambda$ for SDP (Wang and Xu, 2016).
 * SDP does not guarantee community detection.
 
+## Orthogonal Spectral Clustering
+
+**Theorem** (KTT): 
+If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
+then $B_{ij} = 0$ $\forall i, j$ in different communities.
+
+Orthogonal Spectral Clustering algorithm: 
+
+1. Let $V$ be the eigenvectors of $A$ corresponding to the $K (K+1)/2$ most 
+positive and $K (K-1) / 2$ most negative eigenvalues.
+2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
+3. Construct graph $G$ using $B$ as its similarity matrix.
+4. Partition $G$ into $K$ disconnected subgraphs.
+
+**Theorem** (KTT): 
+Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC. 
+Then $\forall$ pairs $(i, j)$ belonging to different communities 
+and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
+
+$$
+\max_{i, j} \hat{B}^{(ij)} = 
+O_P \Big( \frac{(\log n)^c}{\sqrt{n \rho_n}} \Big)
+$$
+
 # General Community Detection for the (G)RDPG
 
 ## Generative Model
@@ -481,20 +520,23 @@ Remarks:
 Let $(A, X) \sim RDPG(F, n)$ such that
 
 1. Define functions $f_1, ..., f_K$ such that 
-$f_k : [0, 1] \mapsto \mathcal{X}$ and $f_k(t) \neq f_l(t)$ 
+$f_k : [0, 1]^r \mapsto \mathbb{R}^d$ and $f_k(t) \neq f_l(t)$ 
 $\forall k, l \in [K]$. 
 2. Sample labels
 $Z_1, ..., Z_n \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$.
-3. Sample $T_1, ..., T_n \stackrel{iid}{\sim} D$ with support $[0, 1]$. 
+3. Sample $T_1, ..., T_n \stackrel{iid}{\sim} D$ with support $[0, 1]^r$. 
 4. Set latent positions $X_i = f_{Z_i}(T_i)$ and 
 $X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}^\top$.
 5. $A \sim BernoulliGraph(X X^\top)$
 
 ## Community Detection
 
-* Athreya et al. and Rubin-Delanchy et al.: we can approximate properties of 
+Athreya et al. and Rubin-Delanchy et al.: we can approximate properties of 
 the latent configurations via ASE.
-* General community detection method: Given $A$, $K$, and $d$ (or $p$ and $q$), 
+
+General community detection method:  
+Given $A$, $K$, and $d$ (or $p$ and $q$), 
+
   1. Use ASE to approximate the latent configuration.
   2. Use the appropriate clustering algorithm for the form of the latent
   configuration (manifolds).
@@ -507,11 +549,11 @@ Let $U_1, ..., U_{n_1}, U_{n_1 + 1}, ..., U_{n} \stackrel{iid}{\sim} Uniform(0, 
 ```{r fig.height = 3, out.width = '50%'}
 set.seed(123456)
 
-n1 <- 2 ** 7
-n2 <- 2 ** 7
+n1 <- 2 ** 5
+n2 <- 2 ** 5
 n <- n1 + n2
 
-a <- .5
+a <- .1
 
 X <- cbind(runif(n1, 0, cos(pi / 2 * a)), rep(0, n1))
 Y <- cbind(runif(n2, 0, cos(pi / 2 * a)), rep(a, n2))
@@ -587,6 +629,20 @@ This also holds for noisy points sampled from one-dimensional manifolds such tha
 
 ## Recovery from the Adjacency Matrix
 
+```{r}
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+u1 <- runif(n1)
+u2 <- runif(n2)
+x1 <- cos(pi / 3 * u1)
+y1 <- sin(pi / 3 * u1)
+x2 <- 1 + cos(pi / 3 * u2 + pi)
+y2 <- 1 + sin(pi / 3 * u2 + pi)
+data.matrix <- cbind(c(x1, x2), c(y1, y2))
+```
+
 ::: columns
 
 :::: {.column width=33%}
@@ -605,7 +661,7 @@ plot(data.matrix, col = z * 2, asp = 1, xlab = NA, ylab = NA,
 par(mar = rep(1, 4))
 P <- data.matrix %*% t(data.matrix)
 A <- draw.graph(P)
-qgraph::qgraph(A, groups = factor(z))
+qgraph::qgraph(A, groups = factor(z), layout = 'spring')
 title('RDPG')
 ```
 
