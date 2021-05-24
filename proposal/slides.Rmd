@@ -252,10 +252,35 @@ $\max\limits_i \|\hat{X}_i - Q_n X_i \| \stackrel{a.s.}{\to} 0$
 
 ## Connecting Block Models to the (G)RDPG Model
 
-All $G$ with $A \sim BernoulliGraph(P)$ are RDPG (if $P$ is 
-positive semidefinite) or GRDPG (includes all block models).
+All Bernoulli Graphs are RDPG (if $P$ is 
+positive semidefinite) or GRDPG.
 
 Example 1 (cont'd): Assortative SBM ($p q > r^2$) with $K = 2$
+
+::: columns
+
+:::: column
+
+$$P_{ij} = \begin{cases} 
+p & z_i = z_j = 1 \\
+q & z_i = z_j = 2 \\
+r & z_i \neq z_j
+\end{cases}$$
+
+```{r fig.height = 3, fig.width = 6, out.width = '100%'}
+qgraph::qgraph(A, vsize = 4, groups = factor(z))
+```
+
+::::
+
+:::: column
+
+$$P = 
+\begin{bmatrix} 
+P^{(11)} & P^{(12)} \\
+P^{(21)} & P^{(22)}
+\end{bmatrix} =
+X X^\top$$
 
 $$X = \begin{bmatrix} 
 \sqrt{p} & 0 \\
@@ -266,7 +291,9 @@ $$X = \begin{bmatrix}
 \sqrt{r^2 / p} & \sqrt{q - r^2 / p}
 \end{bmatrix}$$
 
-$$P = X X^\top$$
+::::
+
+:::
 
 ## Connecting Block Models to the (G)RDPG Model
 
@@ -280,10 +307,14 @@ $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$
 3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$
 
 ```{r, fig.height = 4, fig.width = 4, out.width = '50%'}
+P.eigen = eigen(P)
+X <- P.eigen$vectors[, 1:2] %*% diag(P.eigen$values[1:2] ** .5)
+
 A.eigen <- eigen(A)
 X.hat <- A.eigen$vectors[, 1:2] %*% diag(A.eigen$values[1:2] ** .5)
-plot(X.hat, asp = 1, col = z, xlab = NA, ylab = NA,
+plot(X.hat, asp = 1, col = z * 2, xlab = NA, ylab = NA, 
      main = 'ASE of the adjacency matrix drawn from SBM')
+points(X, pch = 16, col = z * 2)
 ```
 
 ## Connecting Block Models to the (G)RDPG Model
@@ -294,8 +325,6 @@ plot(X.hat, asp = 1, col = z, xlab = NA, ylab = NA,
 
 ```{r, out.width = '50%', fig.height = 2.5, fig.width = 2.5}
 par(mar = rep(1.75, 4))
-P.eigen = eigen(P)
-X <- P.eigen$vectors[, 1:2] %*% diag(P.eigen$values[1:2] ** .5)
 plot(X, asp = 1, col = z, xlab = NA, ylab = NA, main = 'SBM: Point masses')
 ```
 
@@ -320,7 +349,7 @@ plot(X.dcbm, asp = 1, col = z, xlab = NA, ylab = NA, main = 'DCBM: Rays')
 
 ```{r, out.width = '100%', fig.height = 4, fig.width = 4}
 par(mar = rep(1.75, 4))
-Pz <- generate.P.beta(n)
+Pz <- generate.P.beta(n * 10)
 P <- Pz$P
 z <- Pz$clustering
 X <- embedding(P)
@@ -440,7 +469,8 @@ $$A \approx \hat{X} I_{p, q} \hat{X}^\top$$
 
 ## Sparse Subspace Clustering
 
-Wang and Xu (2016): If data matrix $X$ consists of points lying close to 
+**Theorem** (Wang and Xu, 2016): 
+If data matrix $X$ consists of points lying close to 
 low-dimensional subspaces such that:
 
 1. Each point's distance to its subspace is sufficiently small.
@@ -448,7 +478,7 @@ low-dimensional subspaces such that:
 3. The points corresponding to each subspace cover a sufficient amount of 
 that subspace.
 
-Then SDP holds with probability 1. 
+Then $X$ obeys SDP.
 
 **Theorem** (KTT): 
 If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
