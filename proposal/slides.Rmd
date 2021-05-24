@@ -372,14 +372,13 @@ Then $A \sim PABM(P)$ if each $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$.
 
 **Lemma** (Noroozi, Rimal, and Pensky, 2020): 
 
-$A$ is sampled from a PABM if 
-$A \sim BernoulliGraph(P)$ such that: 
+$A$ is sampled from a PABM if $P$ can be described as:
 
-1. Let $P^{(kl)}$ denote the $n_k \times n_l$ matrix of edge probabilities 
+1. Let each $P^{(kl)}$ denote the $n_k \times n_l$ matrix of edge probabilities 
 between communities $k$ and $l$. 
 2. Organize popularity parameters as vectors 
 $\lambda^{(kl)} \in \mathbb{R}^{n_k}$ 
-such that $\lambda^{(kl)}_i$ is the popularity parameter 
+such that $\lambda^{(kl)}_i = \lambda_{k_i l}$ is the popularity parameter 
 of the $i$^th^ vertex of community $k$ towards community $l$. 
 3. Each block can be decomposed as 
 $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
@@ -430,8 +429,7 @@ the indefinite orthogonal group with signature $p, q$.
 
 ## Sparse Subspace Clustering
 
-**Corollary**: $X$ is block diagonal by community and 
-$U$ is orthogonal $\implies$ 
+**Corollary**: Since $X$ is block diagonal by community and $U$ is orthogonal,
 each community corresponds to a subspace in $\mathbb{R}^{K^2}$.
 
 Subspace property holds even with linear transformation 
@@ -444,11 +442,69 @@ subject to $x_i = X c$ and $c_i^{(i)} = 0$.
 2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$.
 3. Construct affinity matrix $B = |C| + |C^\top|$.
 
-If $X$ obeys the *Subspace Detection Property*, then $B$ is sparse such that 
-$B_{ij} = 0$ if $i$ and $j$ belong to different communities and $\|c_i\| > 0$.
-
 Step (1) of SSC typically performed via LASSO: 
 $c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
+
+## Sparse Subspace Clustering
+
+If $X$ obeys the *Subspace Detection Property*, then $B$ is sparse such that 
+$B_{ij} = 0$ if $x_i$ and $x_j$ belong to different subspaces
+
+::: columns
+
+:::: column
+
+```{r, fig.height = 5, fig.width = 5, out.width = '75%'}
+set.seed(314159)
+
+x1 <- runif(n, 1 / sqrt(50), 1)
+y1 <- rep(0, n)
+x2 <- rep(0, n)
+y2 <- x1
+z <- c(rep(1, n), rep(2, n))
+X <- cbind(c(x1, x2), c(y1, y2))
+X <- X + cbind(runif(n * 2, 0, .025),
+               runif(n * 2, 0, .025))
+X <- X %*% rbind(c(cos(pi / 9), sin(pi / 9)),
+                 c(-sin(pi/ 9), cos(pi / 9)))
+plot(X, col = z * 2, asp = 1, xlab = NA, ylab = NA)
+```
+
+::::
+
+:::: column
+
+```{r, fig.height = 5, fig.width = 5, out.width = '75%'}
+Y <- t(X)
+Y <- sweep(Y, 2, apply(Y, 2, function(y) sqrt(sum(y ** 2))), `/`)
+Y[is.nan(Y)] <- 0
+lambda <- .05
+N <- ncol(Y)
+B <- plyr::aaply(seq(N), 1, function(i) {
+  y <- Y[, i]
+  X <- Y[, -i]
+  betahat <- glmnet::glmnet(X, y, lambda = lambda, intercept = FALSE) %>% 
+    coef() %>% 
+    as.numeric()
+  if (i != N) {
+    betahat <- c(betahat[seq(i)], 0, betahat[seq(i + 1, N)])
+  } else {
+    betahat <- c(betahat, 0)
+  }
+  betahat <- betahat[-1]
+  return(betahat)
+}, .parallel = TRUE) %>% 
+  abs()
+B <- sweep(B, 2, apply(B, 2, max), `/`)
+B[is.nan(B)] <- 0
+W <- B + t(B)
+
+qgraph::qgraph(sign(W), layout = 'spring', groups = factor(z))
+```
+
+::::
+
+:::
 
 ## Sparse Subspace Clustering
 
@@ -456,15 +512,15 @@ Noroozi et al. observed that the rank of $P$ is $K^2$
 and the columns of $P$ belonging to each community has rank $K$ 
 to justify SSC for the PABM.
 
-$$\arg\min_{c_i} \|c_i\|_1 \text{ subject to } A_{\cdot, i} = A c_i
-\text{ and } c_i^{(i)} = 0$$
+$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } A_{\cdot, i} = A c
+\text{ and } c^{(i)} = 0$$
 
 They were able to show that this obeys SDP if we replace $A$ with $P$.
 
 GRDPG-based approach: Apply SSC to the ASE of $A$.
 
-$$\arg\min_{c_i} \|c_i\|_1 \text{ subject to } 
-\hat{x}_i = \hat{X} c_i \text{ and } c_i^{(i)} = 0$$
+$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } 
+\hat{x}_i = \hat{X} c \text{ and } c^{(i)} = 0$$
 $$A \approx \hat{X} I_{p, q} \hat{X}^\top$$
 
 ## Sparse Subspace Clustering
@@ -474,9 +530,9 @@ If data matrix $X$ consists of points lying close to
 low-dimensional subspaces such that:
 
 1. Each point's distance to its subspace is sufficiently small.
-2. The cosine of the angles between pairs of subspaces is sufficiently small.
-3. The points corresponding to each subspace cover a sufficient amount of 
+2. The points corresponding to each subspace cover a sufficient amount of 
 that subspace.
+3. The cosine of the angles between pairs of subspaces is sufficiently small.
 
 Then $X$ obeys SDP.
 
