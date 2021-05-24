@@ -20,7 +20,6 @@ header-includes:
 - \usepackage{verbatim}
 - \usepackage{amsthm}
 - \usepackage{comment}
-- \setbeamertemplate{itemize items}[circle]
 ---
 
 ```{r setup, include=FALSE}
@@ -39,8 +38,6 @@ theme_set(theme_bw())
 source('~/dev/pabm-grdpg/functions.R')
 set.seed(314159)
 ```
-
-# Introduction
 
 ## Community Detection for Networks
 
@@ -127,7 +124,7 @@ Suppose each vertex $v_1, ..., v_n$ has hidden labels $z_1, ..., z_n \in [K]$,
 and each $P_{ij}$ depends on labels $z_i$ and $z_j$.  
 Then $A \sim BernoulliGraph(P)$ is a *block model*.
 
-Example: Stochastic Block Model with two communities
+Example 1: Stochastic Block Model with two communities
 
 ::: columns
 
@@ -229,7 +226,7 @@ $(A, X) \sim RDPG(F, n)$ or $(A, X) \sim GRDPG_{p, q}(F, n)$.
 
 ### Recovery/Estimation
 
-Want to estimate $X$ given $A$, or alternatively, 
+Want to estimate $X$ from $A$, or alternatively, 
 interpoint distances, inner products, or angles.
 
 ### Adjacency Spectral Embedding
@@ -258,7 +255,7 @@ $\max\limits_i \|\hat{X}_i - Q_n X_i \| \stackrel{a.s.}{\to} 0$
 All $G$ with $A \sim BernoulliGraph(P)$ are RDPG (if $P$ is 
 positive semidefinite) or GRDPG (includes all block models).
 
-Example: Assortative SBM
+Example 1 (cont'd): Assortative SBM ($p q > r^2$) with $K = 2$
 
 $$X = \begin{bmatrix} 
 \sqrt{p} & 0 \\
@@ -273,17 +270,20 @@ $$P = X X^\top$$
 
 ## Connecting Block Models to the (G)RDPG Model
 
-Example: SBM (cont'd)
+Example 1 (cont'd)
 
-* $A \sim BernoulliGraph(X X^\top)$
-* $A \approx \hat{X} \hat{X}^\top$
-  * $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$
-* Apply clustering algorithm (e.g., $K$-means) on $\hat{X}$
+If we want to perform community detection, 
 
-```{r, fig.height = 8, fig.width = 8, out.width = '50%'}
+1. Note that $A \sim BernoulliGraph(X X^\top)$ is a RDPG
+2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$  
+$\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$
+3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$
+
+```{r, fig.height = 4, fig.width = 4, out.width = '50%'}
 A.eigen <- eigen(A)
 X.hat <- A.eigen$vectors[, 1:2] %*% diag(A.eigen$values[1:2] ** .5)
-plot(X.hat, asp = 1, col = z, xlab = NA, ylab = NA)
+plot(X.hat, asp = 1, col = z, xlab = NA, ylab = NA,
+     main = 'ASE of the adjacency matrix drawn from SBM')
 ```
 
 ## Connecting Block Models to the (G)RDPG Model
@@ -354,8 +354,7 @@ $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
 
 **Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to 
 $A \sim GRDPG_{3, 1}(X U)$ for block diagonal $X$ 
-constructed from $\{\lambda^{(kl)}\}_2$ and 
-predetermined $U \in \mathbb{O}(4)$.
+constructed from $\{\lambda^{(kl)}\}_2$ and $U \in \mathbb{O}(4)$.
 
 Proof: Decompose $P$ as follows
 
@@ -400,18 +399,19 @@ $$P = (X U) I_{3, 1} (X U)^\top$$
 ## Connecting the PABM to the GRDPG
 
 **Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
-$A \sim GRDPG_{p, q}(X U)$ such that
+$A \sim GRDPG_{p, q}(X U)$ with
 
 * $p = K (K + 1) / 2$
 * $q = K (K - 1) / 2$
-* $U$ is orthogonal and predetermined for each $K$
-* $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$  
+* $U \in \mathbb{O}(K^2)$
+* $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$ 
+with each block corresponding to a community  
 $\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
 to different communities, then $x_i^\top x_j = 0$.
 
 **Remark** (non-uniqueness of the latent configuration):  
-$A \sim GRDPG_{p, q}(X U) \implies A \sim GRDPG_{p, q}(X U Q)$ 
-$\forall Q \in \mathbb{O}(p, q)$
+If $A \sim GRDPG_{p, q}(X)$, then $A \sim GRDPG_{p, q}(X Q)$ for any $Q$ in 
+the indefinite orthogonal group with signature $p, q$.
 
 ## Sparse Subspace Clustering
 
