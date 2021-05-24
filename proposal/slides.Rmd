@@ -306,7 +306,7 @@ If we want to perform community detection,
 $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$
 3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$
 
-```{r, fig.height = 4, fig.width = 4, out.width = '50%'}
+```{r, fig.height = 4, fig.width = 5, out.width = '50%'}
 P.eigen = eigen(P)
 X <- P.eigen$vectors[, 1:2] %*% diag(P.eigen$values[1:2] ** .5)
 
