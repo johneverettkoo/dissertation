@@ -335,26 +335,32 @@ pairs(X, col = z, asp = 1, pch = '.', main = 'PABM: Orthogonal subspaces')
 
 ## Popularity Adjusted Block Model
 
-Definition based on Noroozi, Rimal, and Pensky (2020).
+**Def** Popularity Adjusted Block Model (Sengupta and Chen, 2017):
 
-$A \sim PABM(\{\lambda^{(kl)}\}_K)$ iff 
+Let each vertex $i \in [n]$ have $K$ popularity parameters
+$\lambda_{i1}, ..., \lambda_{iK} \in [0, 1]$. 
+Then $A \sim PABM(P)$ if each $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$. 
 
-1. w.l.o.g., organize $P$ such that each block 
-$P^{(kl)} \in [0, 1]^{n_k \times n_l}$ contains edge 
-probabilities between communities $k$ and $l$.
-2. Organize parameters as vectors such that 
+**Lemma** (Noroozi, Rimal, and Pensky, 2020): 
+
+$A$ is sampled from a PABM if 
+$A \sim BernoulliGraph(P)$ such that: 
+
+1. Let $P^{(kl)}$ denote the $n_k \times n_l$ matrix of edge probabilities 
+between communities $k$ and $l$. 
+2. Organize popularity parameters as vectors 
 $\lambda^{(kl)} \in \mathbb{R}^{n_k}$ 
-are the popularity parameters of members of community $k$ to community $l$.  
-$\{\lambda^{(kl)}\}_K$ is the set of $K^2$ popularity vectors.
-3. Then we can write each block of $P$ as 
+such that $\lambda^{(kl)}_i$ is the popularity parameter 
+of the $i$^th^ vertex of community $k$ towards community $l$. 
+3. Each block can be decomposed as 
 $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
-4. Sample $A \sim BernoulliGraph(P)$.
+
+**Notation**: $A \sim PABM(\{\lambda^{(kl)}\}_K)$.
 
 ## Connecting the PABM to the GRDPG ($K = 2$)
 
-**Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to 
-$A \sim GRDPG_{3, 1}(X U)$ for block diagonal $X$ 
-constructed from $\{\lambda^{(kl)}\}_2$ and $U \in \mathbb{O}(4)$.
+**Theorem** (KTT): 
+Given popularity vectors $\{\lambda^{(kl)}\}_2$, we can define block diagonal $X \in \mathbb{R}^{n \times 4}$ and $U \in \mathbb{O}(4)$ such that $A \sim PABM(\lambda^{(kl)}_2)$ is equivalent to $A \sim GRDPG(X U)$.
 
 Proof: Decompose $P$ as follows
 
@@ -363,30 +369,6 @@ $$X = \begin{bmatrix}
 0 & 0 & \lambda^{(21)} & \lambda^{(22)}
 \end{bmatrix}$$
 
-$$Y = \begin{bmatrix}
-\lambda^{(11)} & 0 & \lambda^{(12)} & 0 \\
-0 & \lambda^{(21)} & 0 & \lambda^{(22)}
-\end{bmatrix}$$
-
-$$P = X Y^\top = \begin{bmatrix}
-\lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
-\lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)} (\lambda^{(22)})^\top
-\end{bmatrix}$$
-
-## Connecting the PABM to the GRDPG ($K = 2$)
-
-Proof (cont'd):
-
-$$Y = X \Pi$$
-
-$$\Pi = \begin{bmatrix} 
-1 & 0 & 0 & 0 \\ 
-0 & 0 & 1 & 0 \\
-0 & 1 & 0 & 0 \\
-0 & 0 & 0 & 1
-\end{bmatrix} = 
-U I_{3, 1} U^\top$$
-
 $$U = \begin{bmatrix}
 1 & 0 & 0 & 0 \\
 0 & 0 & 1 / \sqrt{2} & 1 / \sqrt{2} \\
@@ -394,17 +376,21 @@ $$U = \begin{bmatrix}
 0 & 1 & 0 & 0
 \end{bmatrix}$$
 
-$$P = (X U) I_{3, 1} (X U)^\top$$
+$$P = (X U) I_{3, 1} (X U)^\top = 
+\begin{bmatrix}
+\lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
+\lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)} (\lambda^{(22)})^\top
+\end{bmatrix}$$
 
 ## Connecting the PABM to the GRDPG
 
 **Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
 $A \sim GRDPG_{p, q}(X U)$ with
 
-* $p = K (K + 1) / 2$
-* $q = K (K - 1) / 2$
+* $p = K (K + 1) / 2$, $q = K (K - 1) / 2$
 * $U \in \mathbb{O}(K^2)$
-* $X$ is block diagonal and composed of $\{\lambda^{(kl)}\}_K$ 
+* $X \in \mathbb{R}^{n \times K^2}$ is block diagonal and 
+composed of $\{\lambda^{(kl)}\}_K$ 
 with each block corresponding to a community  
 $\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
 to different communities, then $x_i^\top x_j = 0$.
