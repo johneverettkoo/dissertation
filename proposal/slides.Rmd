@@ -1,5 +1,5 @@
 ---
-title: Community Detection Methods for the Generalized Random Dot Product Graph Model
+title: Community Detection Methods for Generalized Random Dot Product Graphs
 subtitle: Dissertation Proposal
 author: John Koo
 date: 'June 2021'
@@ -41,34 +41,56 @@ set.seed(314159)
 
 ## Community Detection for Networks
 
+\newcommand{\diag}{\text{diag}}
+\newcommand{\tr}{\text{Tr}}
+\newcommand{\blockdiag}{\text{blockdiag}}
+\newcommand{\indep}{\stackrel{\text{ind}}{\sim}}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+\newcommand{\Bernoulli}{\text{Bernoulli}}
+\newcommand{\Betadist}{\text{Beta}}
+\newcommand{\BG}{\text{BernoulliGraph}}
+\newcommand{\Cat}{\text{Categorical}}
+\newcommand{\Uniform}{\text{Uniform}}
+\newcommand{\RDPG}{\text{RDPG}}
+\newcommand{\GRDPG}{\text{GRDPG}}
+\newcommand{\PABM}{\text{PABM}}
+
+```{r out.width = '50%', fig.height = 3, fig.width = 4}
+Pz <- generate.P.beta(64, 4, 4, 1, 1, 4)
+P <- Pz$P
+z <- Pz$clustering
+A <- draw.graph(P)
+qgraph::qgraph(A, groups = factor(z), legend = FALSE)
+```
+
 How can we cluster the nodes of a network?
 
 Statistical inference (parametric approach):
 
-1. Define a generative model 
+1. Define a generative model for graph
 $G \mid z_1, ..., z_n, \vec{\theta} \sim P(\vec{z}, \vec{\theta})$.
 2. Develop a method for obtaining estimators $f(G) = \hat{z}_1, ..., \hat{z}_n$.
-3. Identify asymptotic properties of estimators and prove consistency.
+3. Identify asymptotic properties of estimators.
 
 ## Overview
 
 1. Probability Models for Networks
-    * Block Models and Community Structure
-    * (Generalized) Random Dot Product Graphs
-    * Connecting Block Models to the (G)RDPG
+    a. Block Models and Community Structure
+    b. (Generalized) Random Dot Product Graphs
+    c. Connecting Block Models to the (G)RDPG
 
 \vspace*{.5\baselineskip}
 
 2. Popularity Adjusted Block Model
-    * Connecting the PABM to the GRDPG
-    * Subspace Clustering for Community Detection
-    * Orthogonal Spectral Clustering
+    a. Connecting the PABM to the GRDPG
+    b. Subspace Clustering for Community Detection
+    c. Orthogonal Spectral Clustering
 
 \vspace*{.5\baselineskip}
 
 3. Community Detection for the (G)RDPG
-    * Manifold Clustering
-    * Manfolds as (G)RDPG Latent Configurations
+    a. Manifold Clustering
+    b. Manifolds as (G)RDPG Latent Configurations
 
 # Probability Models for Networks
 
@@ -94,17 +116,19 @@ $A_{ij} = \begin{cases}
 
 $A_{ji} = A_{ij}$ and $A_{ii} = 0$ $\forall i, j \in [n]$.
 
-$A \sim BernoulliGraph(P)$ iff:
+\vspace*{1\baselineskip}
+
+$A \sim \BG(P)$ iff:
 
 1. $P \in [0, 1]^{n \times n}$ describes edge probabilities between pairs of 
 vertices.
-2. $A_{ij} \stackrel{ind}{\sim} Bernoulli(P_{ij})$ for each $i < j$.
-
-Example: If $G$ is an Erdos-Renyi graph, then $P_{ij} = \theta$.
+2. $A_{ij} \indep \Bernoulli(P_{ij})$ for each $i < j$.
 
 ::::
 
 :::: {.column width=37.5%}
+
+**Example 1**: If every entry $P_{ij} = \theta$, then $A \sim \BG(P)$ is an Erdos-Renyi graph.
 
 ```{r, fig.height = 2, fig.width = 2}
 n <- 2 ** 5
@@ -122,9 +146,9 @@ qgraph::qgraph(A, vsize = 4)
 
 Suppose each vertex $v_1, ..., v_n$ has hidden labels $z_1, ..., z_n \in [K]$,  
 and each $P_{ij}$ depends on labels $z_i$ and $z_j$.  
-Then $A \sim BernoulliGraph(P)$ is a *block model*.
+Then $A \sim \BG(P)$ is a *block model*.
 
-Example 1: Stochastic Block Model with two communities
+**Example 2**: Stochastic Block Model with two communities
 
 ::: columns
 
@@ -203,24 +227,24 @@ knitr::include_graphics('noroozi-pensky-hierarchy.png')
 
 ## (Generalized) Random Dot Product Graph Model
 
-Random Dot Product Graph $A \sim RDPG(X)$  
+Random Dot Product Graph $A \sim \RDPG(X)$  
 (Young and Scheinerman, 2007)
 
 * Latent vectors $x_1, ..., x_n \in \mathbb{R}^d$ such that 
 $x_i^\top x_j \in [0, 1]$
-* $A \sim BernoulliGraph(X X^\top)$ where 
+* $A \sim \BG(X X^\top)$ where 
 $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$
 
-Generalized Random Dot Product Graph $A \sim GRDPG_{p, q}(X)$  
+Generalized Random Dot Product Graph $A \sim \GRDPG_{p, q}(X)$  
 (Rubin-Delanchy, Cape, Tang, Priebe, 2020)
 
 * Latent vectors $x_1, ..., x_n \in \mathbb{R}^{p+q}$ such that 
-$x_i^\top I_{p, q} x_j \in [0, 1]$ and $I_{p, q} = blockdiag(I_p, -I_q)$
-* $A \sim BernoulliGraph(X I_{p, q} X^\top)$ where 
+$x_i^\top I_{p, q} x_j \in [0, 1]$ and $I_{p, q} = \blockdiag(I_p, -I_q)$
+* $A \sim \BG(X I_{p, q} X^\top)$ where 
 $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$
 
-If latent vectors $X_1, ..., X_n \stackrel{iid}{\sim} F$, then we write 
-$(A, X) \sim RDPG(F, n)$ or $(A, X) \sim GRDPG_{p, q}(F, n)$.
+If latent vectors $X_1, ..., X_n \iid F$, then we write 
+$(A, X) \sim \RDPG(F, n)$ or $(A, X) \sim \GRDPG_{p, q}(F, n)$.
 
 ## (Generalized) Random Dot Product Graph Model
 
@@ -253,9 +277,10 @@ $\max\limits_i \|\hat{X}_i - Q_n X_i \| \stackrel{a.s.}{\to} 0$
 ## Connecting Block Models to the (G)RDPG Model
 
 All Bernoulli Graphs are RDPG (if $P$ is 
-positive semidefinite) or GRDPG.
+positive semidefinite)  
+or GRDPG (in general).
 
-Example 1 (cont'd): Assortative SBM ($p q > r^2$) with $K = 2$
+**Example 2** (cont'd): Assortative SBM ($p q > r^2$) with $K = 2$
 
 ::: columns
 
@@ -268,7 +293,7 @@ r & z_i \neq z_j
 \end{cases}$$
 
 ```{r fig.height = 3, fig.width = 6, out.width = '100%'}
-qgraph::qgraph(A, vsize = 4, groups = factor(z))
+qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
 ```
 
 ::::
@@ -297,16 +322,14 @@ $$X = \begin{bmatrix}
 
 ## Connecting Block Models to the (G)RDPG Model
 
-Example 1 (cont'd)
+**Example 2** (cont'd): If we want to perform community detection, 
 
-If we want to perform community detection, 
+1. Note that $A \sim \BG(P)$ is a RDPG since $P = X X^\top$.
+2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$ with 
+$\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$.
+3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$.
 
-1. Note that $A \sim BernoulliGraph(X X^\top)$ is a RDPG
-2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$  
-$\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$
-3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$
-
-```{r, fig.height = 4, fig.width = 5, out.width = '50%'}
+```{r, fig.height = 5, fig.width = 5, out.width = '50%'}
 P.eigen = eigen(P)
 X <- P.eigen$vectors[, 1:2] %*% diag(P.eigen$values[1:2] ** .5)
 
@@ -368,7 +391,7 @@ pairs(X, col = z, asp = 1, pch = '.', main = 'PABM: Orthogonal subspaces')
 
 Let each vertex $i \in [n]$ have $K$ popularity parameters
 $\lambda_{i1}, ..., \lambda_{iK} \in [0, 1]$. 
-Then $A \sim PABM(P)$ if each $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$. 
+Then $A \sim \PABM(P)$ if each $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$. 
 
 **Lemma** (Noroozi, Rimal, and Pensky, 2020): 
 
@@ -383,12 +406,12 @@ of the $i$^th^ vertex of community $k$ towards community $l$.
 3. Each block can be decomposed as 
 $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
 
-**Notation**: $A \sim PABM(\{\lambda^{(kl)}\}_K)$.
+**Notation**: $A \sim \PABM(\{\lambda^{(kl)}\}_K)$.
 
 ## Connecting the PABM to the GRDPG ($K = 2$)
 
 **Theorem** (KTT): 
-Given popularity vectors $\{\lambda^{(kl)}\}_2$, we can define block diagonal $X \in \mathbb{R}^{n \times 4}$ and $U \in \mathbb{O}(4)$ such that $A \sim PABM(\lambda^{(kl)}_2)$ is equivalent to $A \sim GRDPG(X U)$.
+Given popularity vectors $\{\lambda^{(kl)}\}_2$, we can define block diagonal $X \in \mathbb{R}^{n \times 4}$ and $U \in \mathbb{O}(4)$ such that $A \sim \PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to $A \sim \GRDPG_{3, 1}(X U)$.
 
 Proof: Decompose $P$ as follows
 
@@ -412,43 +435,351 @@ $$P = (X U) I_{3, 1} (X U)^\top =
 
 ## Connecting the PABM to the GRDPG
 
-**Theorem** (KTT): $A \sim PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
-$A \sim GRDPG_{p, q}(X U)$ with
+**Theorem** (KTT): $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
+$A \sim \GRDPG_{p, q}(X U)$ with
 
 * $p = K (K + 1) / 2$, $q = K (K - 1) / 2$
 * $U \in \mathbb{O}(K^2)$
 * $X \in \mathbb{R}^{n \times K^2}$ is block diagonal and 
 composed of $\{\lambda^{(kl)}\}_K$ 
-with each block corresponding to a community  
-$\implies$ if $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
+with each block corresponding to a community.  
+
+**Remark 1** (orthogonality of subspaces):
+If $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
 to different communities, then $x_i^\top x_j = 0$.
 
-**Remark** (non-uniqueness of the latent configuration):  
-If $A \sim GRDPG_{p, q}(X)$, then $A \sim GRDPG_{p, q}(X Q)$ for any $Q$ in 
+**Remark 2** (non-uniqueness of the latent configuration):  
+If $A \sim \GRDPG_{p, q}(Y)$, then $A \sim \GRDPG_{p, q}(Y Q)$ for any $Q$ in 
 the indefinite orthogonal group with signature $p, q$.
+
+**Remark 3**: Communities correspond to subspaces even with linear transformation $Q \in \mathbb{O}(p, q)$, but this may break the orthogonality property.
+
+## Orthogonal Spectral Clustering
+
+**Theorem** (KTT): 
+If $P = V \Lambda V^\top$ and $B = n V V^\top$,  
+then $B_{ij} = 0$ if $z_i \neq z_j$.
+
+**Algorithm**: Orthogonal Spectral Clustering:
+
+1. Let $V$ be the eigenvectors of $A$ corresponding to the $K (K+1)/2$ most 
+positive and $K (K-1) / 2$ most negative eigenvalues.
+2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
+3. Construct graph $G$ using $B$ as its similarity matrix.
+4. Partition $G$ into $K$ disconnected subgraphs.
+
+**Theorem** (KTT): 
+Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC. 
+Then $\forall$ pairs $(i, j)$ belonging to different communities 
+and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
+
+$$
+\max_{i, j} \hat{B}^{(ij)}_n = 
+O_P \Big( \frac{(\log n)^c}{\sqrt{n \rho_n}} \Big)
+$$
 
 ## Sparse Subspace Clustering
 
-**Corollary**: Since $X$ is block diagonal by community and $U$ is orthogonal,
-each community corresponds to a subspace in $\mathbb{R}^{K^2}$.
+**Corollary**: The ASE of $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ lies near a collection of $K$-dimensional subspaces in $K^2$ dimensions.
 
-Subspace property holds even with linear transformation 
-$Q \in \mathbb{O}(p, q)$.
-
-Sparse Subspace Clustering algorithm:
+**Algorithm**: Sparse Subspace Clustering:
 
 1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
-subject to $x_i = X c$ and $c_i^{(i)} = 0$.
+subject to $x_i = X c$ and $c^{(i)} = 0$.  
+This is typically performed via LASSO: 
+$c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
 2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$.
 3. Construct affinity matrix $B = |C| + |C^\top|$.
 
-Step (1) of SSC typically performed via LASSO: 
-$c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
+## Sparse Subspace Clustering
+
+Noroozi et al. observed that the rank of $P$ is $K^2$ 
+and the columns of $P$ belonging to each community has rank $K$ 
+to justify SSC for the PABM.
+
+$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } A_{\cdot, i} = A c
+\text{ and } c^{(i)} = 0$$
+
+They were able to show that this obeys SDP if we replace $A$ with $P$.
+
+GRDPG-based approach: Apply SSC to the ASE of $A$.
+
+Stronger result: Apply SSC to the eigenvectors of $A$.
+
+$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } 
+\hat{v}_i = \hat{V} c \text{ and } c^{(i)} = 0$$
+$$A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$$
 
 ## Sparse Subspace Clustering
 
+**Theorem** (KTT): 
+
+Let 
+
+* $P_n$ describe the edge probability matrix of the PABM with $n$ vertices, and 
+$A_n \sim \BG(P_n)$.
+* $\hat{V}_n$ be the matrix of eigenvectors of $A_n$ corresponding to the 
+$K (K + 1) / 2$ most positive and $K (K - 1) / 2$ most negative eigenvalues. 
+
+Then 
+
+* $\exists \lambda > 0$ and $N < \infty$ such that when $n > N$, 
+$\sqrt{n} \hat{V}_n$ obeys the Subspace Detection Property with probability 1.
+
+Remarks:
+
+* For large $n$, we can identify $\lambda$ for SDP (Wang and Xu, 2016).
+* SDP does not guarantee community detection.
+
+## Simulation Study
+
+```{r clust_err_k, fig.width = 10, fig.height = 3, out.width = '100%'}
+setwd('~/dev/pabm-grdpg')
+clustering.df <- readr::read_csv('clustering-k.csv')
+ssc.df <- readr::read_csv('clustering-ssc-k.csv')
+clustering.df %>%
+  dplyr::group_by(n, K) %>%
+  dplyr::summarise(
+    med.err = median(error),
+    first.q = quantile(error, .25),
+    third.q = quantile(error, .75),
+    med.err.ssc = median(error.ssc),
+    first.q.ssc = quantile(error.ssc, .25),
+    third.q.ssc = quantile(error.ssc, .75),
+    med.err.ep = median(error.ep, na.rm = TRUE),
+    first.q.ep = quantile(error.ep, .25, na.rm = TRUE),
+    third.q.ep = quantile(error.ep, .75, na.rm = TRUE),
+    med.err.louvain = median(error.louvain),
+    first.q.louvain = quantile(error.louvain, .25),
+    third.q.louvain = quantile(error.louvain, .75)
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::inner_join(
+    ssc.df %>% 
+      dplyr::group_by(n, K) %>% 
+      dplyr::summarise(med.err.ssc2 = median(error.ssc2),
+                       first.q.ssc2 = quantile(error.ssc2, .25),
+                       third.q.ssc2 = quantile(error.ssc2, .75)) %>% 
+      dplyr::ungroup()
+  ) %>% 
+  ggplot() +
+  scale_x_log10(breaks = c(128, 256, 512, 1024, 2048, 4096)) +
+  # scale_x_continuous(breaks = c(128, 256, 512, 1024, 2048, 4096)) + 
+  scale_y_log10() +
+  labs(y = 'community detection error rate', 
+       colour = NULL) +
+  geom_line(aes(x = n, y = med.err,
+                colour = 'OSC')) +
+  geom_errorbar(aes(x = n, ymin = first.q, ymax = third.q,
+                    colour = 'OSC'), width = .1) + 
+  geom_line(aes(x = n, y = med.err.ssc,
+                colour = 'SSC-ASE')) + 
+  geom_errorbar(aes(x = n, ymin = first.q.ssc, ymax = third.q.ssc,
+                    colour = 'SSC-ASE'), width = .1) + 
+  # geom_line(aes(x = n, y = med.err.ep,
+  #               colour = 'MM-EP')) + 
+  # geom_errorbar(aes(x = n, ymin = first.q.ep, ymax = third.q.ep,
+  #                   colour = 'MM-EP'), width = .1) + 
+  geom_line(aes(x = n, y = med.err.ssc2,
+                colour = 'SSC-A')) + 
+  geom_errorbar(aes(x = n, ymin = first.q.ssc2, ymax = third.q.ssc2,
+                    colour = 'SSC-A'), width = .1) + 
+  geom_line(aes(x = n, y = med.err.louvain,
+                colour = 'MM-Louvain')) + 
+  geom_errorbar(aes(x = n, ymin = first.q.louvain, ymax = third.q.louvain,
+                    colour = 'MM-Louvain'), width = .1) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  facet_wrap(~ K, labeller = 'label_both')
+```
+
+# General Community Detection for the (G)RDPG
+
+## Recovery from the Adjacency Matrix
+
+```{r}
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+u1 <- runif(n1)
+u2 <- runif(n2)
+x1 <- cos(pi / 3 * u1)
+y1 <- sin(pi / 3 * u1)
+x2 <- 1 + cos(pi / 3 * u2 + pi)
+y2 <- 1 + sin(pi / 3 * u2 + pi)
+data.matrix <- cbind(c(x1, x2), c(y1, y2))
+```
+
+::: columns
+
+:::: {.column width=33%}
+
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
+par(mar = rep(1, 4))
+plot(data.matrix, col = z * 2, asp = 1, xlab = NA, ylab = NA,
+     main = 'Latent configuration')
+```
+
+::::
+
+:::: {.column width=33%}
+
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
+par(mar = rep(1, 4))
+P <- data.matrix %*% diag(c(1, 1)) %*% t(data.matrix)
+A <- draw.graph(P)
+qgraph::qgraph(A, groups = factor(z), layout = 'spring', legend = FALSE)
+title('(G)RDPG')
+```
+
+::::
+
+:::: {.column width=33%}
+
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
+par(mar = rep(1, 4))
+A.eigen <- eigen(A)
+Xhat <- A.eigen$vectors[, c(1, 2)] %*% diag(sqrt(abs(A.eigen$values[c(1, 2)])))
+plot(Xhat, col = z * 2, asp = 1, main = 'ASE')
+```
+
+::::
+
+:::
+
+## Generative Model
+
+Let $(A, X) \sim \GRDPG_{p, q}(F, n)$ as follows:
+
+1. Define functions $\gamma_1, ..., \gamma_K$ such that each 
+$\gamma_k : [0, 1]^r \mapsto \mathbb{R}^d$ and $\gamma_k(t) \neq \gamma_l(t)$ 
+when $k \neq l$.
+2. Sample labels
+$Z_1, ..., Z_n \iid \Cat(\pi_1, ..., \pi_K)$.
+3. Sample $T_1, ..., T_n \iid D$ with support $[0, 1]^r$. 
+4. Set latent positions $X_i = \gamma_{Z_i}(T_i)$ and 
+$X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}^\top$.
+5. $A \sim \BG(X I_{p, q} X^\top)$
+
+## Community Detection
+
+Recall that the ASE approximates the true latent positions:
+
+$$\max_i \|\hat{X}_i - Q_n X_i\| \stackrel{a.s.}{\to} 0$$
+
+This leads to a general community detection method:
+
+Given $A$, $K$, and $d$ (or $p$ and $q$), 
+
+  1. Use ASE to approximate the latent configuration.
+  
+  2. Use an appropriate clustering algorithm for the latent configuration.
+  
+## Parallel Segments
+
+**Example 3**: 
+Let $U_1, ..., U_{n_1}, U_{n_1 + 1}, ..., U_{n} \iid \Uniform(0, \theta)$, $\gamma_1(t) = (t, 0)$, and $\gamma_2(t) = (t, a)$. $X_i = \gamma_1(U_i)$ for $i \leq n_1$ and $X_j = \gamma_2(U_j)$ for $n_1 + 1 \leq j \leq n$.  
+If we observe $X_1, ..., X_{n_1}, X_{n_1+1}, ..., X_{n}$, what approach will allow us to group the observations by segment?
+
+```{r fig.height = 3, out.width = '50%'}
+set.seed(123456)
+
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+
+a <- .1
+
+X <- cbind(runif(n1, 0, cos(pi / 2 * a)), rep(0, n1))
+Y <- cbind(runif(n2, 0, cos(pi / 2 * a)), rep(a, n2))
+
+data.matrix <- rbind(X, Y)
+z <- c(rep(1, n1), rep(2, n2))
+
+as.data.frame(data.matrix) %>% 
+  dplyr::mutate(label = factor(z)) %>% 
+  ggplot() + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = 0, yend = 0), size = .1) + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = a, yend = a), size = .1) + 
+  geom_point(aes(x = V1, y = V2, colour = label)) + 
+  labs(x = NULL, y = NULL, colour = NULL) + 
+  guides(colour = FALSE) + 
+  xlim(-.1, cos(pi / 2 * a) + .1) + 
+  ylim(-a, 2 * a) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  # coord_fixed() + 
+  # ggthemes::theme_few() + 
+  theme_void() + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank())
+```
+
+$\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
+$\exists N(a, \delta, K) < \infty$ such that when $\min_k n_k \geq N$, 
+with probability at least $1 - \delta$,
+
+1. Single linkage clustering entails perfect community detection.
+
+2. Any $\epsilon$-neighborhood graph with $\epsilon \leq a$ will consist of 
+at least $K$ disjoint subgraphs such that no subgraph contains members of two 
+different communities.
+
+## Noisy Parallel Segments and One-Dimensional Manifolds
+
+**Example 4**: 
+Starting with the parallel segments as before, suppose instead of observing $X_1, ..., X_n$, we have noisy observations $X_1 + \xi_1, ..., X_n + \xi_n$ such that 
+$\max_i \|\xi_i\| = \xi \leq a / 3$.
+
+```{r fig.height = 3, out.width = '50%'}
+# xi1 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
+xi1 <- rep(0, n)
+xi2 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
+
+as.data.frame(data.matrix) %>% 
+  dplyr::mutate(V1 = V1 + xi1, V2 = V2 + xi2) %>% 
+  dplyr::mutate(label = factor(z)) %>% 
+  ggplot() + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = 0, yend = 0), size = .1) + 
+  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = a, yend = a), size = .1) + 
+  geom_point(aes(x = V1, y = V2, colour = label)) + 
+  labs(x = NULL, y = NULL, colour = NULL) + 
+  guides(colour = FALSE) + 
+  xlim(-.1, cos(pi / 2 * a) + .1) + 
+  ylim(-a, 2 * a) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  # coord_fixed() + 
+  # ggthemes::theme_few() + 
+  theme_void() + 
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank())
+```
+
+Then we can derive similar statements as in Example 3. 
+
+This also holds for noisy points sampled uniformly on one-dimensional manifolds such that the manifolds are distance at least $a$ apart.
+
+Since the ASE of a RDPG generated from points on these segments/curves will reconstruct the original segments/curves with noise, we can apply this to the RDPG (if sufficient $n$).
+
+## Future Work
+
+1. Derive formal statements showing that the ASE of a random graph generated by these latent configurations produces the correct conditions for community detection.
+
+2. Extend results to non-uniform distributions.
+
+3. Extend results to multidimensional manifolds.
+
+4. Relax condition for the minimum distance between manifolds.
+
+5. Explore the performance of these techniques in the presence of outliers. 
+
+6. Extend results to the GRDPG.
+
+# Additional Slides
+
+## Subspace Detection Property
+
 If $X$ obeys the *Subspace Detection Property*, then $B$ is sparse such that 
-$B_{ij} = 0$ if $x_i$ and $x_j$ belong to different subspaces
+$B_{ij} = 0$ if $x_i$ and $x_j$ belong to different subspaces.
 
 ::: columns
 
@@ -499,31 +830,12 @@ B <- sweep(B, 2, apply(B, 2, max), `/`)
 B[is.nan(B)] <- 0
 W <- B + t(B)
 
-qgraph::qgraph(sign(W), layout = 'spring', groups = factor(z))
+qgraph::qgraph(sign(W), layout = 'spring', groups = factor(z), legend = FALSE)
 ```
 
 ::::
 
 :::
-
-## Sparse Subspace Clustering
-
-Noroozi et al. observed that the rank of $P$ is $K^2$ 
-and the columns of $P$ belonging to each community has rank $K$ 
-to justify SSC for the PABM.
-
-$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } A_{\cdot, i} = A c
-\text{ and } c^{(i)} = 0$$
-
-They were able to show that this obeys SDP if we replace $A$ with $P$.
-
-GRDPG-based approach: Apply SSC to the ASE of $A$.
-
-$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } 
-\hat{x}_i = \hat{X} c \text{ and } c^{(i)} = 0$$
-$$A \approx \hat{X} I_{p, q} \hat{X}^\top$$
-
-## Sparse Subspace Clustering
 
 **Theorem** (Wang and Xu, 2016): 
 If data matrix $X$ consists of points lying close to 
@@ -536,234 +848,6 @@ that subspace.
 
 Then $X$ obeys SDP.
 
-**Theorem** (KTT): 
-If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
-then $B_{ij} = 0$ $\forall i, j$ in different communities.
-
-## Sparse Subspace Clustering
-
-**Theorem** (KTT): 
-
-Let 
-
-* $P_n$ describe the edge probability matrix of the PABM with $n$ vertices, and 
-$A_n \sim BernoulliGraph(P_n)$.
-* $\hat{V}_n$ be the matrix of eigenvectors of $A_n$ corresponding to the 
-$K (K + 1) / 2$ most positive and $K (K - 1) / 2$ most negative eigenvalues. 
-
-Then 
-
-* $\exists \lambda > 0$ and $N < \infty$ such that when $n > N$, 
-$\sqrt{n} \hat{V}_n$ obeys the Subspace Detection Property with probability 1.
-
-Remarks:
-
-* For large $n$, we can identify $\lambda$ for SDP (Wang and Xu, 2016).
-* SDP does not guarantee community detection.
-
-## Orthogonal Spectral Clustering
-
-**Theorem** (KTT): 
-If $P = V \Lambda V^\top$ and $B = n V V^\top$, 
-then $B_{ij} = 0$ $\forall i, j$ in different communities.
-
-Orthogonal Spectral Clustering algorithm: 
-
-1. Let $V$ be the eigenvectors of $A$ corresponding to the $K (K+1)/2$ most 
-positive and $K (K-1) / 2$ most negative eigenvalues.
-2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
-3. Construct graph $G$ using $B$ as its similarity matrix.
-4. Partition $G$ into $K$ disconnected subgraphs.
-
-**Theorem** (KTT): 
-Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC. 
-Then $\forall$ pairs $(i, j)$ belonging to different communities 
-and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
-
-$$
-\max_{i, j} \hat{B}^{(ij)} = 
-O_P \Big( \frac{(\log n)^c}{\sqrt{n \rho_n}} \Big)
-$$
-
-# General Community Detection for the (G)RDPG
-
-## Generative Model
-
-Let $(A, X) \sim RDPG(F, n)$ such that
-
-1. Define functions $f_1, ..., f_K$ such that 
-$f_k : [0, 1]^r \mapsto \mathbb{R}^d$ and $f_k(t) \neq f_l(t)$ 
-$\forall k, l \in [K]$. 
-2. Sample labels
-$Z_1, ..., Z_n \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$.
-3. Sample $T_1, ..., T_n \stackrel{iid}{\sim} D$ with support $[0, 1]^r$. 
-4. Set latent positions $X_i = f_{Z_i}(T_i)$ and 
-$X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}^\top$.
-5. $A \sim BernoulliGraph(X X^\top)$
-
-## Community Detection
-
-Athreya et al. and Rubin-Delanchy et al.: we can approximate properties of 
-the latent configurations via ASE.
-
-General community detection method:  
-Given $A$, $K$, and $d$ (or $p$ and $q$), 
-
-  1. Use ASE to approximate the latent configuration.
-  2. Use the appropriate clustering algorithm for the form of the latent
-  configuration (manifolds).
-  
-## Parallel Segments
-
-**Example**: 
-Let $U_1, ..., U_{n_1}, U_{n_1 + 1}, ..., U_{n} \stackrel{iid}{\sim} Uniform(0, \cos \frac{\pi}{2} a)$, $f_1(t) = (t, 0)$, and $f_2(t) = (t, a)$. $X_i = f_1(U_i)$ for $i \leq n_1$ and $X_j = f_2(U_j)$ for $n_1 + 1 \leq j \leq n$. If we observe $X_1, ..., X_{n_1}, X_{n_1+1}, ..., X_{n}$, what approach will allow us to group the observations by segment?
-
-```{r fig.height = 3, out.width = '50%'}
-set.seed(123456)
-
-n1 <- 2 ** 5
-n2 <- 2 ** 5
-n <- n1 + n2
-
-a <- .1
-
-X <- cbind(runif(n1, 0, cos(pi / 2 * a)), rep(0, n1))
-Y <- cbind(runif(n2, 0, cos(pi / 2 * a)), rep(a, n2))
-
-data.matrix <- rbind(X, Y)
-z <- c(rep(1, n1), rep(2, n2))
-
-as.data.frame(data.matrix) %>% 
-  dplyr::mutate(label = factor(z)) %>% 
-  ggplot() + 
-  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = 0, yend = 0), size = .1) + 
-  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = a, yend = a), size = .1) + 
-  geom_point(aes(x = V1, y = V2, colour = label)) + 
-  labs(x = NULL, y = NULL, colour = NULL) + 
-  guides(colour = FALSE) + 
-  xlim(-.1, cos(pi / 2 * a) + .1) + 
-  ylim(-a, 2 * a) + 
-  scale_colour_brewer(palette = 'Set1') + 
-  # coord_fixed() + 
-  # ggthemes::theme_few() + 
-  theme_void() + 
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank())
-```
-
-$\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
-$\exists N(a, \delta, K) < \infty$ such that when $\min_k n_k \geq N$, 
-with probability at least $1 - \delta$,
-
-1. Single linkage clustering will produce perfect community detection.
-2. Any $\epsilon$-neighborhood graph with $\epsilon \leq a$ will consist of 
-at least $K$ disjoint subgraphs such that no subgraph contains members of two 
-different communities.
-
-## Noisy Parallel Segments and One-Dimensional Manifolds
-
-**Example**: 
-Starting with the parallel segments as before, suppose instead of observing $X_1, ..., X_n$, we have noisy observations $X_1 + \xi_1, ..., X_n + \xi_n$ such that 
-$\max_i \|\xi_i\| = \xi \leq a / 3$.
-
-```{r fig.height = 3, out.width = '50%'}
-# xi1 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
-xi1 <- rep(0, n)
-xi2 <- runif(n, -a / 6 / sqrt(2), a / 6 / sqrt(2))
-
-as.data.frame(data.matrix) %>% 
-  dplyr::mutate(V1 = V1 + xi1, V2 = V2 + xi2) %>% 
-  dplyr::mutate(label = factor(z)) %>% 
-  ggplot() + 
-  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = 0, yend = 0), size = .1) + 
-  geom_segment(aes(x = 0, xend = cos(pi / 2 * a), y = a, yend = a), size = .1) + 
-  geom_point(aes(x = V1, y = V2, colour = label)) + 
-  labs(x = NULL, y = NULL, colour = NULL) + 
-  guides(colour = FALSE) + 
-  xlim(-.1, cos(pi / 2 * a) + .1) + 
-  ylim(-a, 2 * a) + 
-  scale_colour_brewer(palette = 'Set1') + 
-  # coord_fixed() + 
-  # ggthemes::theme_few() + 
-  theme_void() + 
-  theme(axis.text = element_blank(),
-        axis.ticks = element_blank())
-```
-
-Then $\forall a \in (0, 1)$, $\delta \in (0, 1)$, $K \geq 2$, $\xi \leq a / 3$, 
-$\exists N(a, \delta, K, \xi) < \infty$ such that when $\min_k n_k \geq N$, 
-with probability at least $1 - \delta$,
-
-1. Single linkage will produce perfect community detection.
-2. Any $\epsilon$-neighborhood graph will consist of at least $K$ sub-graphs with no subgraph containing vertices from multiple communities.
-
-This also holds for noisy points sampled from one-dimensional manifolds such that the manifolds are distance at least $a$ apart.
-
-## Recovery from the Adjacency Matrix
-
-```{r}
-n1 <- 2 ** 5
-n2 <- 2 ** 5
-n <- n1 + n2
-z <- c(rep(1, n1), rep(2, n2))
-u1 <- runif(n1)
-u2 <- runif(n2)
-x1 <- cos(pi / 3 * u1)
-y1 <- sin(pi / 3 * u1)
-x2 <- 1 + cos(pi / 3 * u2 + pi)
-y2 <- 1 + sin(pi / 3 * u2 + pi)
-data.matrix <- cbind(c(x1, x2), c(y1, y2))
-```
-
-::: columns
-
-:::: {.column width=33%}
-
-```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
-par(mar = rep(1, 4))
-plot(data.matrix, col = z * 2, asp = 1, xlab = NA, ylab = NA,
-     main = 'Latent configuration')
-```
-
-::::
-
-:::: {.column width=33%}
-
-```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
-par(mar = rep(1, 4))
-P <- data.matrix %*% t(data.matrix)
-A <- draw.graph(P)
-qgraph::qgraph(A, groups = factor(z), layout = 'spring')
-title('RDPG')
-```
-
-::::
-
-:::: {.column width=33%}
-
-```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
-par(mar = rep(1, 4))
-A.eigen <- eigen(A)
-Xhat <- A.eigen$vectors[, 1:2] %*% diag(sqrt(A.eigen$values[1:2]))
-plot(Xhat, col = z * 2, asp = 1, main = 'ASE')
-```
-
-::::
-
-:::
-
-## Future Work
-
-1. Show that the ASE of a random graph generated by these latent vectors 
-produces the correct conditions for sufficiently large $n$.
-2. Extend results to non-uniform distributions.
-3. Extend results to multidimensional manifolds.
-4. Relax condition for the minimum distance between manifolds.
-5. Explore more robust clustering techniques for these latent configurations.
-6. Extend results to the GRDPG.
-
-# Additional Slides
-
 ## Parameter Estimation
 
 ## Indefinite Orthogonal Group
@@ -771,11 +855,11 @@ produces the correct conditions for sufficiently large $n$.
 $$\mathbb{O}(p, q) = \{Q : Q I_{p, q} Q^\top = I_{p, q}\}$$
 
 * $Q^\top Q \neq I$
-* If $A \sim GRDPG_{p, q}(X)$, then $A \sim GRDPG_{p, q}(X Q)$
+* If $A \sim \GRDPG_{p, q}(X)$, then $A \sim \GRDPG_{p, q}(X Q)$
 * $(Q x)^\top (Q y) = x^\top Q^\top Q y \neq x^\top y$
 * $\|Q\| \neq 1$ $\implies$ $\|Q x - Q y\| \neq \|x - y\|$
 
-## Community Detection in Block Models
+## Non-Spectral Community Detection for Block Models
 
 Likelihood
 
@@ -824,8 +908,8 @@ M-step
 
 Priors:
 
-* $Z_i \stackrel{iid}{\sim} Categorical(\pi_1, ..., \pi_K)$
-* $\lambda_{ik} \stackrel{ind}{\sim} Beta(a_{ik}, b_{ik})$
+* $Z_i \iid Categorical(\pi_1, ..., \pi_K)$
+* $\lambda_{ik} \indep Beta(a_{ik}, b_{ik})$
 
 Full joint distribution:
 

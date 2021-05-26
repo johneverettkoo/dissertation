@@ -410,7 +410,7 @@ $\exists \lambda > 0$ and $N < \infty$ such that when $n > N$,
 $\sqrt{n} \hat{V}_n$ obeys the subspace detection property with probability 1.
 \end{theorem}
 
-## Alternative Approaches to Community Detection
+## Non-Spectral Approaches to Community Detection
 
 So far, we connected the PABM to the GRDPG and used this to motivate community detection methods based on the ASE of the adjacency matrix sampled from the PABM. In this section, we will explore non-spectral methods for community detection. 
 
