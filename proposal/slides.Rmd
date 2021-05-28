@@ -83,8 +83,8 @@ $G \mid z_1, ..., z_n, \vec{\theta} \sim P(\vec{z}, \vec{\theta})$.
 
 2. Popularity Adjusted Block Model
     a. Connecting the PABM to the GRDPG
-    b. Subspace Clustering for Community Detection
-    c. Orthogonal Spectral Clustering
+    b. Orthogonal Spectral Clustering
+    c. Sparse Subspace Clustering
 
 \vspace*{.5\baselineskip}
 
@@ -128,7 +128,8 @@ vertices.
 
 :::: {.column width=37.5%}
 
-**Example 1**: If every entry $P_{ij} = \theta$, then $A \sim \BG(P)$ is an Erdos-Renyi graph.
+**Example 1**: If every entry $P_{ij} = \theta$, then $A \sim \BG(P)$ is an Erdos-Renyi graph.  
+For this model, $A_{ij} \iid \Bernoulli(\theta)$.
 
 ```{r, fig.height = 2, fig.width = 2}
 n <- 2 ** 5
@@ -180,7 +181,7 @@ P <- matrix(r, nrow = n, ncol = n)
 P[seq(n1), seq(n1)] <- p
 P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
 A <- draw.graph(P)
-qgraph::qgraph(A, vsize = 4, groups = factor(z))
+qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
 ```
 
 ::::
@@ -327,7 +328,8 @@ $$X = \begin{bmatrix}
 1. Note that $A \sim \BG(P)$ is a RDPG since $P = X X^\top$.
 2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$ with 
 $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$.
-3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$.
+3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$,  
+noting that as $n \to \infty$, the ASE approaches point masses.
 
 ```{r, fig.height = 5, fig.width = 5, out.width = '50%'}
 P.eigen = eigen(P)
@@ -391,7 +393,8 @@ pairs(X, col = z, asp = 1, pch = '.', main = 'PABM: Orthogonal subspaces')
 
 Let each vertex $i \in [n]$ have $K$ popularity parameters
 $\lambda_{i1}, ..., \lambda_{iK} \in [0, 1]$. 
-Then $A \sim \PABM(P)$ if each $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$. 
+Then $A \sim \PABM(P)$ if each $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$,  
+e.g., if $z_i = k$ and $z_j = l$, $P_{ij} = \lambda_{il} \lambda_{jk}$.
 
 **Lemma** (Noroozi, Rimal, and Pensky, 2020): 
 
@@ -444,9 +447,45 @@ $A \sim \GRDPG_{p, q}(X U)$ with
 composed of $\{\lambda^{(kl)}\}_K$ 
 with each block corresponding to a community.  
 
+$$X = \begin{bmatrix}
+\Lambda^{(1)} & \cdots & 0 \\
+0 & \ddots & 0 \\
+0 & \cdots & \Lambda^{(K)}
+\end{bmatrix}$$
+
+$$\Lambda^{(k)} = \begin{bmatrix} 
+\lambda^{(k1)} & \cdots & \lambda^{(kK)} 
+\end{bmatrix}$$
+
+## Connecting the PABM to the GRDPG
+
+::: columns
+
+:::: column
+
+$$X = \begin{bmatrix}
+\Lambda^{(1)} & \cdots & 0 \\
+0 & \ddots & 0 \\
+0 & \cdots & \Lambda^{(K)}
+\end{bmatrix}$$
+
+::::
+
+:::: column
+
+\vspace*{2\baselineskip}
+
+$$U \in \mathbb{O}(K^2)$$
+
+::::
+
+:::
+
+$$A \sim \PABM(\{\lambda^{(kl)}\}_K) \iff A \sim \GRDPG_{p, q}(X U)$$
+
 **Remark 1** (orthogonality of subspaces):
-If $x_i^\top$ and $x_j^\top$ are two rows of $X U$ corresponding 
-to different communities, then $x_i^\top x_j = 0$.
+If $y_i^\top$ and $y_j^\top$ are two rows of $X U$ corresponding 
+to different communities, then $y_i^\top y_j = 0$.
 
 **Remark 2** (non-uniqueness of the latent configuration):  
 If $A \sim \GRDPG_{p, q}(Y)$, then $A \sim \GRDPG_{p, q}(Y Q)$ for any $Q$ in 
@@ -482,7 +521,7 @@ $$
 
 **Corollary**: The ASE of $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ lies near a collection of $K$-dimensional subspaces in $K^2$ dimensions.
 
-**Algorithm**: Sparse Subspace Clustering:
+**Algorithm**: Sparse Subspace Clustering (Elhamifar and Vidal, 2009):
 
 1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
 subject to $x_i = X c$ and $c^{(i)} = 0$.  
