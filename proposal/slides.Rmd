@@ -1,25 +1,13 @@
 ---
-title: Community Detection Methods for Generalized Random Dot Product Graphs
-subtitle: Dissertation Proposal
-author: 
-  - John Koo$^1$
-  - Michael Trosset$^1$
-  - Minh Tang$^2$
-  - Julia Fukuyama$^1$
-  - Roni Khardon$^3$
-  - Fangzheng Xie$^1$
-institute:
-  - $^1$Indiana University, Department of Statistics
-  - $^2$North Carolina State University, Department of Statistics
-  - $^3$Indiana University, Department of Computer Science
-date: 'June 2021'
 output: 
   beamer_presentation:
     fig_crop: no
     theme: 'default'
     colortheme: 'beaver'
     includes:
-      in_header: page_headers.tex
+      in_header: 
+        - page_headers.tex
+        - slidestemplate.tex
 header-includes:
 - \usepackage{setspace}
 - \usepackage{float}
@@ -48,6 +36,54 @@ theme_set(theme_bw())
 source('~/dev/pabm-grdpg/functions.R')
 set.seed(314159)
 ```
+
+## {.plain}
+
+\center
+
+\LARGE
+
+\textcolor{darkred}{Community Detection Methods for the Generalized Random Dot Product Graph}
+
+\normalsize
+
+Dissertation Proposal
+
+June 2021
+
+\vspace*{1\baselineskip}
+
+::: columns
+
+:::: {.column width=33%}
+
+John Koo^1^  
+*PhD Candidate*
+
+::::
+
+:::: {.column width=33%}
+
+*Research Committee*  
+Dr. Michael Trosset^1^  
+Dr. Minh Tang^2^  
+Dr. Julia Fukuyama^1^  
+Dr. Roni Khardon^3^  
+Dr. Fangzheng Xie^1^
+
+::::
+
+:::
+
+\vspace*{1\baselineskip}
+
+\tiny 
+
+^1^Department of Statistics, Indiana University  
+^2^Department of Statistics, North Carolina State University  
+^3^Department of Computer Science, Indiana University
+
+\normalsize
 
 ## Community Detection for Networks
 

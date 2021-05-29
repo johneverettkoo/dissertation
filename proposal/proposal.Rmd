@@ -614,7 +614,7 @@ For this research, we propose using the connection between Block Models and the 
 
 We aim to extend these results by defining more general structures in the latent space to construct RDPG or GRDPG models and show that community detection is possible via Adjacency Spectral Embedding. So far, we showed that if in the latent space the communities can be represented as points sampled uniformly on curves or one-dimensional manifolds separated by a nonzero distance, we can apply two existing clustering techniques to the ASE and show that they will perform perfect community detection with high probability. We will generalize these results to nonuniform distributions on higher dimensional manifolds as well as investigate alternative clustering techniques for the latent space that may perform better for smaller $n$. 
 
-# Estimated Timeline of Completion
+## Estimated Timeline of Completion
 
 Literature review: August 2021
 
