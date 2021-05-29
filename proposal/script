@@ -1,0 +1,134 @@
+thesis proposal script
+
+Hello. Thank you all for attending my dissertation proposal talk, titled community detection methods for generalized random dot product graphs.
+
+
+First, I will try to motivate this work with an illustration. Suppose we observe a network with binary and undirected edges, for example, a facebook network in which the nodes are individuals and edges represent whether pairs of individuals are friends. One analysis task might be to partition this network into subgraphs in an unsupervized yet meaningful manner. In the facebook network example, we might want to identify cliques or friend groups. 
+
+One approach might be to define a metric, for example, minimizing the number of edges we need to cut to partition the graph into disconnected subgraphs, while also maximizing the minimum number of edges within each partition. Examples of this include min-cut, ratio cut, and normalized cut. 
+
+Another approach, based on statistical inference, would start by defining a probability model that might generate the network, and the parameters of this model would include hidden or unobserved labels associated with each node. Then our goal would be to develop a method for estimating these parameters and stating asymptotic properties of these estimators, such as convergence/consistency. In our work, we take the statistical inference approach. 
+
+
+Here is a brief outline of today's talk. First, we'll go over some preliminaries by introducing two families of generative graph models, the block model and the generalized random dot product graph. Then I will show how these are connected and mention some implications of this connection for community detection. 
+
+Next, we will zoom into one particular block model called the popularity adjusted block model. We show the particularities in connecting the pabm to the grdpg and how two community detection methods arise naturally from this connection.
+
+Finally, we move onto more general community structures in the grdpg and posit some community detection methods for these structures. We will try to come up with a general framework for community detection for any GRDPG that induces community structure.
+
+
+Probability models for networks.
+
+
+Let's begin very generally with bernoulli graphs. Suppose we have a graph, which is a set of vertices V and a set of edges E, that is undirected and unweighted. We can describe this graph by n by n adjacency matrix A, which contains entries 1 when there is an edge between its corresponding pair of vertices, and 0 otherwise. We say A describes a bernoulli graph if there is an edge probability matrix P such that each A_ij is drawn as bernoulli P_ij. The simpliest example of this would be the erdos-renyi graph, which sets all entries of P to a constant. 
+
+
+Now we want to turn our attention to bernoulli graphs with community structure. We begin by assigning each vertex v_1, v_2, up to v_n community labels z_1, z_2, up to z_n, which can take on values from 1 to K. Then if each P_ij depends in some way on the labels of i and j, we call this a block model. 
+
+The simplest example of this is the stochastic block model. In this example, we have two communities, so each z_i can take on values 1 or 2. Then we set each P_ij as p if both i and j are in community 1, q if they are both in community 2, and r if they are in different communities. In this figure, we set p to 1/2, q to 1/4, and r to 1/8 and sampled one network from this model. We also say this is an assortative sbm if p q > r^2. A general and non-technical definintion of assortativity, we say an sbm is assortative if on average, the within-community edge probability is greater than the between-community edge probability, and we will return to this idea a couple of slides down the line. 
+
+
+Here is a brief overview of some of the main types of block models. First, we have the erdos-renyi model, which is not a block model but I am including it here for completeness. As we saw before, the erdos-renyi model sets each P_ij to a constant value, so edges are drawn iid bernoulli. Second is the stochastic block model, which has a parameter for each pair of communities. Then we have the degree corrected block model and the popularity adjusted block model, which are successive generalizations of the sbm. 
+
+
+And here is one way we can characterize the nested nature of these block models. The PABM is a generalization of the DCBM, which is a generalization of the SBM, which is a generalization of the erdos-renyi model. 
+
+
+Next, let's switch gears to another family of bernoulli graph models, the random dot product graph and generalized random dot product graph. We say that A represents a random dot product graph if its edge probability matrix comes from latent vectors in euclidean space. More specifically, the edge probability between vertices i and j is computed as the dot product of x_i and x_j, their corresponding latent vectors. 
+
+We also define the *generalized* random dot product graph similarly by setting the edge probability between vertices i and j as the indefinite inner product of vectors x_i and x_j, where the indefinite inner product is defined as follows. 
+
+If instead of fixed latent vectors, they come from some probability distribution, we denote the rdpg and grdpg as follows.
+
+
+The main inference task for the rdpg and grdpg is in recovery of the latent vectors (or some quantity derived from them such as interpoint distances or angles). The structure of the rdpg provides a very straightforward method for estimating X based on spectral decomposition. To embed in d dimensions, we use the d largest eigenvalues and their corresponding eigenvectors. In the grdpg case, we need to split d into p and q and then use the p most positive and q most negative eigenvalues and their corresponding eigenvectors. This is called the adjacency spectral embedding. 
+
+It's already been shown that the ASE converges to the true latent configuration, up to some unidentifiable linear transformation. In the rdpg case, this isn't too big of an issue because the transformation must be orthogonal, which preserves interpoint distances and angles. We are not as lucky in the grdpg case, as the transformation can include skew transformations. 
+
+
+So now that we defined these two families of bernoulli graphs, we want to make a connection between them. In a sense, this connection is actually very trivial. If we have any positive semidefinite P, we can decompose it as X X^T which gives us a latent configuration in euclidean space. So any bernoulli grpah with positive semidefinite P is a rdpg. Furthermore, all bernoulli graphs are grdpg regardless of positive semidefiniteness in the same way. So that fact isn't super interesting. What we're going to focus on instead are the specific forms of the latent configurations that induce various block models. 
+
+Let's go back to the SBM example from before. We have two communities and the edge probabilities are defined solely on community membership. If we organize P by community, the upper left block is all p, the lower right is q, and the off diagonal blocks are r. Then it's easy to find a two dimensional embedding for P that consists of two unique rows, resulting in two point masses. 
+
+This leads to a straightforward community detection method. We just take the ASE of A, and we know that as n increases, the ASE converges to the latent configuration, that is, two point masses which correspond to the two communities, and we can apply a clustering technique on the ASE that is based on clusters aggregating around point masses, such as K-means or gaussian mixture models. 
+
+
+Going back to our three block model types, we saw that the latent configuration that induces the SBM consists of point masses, and it's also well known that the latent configuration that induces the DCBM consists of segments that intersect at the origin. Our result extends this by showing that the latent configuration that induces the PABM consists of orthogonal subspaces. 
+
+
+The popularity adjusted block model.
+
+
+So let's first define the pabm. In the pabm, each vertex has K popularity parameters lambda_i1, lambda_i2, up to lambda_iK. So lambda_ik is vertex i's affinity toward community k. Each P_ij is defined as lambda_{i, z_j} lambda_{j z_i}. 
+
+For instance, if vertex i is in community k and vertex j is in community l, the edge probability between i and j is lambda_il times lambda_jk.
+
+Noroozi, rimal, and pensky came up with an another characterization of the pabm using popularity vectors. This hints at the idea that the pabm can be induced by a set of latent vectors. 
+
+Let's designate P^kl as the n_k x n_l block of edge probabilities between k and l. We also organize the popularity parameters into popularity vectors, so lambda^kl contains the popularity parameters of community k toward community l. We have K^2 of these popularity vectors. Then we can decompose each block P^kl as the outer product of lambda^kl and lambda^lk. 
+
+
+We already noted that all block models are grdpg, and this includes the pabm, so that fact alone isn't all that interesting. What's interesting is how they are connected. For illustrative purposes, we'll look at the 2-community case first.
+
+The main statement of the theorem is that we can find a block diagonal X consisting of vectors in 4 dimensions where each block corresponds to a community, along with an orthogonal U such that X times U is the latent configuration under the GRDPG framework that induces the PABM. 
+
+
+Now this theorem easily generalizes to higher K and provides an explicit formula for constructing a latent configuration that induces the PABM. The statement of the theorem is that A is PABM with these popularity vectors iff A is also GRDPG with latent configuration X U and signature p, q where p, q, U, X are as follows.
+
+The main thing to note here is we have an explicit form for p and q, we know U is orthogonal (and we can compute it, but the details of that aren't too relevant here), and X is block diagonal with each block corresponding to a community. Each block consists of the popularity vectors for its community. So recall that lambda^k1 consists of the popularity parameters of the vertices in community k toward community 1. 
+
+
+We laid out three implications of this latent configuration.
+
+First, if we take two rows of XU that correspond to different communities, then they must be orthogonal, so theirir inner product is 0. So if we are able to recover the original latent configuration, it would provide a very nice method for community detection.
+
+The second implication breaks this, however. The latent configuration is only unique up to this linear transformation Q, which can be a stretch or skew transformation, breaking the orthogonality property. 
+
+On the other hand, even though this transformation can break orthogonality, we are still left with subspaces. 
+
+Now, the ASE allows us to recover the latent configuration with some noise, up to this unidentifiable transformation Q. If we could make Q the identity, then we can use this orthogonality property for community detection, but there is no way to guarantee this. 
+
+
+Fortunately, the unscaled ASE, in which we just use the eigenvectors and ignore the eigenvalues, allows us to preserve orthogonality. 
+
+We start with a theorem. Let V Lambda V^T be the spectral decomposition of P. Then the rows of V that correspond to different communities are orthogonal. We can collect this information in this matrix B, so B_ij is 0 if i and j are in different communities. Then we can let B represent a similarity graph which consists of at least K disjoint subgraphs that correspond to the communities.
+
+The most straightforward application of this theorem is to replace P with A. We call this algorithm orthogonal spectral clustering. And we have a theorem that states that the matrix B outputted by this algorithm will be such that B_ij goes to 0 for i and j in different communities, under some mild conditions. 
+
+
+Next, we'll take a look at another algorithm for community detection on the pabm that exploits the latent configuration. We already showed that the ASE of the PABM is K^2-dimensional and consists of K-dimensional subspaces. As it turns out, there already is a family of clustering algorithms for data that lie on or near subspaces. We'll focus on one particular one called sparse subspace clustering. This algorithm essentially amounts to fitting a sparse regression for each vector using the other vectors as covariates. The idea is that if x_i lives in a subspace with a few other vectors in X, then it can be expressed as a linear combination of them, with the other coefficients being 0. Then if we combine all of these coefficients into a matrix B, B_ij will be 0 for i and j on different subspaces.
+
+In practice, the sparse regression fits are done via lasso, which requires us to choose the sparsity parameter lambda.
+
+
+We aren't the first to propose the use of sparse subspace clustering for this problem. Noroozi, Rimal, and Pensky noticed that P is rank K^2 and the columns of P corresponding to each community are rank K to justify the use of SSC. They showed that if you treat P as a data matrix for SSC, then the output obeys the subspace detection property, which we won't get into here, but this is considered the ideal case for ssc. 
+
+Our approach uses the geometry of the latent configuration to justify using ssc on the ASE. Actually, ssc works better the more orthogonal these subspaces are, and we saw that if we treat the rows of the eigenvector matrix as an embedding, we get exactly that. 
+
+This leads to our version of the sparse subspace clustering algorithm for the pabm. First, we take the approximate spectral decomposition of A, then apply SSC on the rows of the eigenvector matrix. 
+
+
+Then we were able to prove that for a large yet finite n, the rows of V obey the subspace detection property, provided that we choose the correct sparsity parameter. In some sense, this is a nicer result than the one for orthogonal spectral clustering, which has B_ij going to 0 asymptotically--for ssc, B_ij is exactly 0 if the conditions are just right. 
+
+
+We also ran a few simulations to test our algorithms empirically. Here, we show the interquartile range of the community detection error rates of our simulations, with the x axis being the size of the graph. There is some weird behavior going on for ssc with K = 2, but otherwise, all of these methods result in zero error for large n, with orthogonal spectral clustering and ssc on the eigenvectors performing better than ssc on the adjacency matrix. 
+
+
+Next, we're going to look at some material we're currently working on. The goal is to develop a general framework for community detection for all bernoulli graphs with community structure. And since all bernoulli graphs can be represented as generalized random dot product graphs, our approach is to treat them as such and say that the latent configuration has some sort of community structure, which we want to uncover.
+
+
+Here is an illustration of what we would like to achieve. We say that a latent configuration with some sort of community structure induces a graph, and that community structure can be recovered by the adjacency spectral embedding.
+
+
+This is an attempt at a more formal definition the latent structure. First, we have a set of K functions from the 0-1 hypercube to a subset of d-dimensional space. The idea here is that these functions represent low-dimensional manifolds. Then we sample labels from a categorical distribution, along with their corresponding positions, first by sampling points from the hypercube and mapping them onto their respective positions on the manifolds. This then becomes a latent configuration for a RDPG or GRDPG. 
+
+As a more concrete example, we can set r to 1 so we sample T on the unit interval, and each gamma_k to a point mass. This would then give us the SBM. Or we could set each gamma_k as a segment from the origin to some point with norm at most 1, which gives us the DCBM. If r = K and each gamma_k is a K-dimensional hyperplane, we get the PABM. 
+
+
+Then we get a general community detection meta-algorithm by taking advantage of the convergence of the ASE. First, we approximate the latent configuration via the ASE, then we choose an appropriate clustering algorithm for the latent configuration. For the SBM, since the latent configuration consists of point masses, the ASE consists of points near point masses, so K-means would work. Or for the DCBM and PABM, since the ASE consists of points lying near low-dimensional subspaces (1-dimensional for the DCBM, K-dimensional for the PABM), we can use subspace clustering. 
+
+
+We'll try to motivate a clustering method with an example. Suppose we sample points uniformly from two segments of some nonzero distance apart. We can say this is our latent configuration for the RDPG, for example. We want a clustering method to separate points by segment that will give us zero error with probability at least 1 - delta. And we were able to show that if the clustering algorithm we use is single linkage or epsilon neighborhood graphs, it's possible to solve for a required finite sample size for these two algorithms produce zero error, and the sample size depends on delta as well as the size of the gap, and we can also generalize this to K segments. 
+
+
+
