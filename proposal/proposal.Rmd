@@ -70,23 +70,23 @@ library(ggplot2)
 
 ## Research Goal
 
-Graph and network data have become increasingly widespread in various fields including sociology, neuroscience, biostatistics, and computer science. This has resulted in various challenges for researchers who rely on traditional statistical and machine learning methods, many of which are incompatible with graph data and instead require the data to exist as feature vectors in Euclidean space. This includes graph clustering and community detection, which are often the goal of data analysis on graphs and networks. Common clustering methods typically involve calculating some central or representative point for each cluster around which the data belonging to that cluster lie (e.g., Lloyd's algorithm for $K$-means clustering \cite{1056489}, Gaussian Mixture Models \cite{doi:10.1198/016214502760047131}). Because these methods involve computing summary statistics within each cluster, such as the sample average, they cannot be applied directly to graphs, necessitating methods for transforming the graph data into feature vectors. 
+Graph and network data have become increasingly widespread in various fields including sociology, neuroscience, biostatistics, and computer science. This has resulted in various challenges for researchers who rely on traditional statistical and machine learning methods, many of which are incompatible with graph data and instead require the data to exist as feature vectors in Euclidean space. This includes graph clustering and community detection, which are often the goal of data analysis on graphs and networks. Common clustering methods typically involve calculating some central or representative point for each cluster around which the data belonging to that cluster lie (e.g., Lloyd's algorithm for $K$-means clustering \cite{1056489}, Gaussian Mixture Models \cite{doi:10.1198/016214502760047131}). Because these methods involve computing summary statistics within each cluster, such as the sample average, they cannot be applied directly to graphs, necessitating methods for transforming the graph data into feature vectors if they are to be used. 
 
-One family of methods for unifying graph community detection with traditional clustering techniques is Spectral Clustering \cite{DBLP:journals/corr/abs-0711-0189}, which involves embedding the graph into Euclidean space, followed by applying a popular clustering algorithm such as $K$-means clustering. The Random Dot Product Graph (RDPG) \cite{10.1007/978-3-540-77004-6_11} and Generalized Random Dot Product Graph (GRDPG) \cite{rubindelanchy2017statistical} models take this further by explicitly constructing generative models for graphs involving latent vectors in Euclidean space. In such a model, each vertex has a corresponding vector in latent space, and the edge probabilities between pairs of vertices is computed by operations on corresponding pairs of latent vectors. A community detection algorithm motivated by this may involve learning the latent positions given an observed graph and then learning the community labels given the latent positions. 
+One family of methods for unifying graph community detection with traditional clustering techniques is Spectral Clustering \cite{DBLP:journals/corr/abs-0711-0189}, which involves embedding the graph into Euclidean space, followed by applying a popular clustering algorithm such as $K$-means clustering. The Random Dot Product Graph (RDPG) \cite{10.1007/978-3-540-77004-6_11} and Generalized Random Dot Product Graph (GRDPG) \cite{rubindelanchy2017statistical} models take this further by explicitly constructing generative models for graphs via latent vectors in Euclidean space. In such a model, each vertex has a corresponding vector in latent space, and the edge probabilities between pairs of vertices are computed by operations on the corresponding pairs of latent vectors. A community detection algorithm motivated by this may involve learning the latent positions given an observed graph and then learning the community labels given the latent positions. 
 
-The aim of our research is to develop consistent community detection techniques under the RDPG and GRDPG frameworks. First, we explore existing generative graph models with underlying community structures that can be inferred by connecting these models to the RDPG or GRDPG. In particular, we use the connection between the Popularity Adjusted Block Model \cite{307cbeb9b1be48299388437423d94bf1} and the GRDPG to motivate two community detection methods. Then we explore other latent structures or mixture distributions in the latent space that induce graphs for which consistent community detection is possible. 
+The aim of our research is to develop consistent community detection techniques under the RDPG and GRDPG frameworks. First, we explore existing generative graph models with underlying community structures (Block Models) that can be inferred by connecting these models to the RDPG or GRDPG. In particular, we use the connection between the Popularity Adjusted Block Model \cite{307cbeb9b1be48299388437423d94bf1} and the GRDPG to motivate two community detection methods. Then we explore other latent structures or mixture distributions in the latent space that induce graphs for which consistent community detection is possible. 
 
 ## Notation
 
-Let $G = (V, E)$ be an undirected, unweighted graph with no self-loops and $n$ vertices. Denote $A \in \{0, 1\}^{n \times n}$ as the adjacency matrix for $G$ such that $A_{ij} = 1$ if there exists an edge between vertices $i$ and $j$ and $A_{ij} = 0$ otherwise. Because $G$ is symmetric and contains no self-loops, $A_{ij} = A_{ji}$ and $A_{ii} = 0$ for $i, j \in [n]$. We further restrict our analyses to independent Bernoulli graphs. Let $P \in [0, 1]^{n \times n}$ be a symmetric matrix of edge probabilities. Graph $G$ is sampled from $P$ by drawing $A_{ij} \indep \Bernoulli(P_{ij})$ for each $1 \leq i < j \leq n$ ($A_{ji} = A_{ij}$ and $A_{ii} = 0$). We denote $A \sim \BG(P)$ as graph with adjacency matrix $A$ sampled from edge probability matrix $P$ in this manner. If each vertex has a hidden label in $[K]$, they are denoted as $z_1, ..., z_n$. Finally, we denote $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top \in \mathbb{R}^{n \times d}$ as the sample $x_1, ..., x_n \in \mathbb{R}^d$.
+Let $G = (V, E)$ be an undirected, unweighted graph with no self-loops and $n$ vertices. Denote $A \in \{0, 1\}^{n \times n}$ as the adjacency matrix of $G$ such that $A_{ij} = 1$ if there exists an edge between vertices $i$ and $j$ and $A_{ij} = 0$ otherwise. Because $G$ is symmetric and contains no self-loops, $A_{ij} = A_{ji}$ and $A_{ii} = 0$ for $i, j \in [n]$. We further restrict our analyses to independent Bernoulli graphs. Let $P \in [0, 1]^{n \times n}$ be a symmetric matrix of edge probabilities. Graph $G$ is sampled from $P$ by drawing $A_{ij} \indep \Bernoulli(P_{ij})$ for each $1 \leq i < j \leq n$ ($A_{ji} = A_{ij}$ and $A_{ii} = 0$). We denote $A \sim \BG(P)$ as graph with adjacency matrix $A$ sampled from edge probability matrix $P$ in this manner. If each vertex has a hidden label in $[K]$, they are denoted as $z_1, ..., z_n$. Finally, we denote $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top \in \mathbb{R}^{n \times d}$ as the sample $x_1, ..., x_n \in \mathbb{R}^d$.
 
 # Preliminaries
 
 ## Block Models
 
-Generative models for independent Bernoulli graphs involve defining the edge probability matrix $P$ whose $ij$^th^ entry is the probability of an edge between vertices $i$ and $j$ for each $i, j \in [n]$. In order to motivate community detection methods, we restrict the generative model such that for each pair of vertices $(i, j)$, the probability of an edge between the vertices $P_{ij}$ depends in some way on their labels $z_i$ and $z_j$.
+Generative models for independent Bernoulli graphs involve defining the edge probability matrix $P$ whose $ij$^th^ entry is the probability of an edge between vertices $i$ and $j$ for each $i, j \in [n]$. In order to motivate community detection methods, we restrict the generative model such that for each pair of vertices $(i, j)$, the probability of an edge between the vertices $P_{ij}$ depends in some way on their labels $z_i$ and $z_j$. Such models are called Block Models. 
 
-One such model is the Stochastic Block Model (SBM) \cite{doi:10.1080/0022250X.1971.9989788}: Given $K$ communities and each vertex belonging to one community, the SBM restricts $P$ to $K (K + 1) / 2$ unique entries such that $P_{ij} = p_{z_i z_j}$ where $p_{kl} = p_{lk}$ is the probability of an edge between each vertex in community $k$ to each vertex in community $l$. The homogeneous SBM further restricts $P$ to two unique entries: $P_{ij} = p$ if $z_i = z_j$ and $P_{ij} = q$ otherwise. Several generalizations of the SBM have been introduced since, including the Degree Corrected Block Model (DCBM) \cite{Karrer_2011} and the Popularity Adjusted Block Model (PABM) \cite{307cbeb9b1be48299388437423d94bf1}. Like the SBM, these models involve imposing some restriction on $P$ based on community labels (and possibly other factors).
+One type of Block Model is the Stochastic Block Model (SBM) \cite{doi:10.1080/0022250X.1971.9989788}: Given $K$ communities and each vertex belonging to one of the $K$ communities, the SBM restricts $P$ to $K (K + 1) / 2$ unique entries such that $P_{ij} = p_{z_i z_j}$ where $p_{kl} = p_{lk}$ is the probability of an edge between each vertex in community $k$ to each vertex in community $l$. The homogeneous SBM further restricts $P$ to two unique entries: $P_{ij} = p$ if $z_i = z_j$ and $P_{ij} = q$ otherwise. Several generalizations of the SBM have been introduced since, including the Degree Corrected Block Model (DCBM) \cite{Karrer_2011} and the Popularity Adjusted Block Model (PABM) \cite{307cbeb9b1be48299388437423d94bf1}. Like the SBM, these models involve imposing some restriction on $P$ based on community labels (and possibly other factors).
 
 ## (Generalized) Random Dot Product Graphs
 
@@ -105,10 +105,10 @@ The structure of the RDPG and GRDPG provides a straightforward method for recove
 \begin{definition}[Adjacency Spectral Embedding]
 Let $A \sim \text{RDPG}(X)$ for $X \in \mathcal{X} \subset \mathbb{R}^{n \times d}$. Let $A \approx V \Lambda V^\top$ be the approximate spectral decomposition of $A$ corresponding to the $d$ largest eigenvalues and their corresponding eigenvectors. Then the rows of $V \Lambda^{1/2}$ are the scaled Adjacency Spectral Embedding (ASE) of $A$, and the rows of $V$ are the unscaled ASE of $A$. 
 
-If $A \sim \text{GRDPG}_{p, q}(X)$, then let $A = V \Lambda V^\top$ be the approximate spectral decomposition of $A$ corresponding to the $p$ most positive and $q$ most negative eigenvalues of $A$ and their corresponding eigenvectors. Then the rows of $V |\Lambda|^{1/2}$ and $V$ are the scaled and unscaled ASE of $A$ respectively.
+If $A \sim \text{GRDPG}_{p, q}(X)$, then let $A \approx V \Lambda V^\top$ be the approximate spectral decomposition of $A$ corresponding to the $p$ most positive and $q$ most negative eigenvalues of $A$ and their corresponding eigenvectors. Then the rows of $V |\Lambda|^{1/2}$ and $V$ are the scaled and unscaled ASE of $A$ respectively.
 \end{definition}
 
-\citet{athreya2017statistical} showed that under mild conditions, if $(A_n, X_n) \sim \text{RDPG}(F, n)$ and $\hat{X}_n$ is the scaled ASE of $A_n$, for some sequence of orthogonal matrices $W_n$, 
+\citet{athreya2017statistical} showed that under mild conditions, if $(A_n, X_n) \sim \text{RDPG}(F, n)$ and $\hat{X}_n$ is the scaled ASE of $A_n$, for some sequence of orthogonal matrices $\{W_n\}$, 
 
 \begin{equation}
 \max_i \|(\hat{X}_n)_i - W_n (X_n)_i \| \stackrel{a.s.}{\to} 0
@@ -120,9 +120,9 @@ Similarly, \citet{rubindelanchy2017statistical} showed that for $(A_n, X_n) \sim
 \max_i \|(\hat{X}_n)_i - Q_n (X_n)_i \| \stackrel{a.s.}{\to} 0
 \end{equation}
 
-where $Q_n$ is a sequence of matrices in $\mathbb{O}(p, q)$, the indefinite orthogonal group of order $p, q$.
+where $\{Q_n\}$ is a sequence of matrices in $\mathbb{O}(p, q)$, the indefinite orthogonal group of order $p, q$.
 
-It is straightforward to show that all Bernoulli graphs with positive semidefinite $P$ are special cases of the RDPG, which is a special case of the GRDPG, and all graphs generated by $P$ regardless of positive semidefiniteness are special cases of the GRDPG. This includes the SBM, DCBM, and PABM. In the following example, we show that under the RDPG framework, the latent configuration that induces the SBM takes on a very particular form.
+It is straightforward to show that all Bernoulli graphs with positive semidefinite $P$ are special cases of the RDPG, which is a special case of the GRDPG, and all Bernoulli Graphs generated by $P$ regardless of positive semidefiniteness are special cases of the GRDPG. This includes the SBM, DCBM, and PABM. In the following example, we show that under the RDPG framework, the latent configuration that induces the SBM takes on a very particular form.
 
 \begin{example}[Connecting the SBM to the RDPG]
 Let $G = (V, E)$ with adjacency matrix $A$ be sampled from the SBM with two communities for which the within-edge probabilities are $p$ and $q$ for communities 1 and 2 respectively, and the between-community edge probability is $r$, with $p q > r^2$. Let community 1 have $n_1$ vertices, community 2 have $n_2$ vertices, and $n_1 + n_2 = n$. Without loss of generality, organize $P$ and $A$ such that the $kl^{th}$ block represents edges between communities $k$ and $l$. Then $P = \begin{bmatrix} P^{(11)} & P^{(12)} \\ P^{(21)} & P^{(22)} \end{bmatrix}$ where each block is a constant value, e.g., $P^{(11)}_{ij} = p$. Then one RDPG representation of this SBM is:
@@ -137,10 +137,10 @@ $$X = \begin{bmatrix}
 \end{bmatrix}
 \in \mathbb{R}^{n \times 2}$$
 
-where the first $n_1$ rows are $\begin{bmatrix} \sqrt{p} & 0 \end{bmatrix}$ and the next $n_2$ rows are $\begin{bmatrix} \sqrt{r^2 / p} & \sqrt{q - r^2 / p} \end{bmatrix}$. This is shown by reconstructing $P$ as $P = X X^\top$.
+where the first $n_1$ rows are $\begin{bmatrix} \sqrt{p} & 0 \end{bmatrix}$ and the next $n_2$ rows are $\begin{bmatrix} \sqrt{r^2 / p} & \sqrt{q - r^2 / p} \end{bmatrix}$. This is shown by reconstructing $P$ as $P = X X^\top$. Thus the SBM is equivalent to a RDPG with the latent configuration of two point masses, one for each community. 
 \end{example}
 
-The ASE of the assortative SBM consists of points in $\mathbb{R}^K$ that lie near one of $K$ centers, depending on the community label, leading to ASE followed by $K$-means clustering (or similar, e.g., GMM) as a consistent community detection algorithm \cite{lyzinski2014}. A similar result can be shown for the DCBM and PABM but with different structures in the ASE.
+The ASE of the assortative SBM consists of points in $\mathbb{R}^K$ that lie near one of $K$ centers, depending on the community label, leading to ASE followed by $K$-means clustering (or similar, e.g., GMM) as a consistent community detection algorithm \cite{lyzinski2014}. A similar result has been shown for the DCBM \cite{lyzinski2014}, and our work extends this to the PABM.
 
 ## Manifold Learning
 
@@ -154,7 +154,7 @@ d_{\epsilon}(y_i, y_j) \stackrel{p}{\to} \int_{t_i}^{t_j} \sqrt{\sum_r^d \Big( \
 
 # The Popularity Adjusted Block Model
 
-As discussed in \S 2.2, all Bernoulli graph models can be expressed as a RDPG or GRDPG model, and in particular, the (associative) SBM is a RDPG with a very specific structure in the latent space. A similar result has been shown for the DCBM \cite{lyzinski2014}. We can also extend this to the PABM. In \S 3.1, we show that the PABM is equivalent to the GRDPG model for which the communities correspond to subspaces in the latent configuration. We further show that while the latent configuration is not unique, there exists one in particular for which the subspaces are orthogonal. This leads to two straightforward methods for community detection, one involving computing inner products in the ASE and another which is a slight modification of an existing algorithm for subspace clustering. Finally, we will briefly explore alternative, non-spectral-based methods for community detection in the ASE involving Expectation Maximization, MCMC sampling, and Mean Field Variational Inference. 
+As discussed in \S 2.2, all Bernoulli graph models can be expressed as a RDPG or GRDPG model, and in particular, the (associative) SBM is a RDPG with a very specific structure in the latent space. A similar result has been shown for the DCBM \cite{lyzinski2014}. We can also extend this to the PABM. In \S 3.1, we show that the PABM is equivalent to the GRDPG model for which the communities correspond to subspaces in the latent configuration. We further show that while the latent configuration is not unique, there exists one in particular for which the subspaces are orthogonal. This leads to two straightforward methods for community detection, one involving computing inner products in the ASE and another which is a straightforward application of an existing algorithm for subspace clustering. Finally, we will briefly explore alternative, non-spectral-based methods for community detection in the ASE involving Expectation Maximization and Bayesian methods.
 
 ## Connecting the PABM to the GRDPG
 
@@ -170,9 +170,7 @@ $P^{(kl)}$ describes the edge probabilities between vertices in communities
 $k$ and $l$ ($P^{(lk)} = (P^{(kl)})^\top$). 
 Let graph $G = (V, E)$ be an undirected, unweighted graph such 
 that its corresponding adjacency matrix $A \in \{0, 1\}^{n \times n}$ is a 
-realization of $\Bernoulli(P)$, i.e., 
-$A_{ij} \indep \Bernoulli(P_{ij})$ for $i > j$ 
-($A_{ij} = A_{ji}$ and $A_{ii} = 0$). 
+realization of $\BG(P)$.
 
 If each block $P^{(kl)}$ can be written as the outer product of two vectors:
 
@@ -191,7 +189,7 @@ We will use the notation $A \sim \text{PABM}(\{\lambda^{(kl)}\}_K)$
 to denote a random adjacency matrix $A$ drawn from a PABM with parameters
 $\lambda^{(kl)}$ consisting of $K$ underlying communities.
 
-It is straightforward to show that the PABM, as well as all graphs such that the adjacency matrix is drawn such that $A_{ij} \indep Bernoulli(P_{ij})$, is a special case of the GRDPG. It can also be shown that the latent positions of the PABM under the GRDPG framework consists of $K$ $K$-dimensional subspaces in $\mathbb{R}^{K^2}$. While there is no unique latent configuration $X$ such that $X X^\top = P$, the edge probability $P$ for the PABM, they all have this subspace structure, and one in particular consists of *orthogonal* subspaces.
+It is straightforward to show that the PABM (as well as all Bernoulli Graphs) is a special case of the GRDPG. It can also be shown that the latent positions of the PABM under the GRDPG framework consists of $K$ $K$-dimensional subspaces in $\mathbb{R}^{K^2}$. While there is no unique latent configuration $X$ such that $X X^\top = P$, the edge probability $P$ for the PABM, they all have this subspace structure, and one in particular consists of *orthogonal* subspaces.
 
 \begin{theorem}[Connecting the PABM to the GRDPG for $K = 2$]
 \label{theorem1}  
@@ -329,7 +327,13 @@ $$XU = \begin{bmatrix}
 \end{bmatrix}$$
 \end{example}
 
-In Theorem \ref{theorem2}, we showed that a possible latent configuration for a $K$-community PABM under the GRDPG framework consists of vectors in $\mathbb{R}^{K^2}$ such that each community corresponds to a $K$-dimensional subspace and each subspace is orthogonal to the others. 
+In Theorem \ref{theorem2}, we showed that a possible latent configuration for a $K$-community PABM under the GRDPG framework consists of vectors in $\mathbb{R}^{K^2}$ such that each community corresponds to a $K$-dimensional subspace and each subspace is orthogonal to the others. However, because latent configurations are not unique, we cannot apply this fact directly for community detection.
+
+\begin{remark}
+Let $A \sim \text{GRDPG}_{p, q}(Y)$. Then $A\sim \text{GRDPG}_{p, q}(Y Q)$ $\forall Q \in \mathbb{O}(p, q)$. This is because $Y Q I_{p, q} Q^\top Y^\top = Y I_{p, q} Y^\top$. 
+\end{remark}
+
+However, we can show that if we treat the rows of the eigenvectors of $P$ (ignoring the eigenvalues) as an embedding (unscaled ASE), then they always form orthogonal subspaces. This is stated more formally in Theorem \ref{osc}, and we call the resulting algorithm Orthogonal Spectral Clustering. 
 
 \begin{theorem}
 \label{osc}

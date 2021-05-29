@@ -1,7 +1,17 @@
 ---
 title: Community Detection Methods for Generalized Random Dot Product Graphs
 subtitle: Dissertation Proposal
-author: John Koo
+author: 
+  - John Koo$^1$
+  - Michael Trosset$^1$
+  - Minh Tang$^2$
+  - Julia Fukuyama$^1$
+  - Roni Khardon$^3$
+  - Fangzheng Xie$^1$
+institute:
+  - $^1$Indiana University, Department of Statistics
+  - $^2$North Carolina State University, Department of Statistics
+  - $^3$Indiana University, Department of Computer Science
 date: 'June 2021'
 output: 
   beamer_presentation:
@@ -521,7 +531,7 @@ $$
 
 **Corollary**: The ASE of $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ lies near a collection of $K$-dimensional subspaces in $K^2$ dimensions.
 
-**Algorithm**: Sparse Subspace Clustering (Elhamifar and Vidal, 2009):
+**Algorithm**: Sparse Subspace Clustering (Elhamifar & Vidal, 2009):
 
 1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
 subject to $x_i = X c$ and $c^{(i)} = 0$.  
@@ -623,10 +633,10 @@ clustering.df %>%
                 colour = 'SSC-A')) + 
   geom_errorbar(aes(x = n, ymin = first.q.ssc2, ymax = third.q.ssc2,
                     colour = 'SSC-A'), width = .1) + 
-  geom_line(aes(x = n, y = med.err.louvain,
-                colour = 'MM-Louvain')) + 
-  geom_errorbar(aes(x = n, ymin = first.q.louvain, ymax = third.q.louvain,
-                    colour = 'MM-Louvain'), width = .1) + 
+  # geom_line(aes(x = n, y = med.err.louvain,
+  #               colour = 'MM-Louvain')) + 
+  # geom_errorbar(aes(x = n, ymin = first.q.louvain, ymax = third.q.louvain,
+  #                   colour = 'MM-Louvain'), width = .1) + 
   scale_colour_brewer(palette = 'Set1') + 
   facet_wrap(~ K, labeller = 'label_both')
 ```
@@ -699,6 +709,12 @@ $Z_1, ..., Z_n \iid \Cat(\pi_1, ..., \pi_K)$.
 4. Set latent positions $X_i = \gamma_{Z_i}(T_i)$ and 
 $X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}^\top$.
 5. $A \sim \BG(X I_{p, q} X^\top)$
+
+Examples:
+
+1. $r = 1$ and each $\gamma_k$ is a point mass $\implies$ SBM
+2. $r = 1$ and the range of each $\gamma_k$ is a segment from the origin to point $y_k$ with $\|y_k\| \leq 1$ $\implies$ DCBM
+3. $r = K$ and the range of each $\gamma_k$ is the hyperplane of coordinates $x_{K (k-1) + 1}$ to $x_{k K}$ $\implies$ PABM
 
 ## Community Detection
 
@@ -809,9 +825,9 @@ Since the ASE of a RDPG generated from points on these segments/curves will reco
 
 4. Relax condition for the minimum distance between manifolds.
 
-5. Explore the performance of these techniques in the presence of outliers. 
+5. Extend results to the GRDPG.
 
-6. Extend results to the GRDPG.
+# Thank you
 
 # Additional Slides
 
@@ -888,6 +904,19 @@ that subspace.
 Then $X$ obeys SDP.
 
 ## Parameter Estimation
+
+1. Let $A^{(kl)}$ be the block of edges between communities $k$ and $l$. 
+2. For each $k, l \in [K]$, do:
+    i. Compute the SVD $A^{(kl)} = U \Sigma V^\top$.
+    ii. Assign $u^{(kl)}$ and $v^{(kl)}$ as the first columns of $U$ and $V$. 
+    Assign $\sigma^{(kl)} \leftarrow \Sigma_{11}^{1/2}$. 
+    iii. Assign $\hat{\lambda}^{(kl)} \leftarrow \pm \sigma^{(kl)} u^{(kl)}$ and 
+    $\hat{\lambda}^{(kl)} \leftarrow \pm \sigma^{(kl)} v^{(kl)}$.
+
+**Theorem** (KTT): 
+
+$$\max_{k, l} \|\hat{\lambda}^{(kl)} - \lambda^{(kl)}\| =
+O_P \Big( \frac{(\log n_k)^c}{\sqrt{n_k}} \Big)$$
 
 ## Indefinite Orthogonal Group
 
