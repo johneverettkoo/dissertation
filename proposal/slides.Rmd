@@ -307,10 +307,10 @@ To embed in $\mathbb{R}^d$,
 1. Compute $A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$ 
 where $\hat{\Lambda} \in \mathbb{R}^{d \times d}$ and 
 $\hat{V} \in \mathbb{R}^{n \times d}$.  
-For RDPG, use $d$ greatest eigenvalues;  
+For RDPG, use $d$ greatest eigenvalues; 
 for GRDPG, use $p$ most positive and $q$ most negative eigenvalues.
 
-2. For RDPG, let $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$;  
+2. For RDPG, let $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$; 
 for GRDPG, let $\hat{X} = \hat{V} |\hat{\Lambda}|^{1/2}$.
 
 \vspace*{.5\baselineskip}
@@ -371,7 +371,7 @@ $$X = \begin{bmatrix}
 
 **Example 2** (cont'd): If we want to perform community detection, 
 
-1. Note that $A \sim \BG(P)$ is a RDPG since $P = X X^\top$.
+1. Note that $A$ is a RDPG because $P = X X^\top$.
 2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$ with 
 $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$.
 3. Apply clustering algorithm (e.g., $K$-means) to $\hat{X}$,  
@@ -569,7 +569,7 @@ GRDPG-based approach: Apply SSC to the ASE of $A$.
 Stronger result: Apply SSC to the eigenvectors of $A$.
 
 $$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } 
-\hat{v}_i = \hat{V} c \text{ and } c^{(i)} = 0$$
+\hat{v}_i = \hat{V}^\top c \text{ and } c^{(i)} = 0$$
 $$A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$$
 
 ## Sparse Subspace Clustering
@@ -579,14 +579,13 @@ $$A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$$
 Let 
 
 * $P_n$ describe the edge probability matrix of the PABM with $n$ vertices, and 
-$A_n \sim \BG(P_n)$.
+$A_n \sim \BG(P_n)$;
 * $\hat{V}_n$ be the matrix of eigenvectors of $A_n$ corresponding to the 
 $K (K + 1) / 2$ most positive and $K (K - 1) / 2$ most negative eigenvalues. 
 
 Then 
 
-* $\exists \lambda > 0$ and $N < \infty$ such that when $n > N$, 
-$\sqrt{n} \hat{V}_n$ obeys the Subspace Detection Property with probability 1.
+* For some $\lambda > 0$ and $N < \infty$, $\sqrt{n} \hat{V}_n$ obeys the Subspace Detection Property with probability 1 when $n > N$.
 
 Remarks:
 
@@ -735,7 +734,7 @@ Recall that the ASE approximates the true latent positions:
 
 $$\max_i \|\hat{X}_i - Q_n X_i\| \stackrel{a.s.}{\to} 0$$
 
-This leads to a general community detection method:
+This suggests a general approach to community detection:
 
 Given $A$, $K$, and $d$ (or $p$ and $q$), 
 
@@ -782,8 +781,8 @@ as.data.frame(data.matrix) %>%
         axis.ticks = element_blank())
 ```
 
-$\forall a \in (0, 1)$, $\delta \in (0, 1)$, and $K \geq 2$, 
-$\exists N(a, \delta, K) < \infty$ such that when $\min_k n_k \geq N$, 
+Then for any $a \in (0, 1)$, $\delta \in (0, 1)$, 
+we can find $N(a, \delta) < \infty$ such that when $\min_k n_k \geq N$, 
 with probability at least $1 - \delta$,
 
 1. Single linkage clustering entails perfect community detection.
@@ -991,8 +990,8 @@ M-step
 
 Priors:
 
-* $Z_i \iid Categorical(\pi_1, ..., \pi_K)$
-* $\lambda_{ik} \indep Beta(a_{ik}, b_{ik})$
+* $Z_i \iid \Cat(\pi_1, ..., \pi_K)$
+* $\lambda_{ik} \indep \Betadist(a_{ik}, b_{ik})$
 
 Full joint distribution:
 
@@ -1019,7 +1018,7 @@ $q(\vec{z}, \{\lambda_{ik}\}) =
 $q_{\theta_i}^{(t+1)} \propto \exp(E_{\theta_{-i}^{(t)}}[\log p])$
 
 * Approximate solution for the PABM
-  * $Z_i \mid \{a'_{ik}\}, \{b'_{ik}\} \sim Categorical(\pi'_1, ..., \pi'_K)$
+  * $Z_i \mid \{a'_{ik}\}, \{b'_{ik}\} \sim \Cat(\pi'_1, ..., \pi'_K)$
   * $\lambda_{ik} \mid 
-  \{a'_{-i, -k}\}, \{b'_{-i, -k}\}, \{\pi'_k\} \sim Beta(a'_{ik}, b'_{ik})$
+  \{a'_{-i, -k}\}, \{b'_{-i, -k}\}, \{\pi'_k\} \sim \Betadist(a'_{ik}, b'_{ik})$
   * Iteratively update $\{\pi'_K\}, \{a'_{ik}\}, \{b'_{ik}\}$ until convergence
