@@ -457,31 +457,6 @@ $P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
 
 **Notation**: $A \sim \PABM(\{\lambda^{(kl)}\}_K)$.
 
-## Connecting the PABM to the GRDPG ($K = 2$)
-
-**Theorem** (KTT): 
-Given popularity vectors $\{\lambda^{(kl)}\}_2$, we can define block diagonal $X \in \mathbb{R}^{n \times 4}$ and $U \in \mathbb{O}(4)$ such that $A \sim \PABM(\{\lambda^{(kl)}\}_2)$ is equivalent to $A \sim \GRDPG_{3, 1}(X U)$.
-
-Proof: Decompose $P$ as follows
-
-$$X = \begin{bmatrix}
-\lambda^{(11)} & \lambda^{(12)} & 0 & 0 \\
-0 & 0 & \lambda^{(21)} & \lambda^{(22)}
-\end{bmatrix}$$
-
-$$U = \begin{bmatrix}
-1 & 0 & 0 & 0 \\
-0 & 0 & 1 / \sqrt{2} & 1 / \sqrt{2} \\
-0 & 0 & 1 / \sqrt{2} & -1 / \sqrt{2} \\
-0 & 1 & 0 & 0
-\end{bmatrix}$$
-
-$$P = (X U) I_{3, 1} (X U)^\top = 
-\begin{bmatrix}
-\lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
-\lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)} (\lambda^{(22)})^\top
-\end{bmatrix}$$
-
 ## Connecting the PABM to the GRDPG
 
 **Theorem** (KTT): $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ is equivalent to 
@@ -497,11 +472,13 @@ $$X = \begin{bmatrix}
 \Lambda^{(1)} & \cdots & 0 \\
 0 & \ddots & 0 \\
 0 & \cdots & \Lambda^{(K)}
-\end{bmatrix}$$
+\end{bmatrix} 
+\in \mathbb{R}^{n \times K^2}$$
 
 $$\Lambda^{(k)} = \begin{bmatrix} 
 \lambda^{(k1)} & \cdots & \lambda^{(kK)} 
-\end{bmatrix}$$
+\end{bmatrix} 
+\in \mathbb{R}^{n_k \times K}$$
 
 ## Connecting the PABM to the GRDPG
 
@@ -570,9 +547,9 @@ $$
 **Algorithm**: Sparse Subspace Clustering (Elhamifar & Vidal, 2009):
 
 1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
-subject to $x_i = X c$ and $c^{(i)} = 0$.  
+subject to $x_i = X^\top c$ and $c^{(i)} = 0$.  
 This is typically performed via LASSO: 
-$c_i = \arg\min \frac{1}{2} \|x_i - X_{-i} c\|_2^2 + \lambda \|c\|_1$
+$c_i = \arg\min \frac{1}{2} \|x_i - X_{-i}^\top c\|_2^2 + \lambda \|c\|_1$
 2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$.
 3. Construct affinity matrix $B = |C| + |C^\top|$.
 
@@ -870,14 +847,16 @@ Since the ASE of a RDPG generated from points on these segments/curves will reco
 ## Subspace Detection Property
 
 If $X$ obeys the *Subspace Detection Property*, then $B$ is sparse such that 
-$B_{ij} = 0$ if $x_i$ and $x_j$ belong to different subspaces.
+$B_{ij} = 0$ for each $x_i$ and $x_j$ belonging to different subspaces.
 
 ::: columns
 
 :::: column
 
-```{r, fig.height = 5, fig.width = 5, out.width = '75%'}
+```{r, fig.height = 3, fig.width = 4, out.width = '50%'}
 set.seed(314159)
+
+par(mar = rep(1, 4))
 
 x1 <- runif(n, 1 / sqrt(50), 1)
 y1 <- rep(0, n)
@@ -896,7 +875,7 @@ plot(X, col = z * 2, asp = 1, xlab = NA, ylab = NA)
 
 :::: column
 
-```{r, fig.height = 5, fig.width = 5, out.width = '75%'}
+```{r, fig.height = 3, fig.width = 5, out.width = '75%'}
 Y <- t(X)
 Y <- sweep(Y, 2, apply(Y, 2, function(y) sqrt(sum(y ** 2))), `/`)
 Y[is.nan(Y)] <- 0
