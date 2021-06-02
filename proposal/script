@@ -1,13 +1,13 @@
 thesis proposal script
 
-Hello. Thank you all for attending my dissertation proposal talk, titled community detection methods for generalized random dot product graphs.
+Hello. Thank you all for attending my dissertation proposal talk, titled community detection methods for the generalized random dot product graph.
 
 
 First, I will try to motivate this work with an illustration. Suppose we observe a network with binary and undirected edges, for example, a facebook network in which the nodes are individuals and edges represent whether pairs of individuals are friends. One analysis task might be to partition this network into subgraphs in an unsupervized yet meaningful manner. In the facebook network example, we might want to identify cliques or friend groups. 
 
 One approach might be to define a metric, for example, minimizing the number of edges we need to cut to partition the graph into disconnected subgraphs, while also maximizing the minimum number of edges within each partition. Examples of this include min-cut, ratio cut, and normalized cut. 
 
-Another approach, based on statistical inference, would start by defining a probability model that might generate the network, and the parameters of this model would include hidden or unobserved labels associated with each node. Then our goal would be to develop a method for estimating these parameters and stating asymptotic properties of these estimators, such as convergence/consistency. In our work, we take the statistical inference approach. 
+Another approach, based on statistical inference, would start by defining a probability model that might generate the network, and the parameters of this model would include hidden or unobserved labels associated with each node. Then our goal would be to develop a method for estimating these parameters and deriving asymptotic properties of these estimators, such as convergence/consistency. In our work, we take the statistical inference approach. 
 
 
 Here is a brief outline of today's talk. First, we'll go over some preliminaries by introducing two families of generative graph models, the block model and the generalized random dot product graph. Then I will show how these are connected and mention some implications of this connection for community detection. 
@@ -36,9 +36,9 @@ And here is one way we can characterize the nested nature of these block models.
 
 Next, let's switch gears to another family of bernoulli graph models, the random dot product graph and generalized random dot product graph. We say that A represents a random dot product graph if its edge probability matrix comes from latent vectors in euclidean space. More specifically, the edge probability between vertices i and j is computed as the dot product of x_i and x_j, their corresponding latent vectors. 
 
-We also define the *generalized* random dot product graph similarly by setting the edge probability between vertices i and j as the indefinite inner product of vectors x_i and x_j, where the indefinite inner product is defined as follows. 
+We also define the *generalized* random dot product graph similarly by setting the edge probability between vertices i and j as the indefinite inner product of vectors x_i and x_j, where the indefinite inner product is characterized by Ipq, which is a diagonal matrix of p positive ones and q negative ones. 
 
-If instead of fixed latent vectors, they come from some probability distribution, we denote the rdpg and grdpg as follows.
+And finally, if instead of fixed latent vectors, they are drawn iid from some probability distribution, we denote the rdpg and grdpg as follows.
 
 
 The main inference task for the rdpg and grdpg is in recovery of the latent vectors (or some quantity derived from them such as interpoint distances or angles). The structure of the rdpg provides a very straightforward method for estimating X based on spectral decomposition. To embed in d dimensions, we use the d largest eigenvalues and their corresponding eigenvectors. In the grdpg case, we need to split d into p and q and then use the p most positive and q most negative eigenvalues and their corresponding eigenvectors. This is called the adjacency spectral embedding. 
