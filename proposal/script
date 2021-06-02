@@ -92,6 +92,8 @@ We start with a theorem. Let V Lambda V^T be the spectral decomposition of P. Th
 
 The most straightforward application of this theorem is to replace P with A. We call this algorithm orthogonal spectral clustering. And we have a theorem that states that the matrix B outputted by this algorithm will be such that B_ij goes to 0 for i and j in different communities, under some mild conditions. 
 
+IF NECESSARY: The sparsity parameter rho_n can be characterized as the average expected degree of each node divided by n. In general, it is thought to either go to 0 or a constant. In our PABM regime, this rho just goes to a constant, since the average expected degree is proportional to K n, so we can ignore it here. The only potential pitfall is when rho_n decays to 0, (i.e., the expected degree grows more slowly than the number of nodes), in which case we just need to make sure it doesn't decay too slowly. 
+
 
 Next, we'll take a look at another algorithm for community detection on the pabm that exploits the latent configuration. We already showed that the ASE of the PABM in K^2-dimensions consists of points lying near K K-dimensional subspaces. As it turns out, there already is a family of clustering algorithms for data that lie on or near subspaces. We'll focus on one particular one called sparse subspace clustering. This algorithm essentially amounts to fitting a sparse regression for each vector using the other vectors as covariates. The idea is that if x_i lives in a subspace with a few other vectors in X, then it can be expressed as a linear combination of them, with the other coefficients being 0. Then if we combine all of these coefficients into a matrix B, B_ij will be 0 for i and j on different subspaces.
 

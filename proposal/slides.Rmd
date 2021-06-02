@@ -238,8 +238,8 @@ qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
 
 Erdos-Renyi Model (1959)
 
-* $P_{ij} = \theta$
-* Not a block model
+* $P_{ij} = \theta$ (not a block model)
+* 1 parameter $\theta$
 
 Stochastic Block Model (Lorrain and White, 1971)
 
@@ -533,7 +533,7 @@ positive and $K (K-1) / 2$ most negative eigenvalues.
 **Theorem** (KTT): 
 Let $\hat{B}_n$ with entries $\hat{B}_n^{(ij)}$ be the affinity matrix from OSC. 
 Then $\forall$ pairs $(i, j)$ belonging to different communities 
-and sparsity factor satisfying $n \rho_n = \omega\{(\log n)^{4c}\}$, 
+and sparsity factor satisfying $n \rho_n = \omega\big((\log n)^{4c}\big)$, 
 
 $$
 \max_{i, j} \hat{B}^{(ij)}_n = 
@@ -721,12 +721,6 @@ $Z_1, ..., Z_n \iid \Cat(\pi_1, ..., \pi_K)$.
 4. Set latent positions $X_i = \gamma_{Z_i}(T_i)$ and 
 $X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}^\top$.
 5. $A \sim \BG(X I_{p, q} X^\top)$
-
-Examples:
-
-1. $r = 1$ and each $\gamma_k$ is a point mass $\implies$ SBM
-2. $r = 1$ and the range of each $\gamma_k$ is a segment from the origin to point $y_k$ with $\|y_k\| \leq 1$ $\implies$ DCBM
-3. $r = K$ and the range of each $\gamma_k$ is the hyperplane of coordinates $x_{K (k-1) + 1}$ to $x_{k K}$ $\implies$ PABM
 
 ## Community Detection
 
