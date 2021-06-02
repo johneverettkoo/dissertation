@@ -1,6 +1,6 @@
 thesis proposal script
 
-Hello. Thank you all for attending my dissertation proposal talk, titled community detection methods for the generalized random dot product graph.
+Thank you all for attending my dissertation proposal, titled community detection methods for the generalized random dot product graph.
 
 
 First, I will try to motivate this work with an illustration. Suppose we observe a network with binary and undirected edges, for example, a facebook network in which the nodes are individuals and edges represent whether pairs of individuals are friends. One analysis task might be to partition this network into subgraphs in an unsupervized yet meaningful manner. In the facebook network example, we might want to identify cliques or friend groups. 
@@ -31,7 +31,7 @@ The simplest example of this is the stochastic block model. In this example, we 
 Here is a brief overview of some of the main types of block models. First, we have the erdos-renyi model, which is not a block model but I am including it here for completeness. As we saw before, the erdos-renyi model sets each P_ij to a constant value, so edges are drawn iid bernoulli. Second is the stochastic block model, which has a parameter for each pair of communities. Then we have the degree corrected block model and the popularity adjusted block model, which are successive generalizations of the sbm. 
 
 
-And here is one way we can characterize the nested nature of these block models. The PABM is a generalization of the DCBM, which is a generalization of the SBM, which is a generalization of the erdos-renyi model. 
+And here is one way we can characterize the nested nature of these block models. The PABM is a generalization of the DCBM, which is a generalization of the SBM, which is a generalization of the erdos-renyi model. There's a recent paper that went into some of the details of this hierarchy, and we will return to this briefly with our own take. 
 
 
 Next, let's switch gears to another family of bernoulli graph models, the random dot product graph and generalized random dot product graph. We say that A represents a random dot product graph if its edge probability matrix comes from latent vectors in euclidean space. More specifically, the edge probability between vertices i and j is computed as the dot product of x_i and x_j, their corresponding latent vectors. 
@@ -59,7 +59,7 @@ Going back to our three block model types, we saw that the latent configuration 
 The popularity adjusted block model.
 
 
-So let's first define the pabm. In the pabm, each vertex has K popularity parameters lambda_i1, lambda_i2, up to lambda_iK. So lambda_ik is vertex i's affinity toward community k. Each P_ij is defined as lambda_{i, z_j} lambda_{j z_i}. 
+So let's first define the pabm. In the pabm, each vertex has K popularity parameters, so vertex i has parameters lambda_i1, lambda_i2, up to lambda_iK. So lambda_ik is vertex i's affinity toward community k. Each P_ij is defined as lambda_{i, z_j} lambda_{j z_i}. 
 
 For instance, if vertex i is in community k and vertex j is in community l, the edge probability between i and j is lambda_il times lambda_jk.
 
@@ -70,7 +70,7 @@ Let's designate P^kl as the n_k x n_l block of edge probabilities between k and 
 
 We already noted that all block models are grdpg, and this includes the pabm, so that fact alone isn't all that interesting. What's more interesting is *how* they are connected. In particular, we show that the configuration of the latent vectors that induce a pabm takes on a specific form.
 
-I'll just go ahead and state the result here. If A is the adjacency matrix of a pabm, then it is also an adjacency matrix of a grdpg with latent vectors described by X times U with signature p, q where we can compute X, U, p, and q exactly. The actual forms of p, q, and U aren't all that important aside from the fact that p + q = K^2 and U is orthogonal. What's more interesting is the form of X, which is block diagonal with each block corresponding to a community. Thus, if we just look at X, then each community lives on a K-dimensional hyperplane, for instance, the first community lives on the hyperplane of coordinates x_1 to x_K, the second lives on the hyperplane described by coordinates x_{K+1} to x_{2K}, and so on. So each Lambda takes on K columns. And since U is orthogonal, the latent configuration just rotates X, so we can't describe the resulting hyperplanes by coordinates, but they are still hyperplanes/subspaces, and they are still orthogonal. 
+I'll just go ahead and state the result here. If A is the adjacency matrix of a pabm, then it is also an adjacency matrix of a grdpg with latent vectors described by X times U with signature p, q where we can compute X, U, p, and q exactly from the parameters of the PABM. The actual forms of p, q, and U aren't all that important aside from the fact that p + q = K^2 and U is orthogonal. What's more interesting is the form of X, which is block diagonal with each block corresponding to a community. Thus, if we just look at X, then each community lives on a K-dimensional hyperplane, for instance, the first community lives on the hyperplane of coordinates x_1 to x_K, the second lives on the hyperplane described by coordinates x_{K+1} to x_{2K}, and so on. So each Lambda takes on K columns. And since U is orthogonal, the latent configuration just rotates X, so we can't describe the resulting hyperplanes by coordinates, but they are still hyperplanes/subspaces, and they are still orthogonal. 
 
 So in summary, the latent configuration under the GRDPG framework that induces the PABM with K communities lives in K^2-dimensional space, each community corresponds to a subspace, and the subspaces are all orthogonal to one other. 
 
@@ -100,7 +100,7 @@ Next, we'll take a look at another algorithm for community detection on the pabm
 In practice, the sparse regression fits are done via lasso, which requires us to choose the sparsity parameter lambda.
 
 
-We aren't the first to propose the use of sparse subspace clustering for this problem. Noroozi, Rimal, and Pensky noticed that P is rank K^2 and the columns of P corresponding to each community are rank K to justify the use of SSC. They showed that if you treat P as a data matrix for SSC, then the output obeys the subspace detection property, which we won't get into here, but this is considered the ideal case for ssc. 
+We aren't the first to propose the use of sparse subspace clustering for this problem. Noroozi, Rimal, and Pensky noticed that P is rank K^2 and the columns of P corresponding to each community are rank K to justify the use of SSC. They showed that if you treat P as a data matrix for SSC, then the output obeys the subspace detection property, the details of which we won't get into here, but the subspace detection property is considered a success criterion for ssc.
 
 Our approach uses the geometry of the latent configuration to justify using ssc on the ASE. Actually, ssc works better the more orthogonal these subspaces are, and we saw that if we treat the rows of the eigenvector matrix as an embedding, we get exactly that. 
 
