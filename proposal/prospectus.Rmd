@@ -87,7 +87,7 @@ The SBM, DCBM, and PABM are all special cases of this generative model. Based on
 
 The estimated timeline of completion is as follows:
 
-1. Literature review and complete proofs of main theorems: December 2022
+1. Literature review and proofs of main theorems: December 2022
 
 2. Simulations, real data analyses, R package: March 2022
 
