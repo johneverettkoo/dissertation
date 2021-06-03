@@ -1,0 +1,213 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+  11pt,
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdfauthor={John Koo},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=blue,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{natbib}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\setcitestyle{numbers,square,comma}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{comment}
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
+
+\title{Community Detection for the\\
+Generalized Random Dot Product Graph}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Dissertation Prospectus}
+\author{John Koo}
+\date{}
+
+\begin{document}
+\maketitle
+
+\newcommand{\diag}{\text{diag}}
+\newcommand{\tr}{\text{Tr}}
+\newcommand{\blockdiag}{\text{blockdiag}}
+\newcommand{\indep}{\stackrel{\text{ind}}{\sim}}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+\newcommand{\Bernoulli}{\text{Bernoulli}}
+\newcommand{\Betadist}{\text{Beta}}
+\newcommand{\BG}{\text{BernoulliGraph}}
+\newcommand{\Cat}{\text{Categorical}}
+\newcommand{\GRDPG}{\text{GRDPG}}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\theoremstyle{example}
+\newtheorem*{example}{Example}
+
+Graph and network data, in which samples are represented not as a
+collection of feature vectors but as relationships between pairs of
+observations, are increasingly widespread in various fields ranging from
+sociology to computer vision. One common goal of analyzing graph data is
+community detection or graph clustering, in which the graph is
+partitioned into disconnected subgraphs in an unsupervised yet
+meaningful manner (e.g., by optimizing an objective function or
+recovering unobserved labels). Because traditional clustering techniques
+were developed for data that can be represented as vectors, they cannot
+be applied directly to graphs. Common examples of such clustering
+techniques include \(K\)-means clustering \cite{1056489} and Gaussian
+Mixture Models \cite{doi:10.1198/016214502760047131}. In addition, these
+techniques assume that the vectors are sampled from a specific type of
+distribution (whether implicitly in the case of \(K\)-means clustering
+or explicitly in the case of GMM). In this research, we investigate the
+use of a family of spectral decomposition based approaches for community
+detection in block models (random graph models with inherent community
+structure). First, we demonstrate that under the Generalized Random Dot
+Product Graph \cite{rubindelanchy2017statistical} framework, all graphs
+generated by Block Models (generative graph models with inherent
+community structure) can be represented as collections of vectors in
+Euclidean space via the Adjacency Spectral Embedding
+\cite{athreya2017statistical, lyzinski2014}. Then, noting the particular
+structure or configuration that the vectors take, we select appropriate
+clustering techniques to apply on the vector representation of the
+graph. Finally we derive the asymptotic properties of these methods to
+show that our methods are consistent or achieve desirable properties
+with high probability. To illustrate this approach, we primarily focus
+on the Popularity Adjusted Block Model
+\cite{307cbeb9b1be48299388437423d94bf1}.
+
+Our work is essentially about connecting two well-known families of
+generative graph models, the Block Model and the (Generalized) Random
+Dot Product Graph \cite{rubindelanchy2017statistical} in order to
+perform community detection. It is straightforward to show that all
+Block Models are various cases of the GRDPG. This fact has been
+leveraged to develop community detection methods
+\cite{athreya2017statistical, lyzinski2014, rubindelanchy2017statistical}
+for the Stochastic Block Model \cite{doi:10.1080/0022250X.1971.9989788}
+and Degree Corrected Block Model \cite{Karrer_2011}. Our work begins by
+extending this to the Popularity Adjusted Block Model. We show that
+under the GRDPG framework, the latent configuration that generates the
+PABM consists of orthogonal subspaces. Then we show that two community
+detection algorithms arise naturally from this latent configuration:
+Orthogonal Spectral Clustering, which is an algorithm of our own design,
+and an existing algorithm, Sparse Subspace Clustering \cite{5206547}. We
+then extend this work to more general configurations in the latent space
+that imply community structure. The overall goal of our research is to
+develop a general framework or approach to community detection for a
+wide range of Block Models.
+
+\newpage
+
+The overall generative model for inducing community structure can be
+described by the following.
+
+Let \((A, X) \sim \text{GRDPG}_{p, q}(F, n)\) such that:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Define functions \(\gamma_1, ..., \gamma_K\) such that each
+  \(\gamma_k : [0, 1]^r \mapsto \mathbb{R}^d\) and
+  \(\gamma_k(t) \neq \gamma_l(t)\) when \(k \neq l\).
+\item
+  Sample labels
+  \(Z_1, ..., Z_n \stackrel{\text{iid}}{\sim}\text{Categorical}(\pi_1, ..., \pi_K)\).
+\item
+  Sample \(T_1, ..., T_n \stackrel{\text{iid}}{\sim}D\) with support
+  \([0, 1]^r\).
+\item
+  Set latent positions \(X_i = \gamma_{Z_i}(T_i)\) and
+  \(X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}^\top\).
+\item
+  \(A \sim \text{BernoulliGraph}(X I_{p, q} X^\top)\)
+\end{enumerate}
+
+The SBM, DCBM, and PABM are all special cases of this generative model.
+Based on the structure of the \(\gamma_k\) functions that correspond to
+each of the SBM, DCBM, and PABM, there are clear choices for clustering
+algorithms on the embeddings of each of these Block Models. Extensions
+of these results may consider which clustering algorithms result in
+consistent estimators given restrictions on each of the \(\gamma_k\),
+and how to approach community detection when \(\gamma_k\) are unknown
+altogether.
+
+The estimated timeline of completion is as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Literature review and complete proofs of main theorems: December 2022
+\item
+  Simulations, real data analyses, R package: March 2022
+\item
+  Dissertation Completion: April 2022
+\end{enumerate}
+
+  \bibliography{proposal.bib}
+
+\end{document}
