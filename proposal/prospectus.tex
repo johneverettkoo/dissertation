@@ -194,15 +194,20 @@ Let \((A, X) \sim \text{GRDPG}_{p, q}(F, n)\) such that:
   \(A \sim \text{BernoulliGraph}(X I_{p, q} X^\top)\)
 \end{enumerate}
 
-The SBM, DCBM, and PABM are all special cases of this generative model.
-Based on the structure of the \(\gamma_k\) functions that correspond to
-each of the SBM, DCBM, and PABM, there are natural choices for
-clustering algorithms on the embeddings of each of these Block Models,
-followed by straightforward parameter estimation techniques. Extensions
-of these results may consider which clustering algorithms result in
-consistent estimators given restrictions on each of the \(\gamma_k\),
-and how to approach community detection when \(\gamma_k\) are unknown
-altogether.
+The goal of statistical inference on data sampled from this model would
+be to estimate each \(Z_i\) (community detection) and properties derived
+from each \(\gamma_{Z_i}(T_i)\) (parameter estimation). The SBM, DCBM,
+and PABM are all special cases of this generative model. Based on the
+structure of the \(\gamma_k\) functions that correspond to each of the
+SBM, DCBM, and PABM, there are natural choices for clustering algorithms
+on the embeddings of each of these Block Models, followed by
+straightforward parameter estimation techniques. For example, in the
+case of the SBM, we can use GMM on the ASE to estimate community labels,
+then use the sample means of each community to estimate the edge
+probabilities. Extensions of these results may consider which clustering
+algorithms result in consistent estimators for various types of
+\(\gamma_k\), and how to approach this problem when \(\gamma_k\) are
+unknown altogether.
 
 The estimated timeline of completion is as follows:
 
