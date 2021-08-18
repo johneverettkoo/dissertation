@@ -1,0 +1,144 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+  11pt,
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=blue,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{natbib}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\setcitestyle{numbers,square,comma}
+\usepackage{verbatim}
+\usepackage{amsthm}
+\usepackage{comment}
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
+
+\title{Clustering of Distributions on 1-Dimensional Manifolds}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{setup}{%
+\subsection{Setup}\label{setup}}
+
+Suppose we have two manifolds \(\mathcal{M}_1\) and \(\mathcal{M}_2\)
+\(\in \mathbb{R}^d\), each of length 1, defined by \(f_1(t)\) and
+\(f_2(t)\) respectively (\(f_i : [0, 1] \mapsto \mathbb{R}^d\)). Define
+\(\delta\) as the minimum distance between the two manifolds, i.e.,
+\(\delta = \min_t \|f_1(t) - f_2(t)\|\), and let \(\delta > 0\). For
+now, restrict each \(f_i\) such that the distance along the manifold
+between \(f_i(t)\) and \(f_i(s)\) is equal to the difference between
+\(t\) and \(s\) (this also implies that each manifold is of length 1).
+We sample \(T_1, ..., T_n \stackrel{iid}{\sim} F\) for continuous \(F\)
+with support \([0, 1]\) and use \(f_1\) to map the first \(n_1\) points
+to \(\mathcal{M}_1\) and \(f_2\) to map the remaining \(n_2 = n - n_1\)
+points to \(\mathcal{M}_2\). Let \(X_i = f_1(T_i)\) and
+\(Y_j = f_2(T_j)\). Without loss of generality, assume \(n_1 \leq n_2\).
+
+\hypertarget{theory}{%
+\subsection{Theory}\label{theory}}
+
+Let \(D_i = X_{(i)} - X_{(i-1)}\). Then if \(\max_i D_i < \delta\), we
+have sufficient separation of points in \(\mathcal{M}_1\).
+
+\hypertarget{uniform-case}{%
+\subsubsection{Uniform case}\label{uniform-case}}
+
+It can be shown that if \(X_i \stackrel{iid}{\sim} Uniform(0, 1)\), then
+\(D_i \sim Beta(1, n)\). Therefore,
+\(P(\max_i D_i < \delta) \geq (P(D_i < \delta))^n = (1 - (1 - \delta)^n)^n\),
+which is a decreasing function for sufficiently large \(n\). This gives
+us the result \(\max_i D_i \stackrel{a.s.}{\to} 0\).
+
+\hypertarget{beta-case}{%
+\subsubsection{Beta case}\label{beta-case}}
+
+\hypertarget{general-case}{%
+\subsubsection{General case}\label{general-case}}
+
+If \(F\) is absolutely continuous, then it can be shown that
+
+\[P(D_i \leq \delta) = 1 - \int_0^{1-\delta} (i-1) \binom{n}{i-1} f(x) (F(x))^{i-1} (1 - F(x + \delta))^{n-i} dx\]
+
+Under certain conditions (namely \(F(x + \delta) \geq F(x) + \delta\)),
+we can make the substitution \(u = F(x)\) and have the result
+
+\[P(D_i \leq \delta) \leq 1- \int_0^{1 - \delta} (i-1) \binom{n}{i-1} u^{i-1} (1 - u - \delta)^{n-i} du\]
+
+which gives the same result as in the uniform case.
+
+\hypertarget{computational-results}{%
+\subsection{Computational Results}\label{computational-results}}
+
+TBD
+
+  \bibliography{proposal.bib}
+
+\end{document}
