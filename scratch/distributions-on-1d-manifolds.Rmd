@@ -21,23 +21,23 @@ header-includes:
 bibliography: proposal.bib
 ---
 
-## Setup
+# Setup
 
 Suppose we have two manifolds $\mathcal{M}_1$ and $\mathcal{M}_2$ $\in \mathbb{R}^d$, each of length 1, defined by $f_1(t)$ and $f_2(t)$ respectively ($f_i : [0, 1] \mapsto \mathbb{R}^d$). Define $\delta$ as the minimum distance between the two manifolds, i.e., $\delta = \min_t \|f_1(t) - f_2(t)\|$, and let $\delta > 0$. For now, restrict each $f_i$ such that the distance along the manifold between $f_i(t)$ and $f_i(s)$ is equal to the difference between $t$ and $s$ (this also implies that each manifold is of length 1). 
 We sample $T_1, ..., T_n \stackrel{iid}{\sim} F$ for continuous $F$ with support $[0, 1]$ and use $f_1$ to map the first $n_1$ points to $\mathcal{M}_1$ and $f_2$ to map the remaining $n_2 = n - n_1$ points to $\mathcal{M}_2$. Let $X_i = f_1(T_i)$ and $Y_j = f_2(T_j)$.
 Without loss of generality, assume $n_1 \leq n_2$.
 
-## Theory
+# Theory
 
 Let $D_i = X_{(i)} - X_{(i-1)}$. Then if $\max_i D_i < \delta$, we have sufficient separation of points in $\mathcal{M}_1$. 
 
-### Uniform case
+## Uniform case
 
 It can be shown that if $X_i \stackrel{iid}{\sim} Uniform(0, 1)$, then $D_i \sim Beta(1, n)$. Therefore, $P(\max_i D_i < \delta) \geq (P(D_i < \delta))^n = (1 - (1 - \delta)^n)^n$, which is a decreasing function for sufficiently large $n$. This gives us the result $\max_i D_i \stackrel{a.s.}{\to} 0$.
 
-### General case
+## General case
 
-#### Proof sketch that $P(D_i \leq \delta) \to 1$
+### Proof sketch that $P(D_i \leq \delta) \to 1$
 
 If $F$ is absolutely continuous, then it can be shown that 
 
@@ -54,6 +54,6 @@ $$1 - \int_0^{F(1-\delta)} \frac{n!}{(n-i+1)! (i-2)!} u^{i-2} (1 - u - a \delta)
 
 Which becomes $1 - C P(n) \delta^{n}$ for some $C > 0$ and $P(n)$ is a polynomial of $n$. This goes to 0 as $n \to \infty$, giving us the result $D_i \stackrel{p}{\to} 0$.
 
-## Computational Results
+# Computational Results
 
 TBD
