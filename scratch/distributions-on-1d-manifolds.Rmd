@@ -41,13 +41,18 @@ It can be shown that if $X_i \stackrel{iid}{\sim} Uniform(0, 1)$, then $D_i \sim
 
 If $F$ is absolutely continuous, then it can be shown that 
 
-$$P(D_i \leq \delta) = 1 - \int_0^{1-\delta} (i-1) \binom{n}{i-1} f(x) (F(x))^{i-1} (1 - F(x + \delta))^{n-i} dx$$
+$$P(D_i \leq \delta) = 1 - \int_0^{1-\delta} \frac{n!}{(n-i+1)! (i-2)!} (F(x))^{i-2} (1 - F(x + \delta))^{n-i} f(x) dx$$
 
-Under certain conditions (namely $F(x + \delta) \geq F(x) + \delta$), we can make the substitution $u = F(x)$ and have the result
+Making the approximation $F(x+\delta) \approx F(x) + \delta f(x)$ 
+and bounding $f(x) \geq a > 0$, we get:
 
-$$P(D_i \leq \delta) \leq 1- \int_0^{1 - \delta} (i-1) \binom{n}{i-1} u^{i-1} (1 - u - \delta)^{n-i} du$$
+$$P(D_i \leq \delta) \geq 1 - \int_0^{1-\delta} \frac{n!}{(n-i+1)! (i-2)!} (F(x))^{i-2} (1 - F(x) - a \delta)^{n-i} f(x) dx$$
 
-which gives the same result as in the uniform case. 
+Then making the substitution $u = F(x) \implies du = f(x) dx$, we get 
+
+$$1 - \int_0^{F(1-\delta)} \frac{n!}{(n-i+1)! (i-2)!} u^{i-2} (1 - u - a \delta)^{n-i} du$$
+
+Which becomes $1 - C P(n) e^{-n}$ for some $C > 0$ and $P(n)$ is a polynomial of $n$. This goes to 0 as $n \to \infty$, giving us the result $D_i \stackrel{p}{\to} 0$.
 
 ## Computational Results
 
