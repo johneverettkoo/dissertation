@@ -202,21 +202,6 @@ $$
 
 \end{proof}
 
-If $F$ is absolutely continuous, then it can be shown that 
-
-$$P(D_i \leq \delta) = 1 - \int_0^{1-\delta} \frac{n!}{(n-i+1)! (i-1)!} (F(x))^{i-1} (1 - F(x + \delta))^{n-i} f(x) \dd x$$
-
-Making the approximation $F(x+\delta) \approx F(x) + \delta f(x)$ 
-and bounding $f(x) \geq a > 0$, we get:
-
-$$P(D_i \leq \delta) \geq 1 - \int_0^{1-\delta} \frac{n!}{(n-i+1)! (i-2)!} (F(x))^{i-2} (1 - F(x) - a \delta)^{n-i} f(x) dx$$
-
-Then making the substitution $u = F(x) \implies du = f(x) dx$, we get 
-
-$$1 - \int_0^{F(1-\delta)} \frac{n!}{(n-i+1)! (i-2)!} u^{i-2} (1 - u - a \delta)^{n-i} du$$
-
-Which becomes $1 - C P(n) \delta^{n}$ for some $C > 0$ and $P(n)$ is a polynomial of $n$, giving us the desired result $D_i \stackrel{p}{\to} 0$.
-
 # Algorithms
 
 TBD
