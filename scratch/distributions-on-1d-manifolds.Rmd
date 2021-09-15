@@ -60,7 +60,7 @@ $g_{ij}(x, y)$ as the joint density of $X_{(i)}, X_{(j)}$, and $h_i(d)$ as the d
 The following are taken as given[^wikipedia]:
 
 1. $g_i(x) = \frac{n!}{(n-i)! (i-1)!} (F(x))^{i-1} (1 - F(x))^{n-i} f(x)$.
-2. $g_{ij}(x) = \frac{n!}{(i-1)! (j-i-1)! (n-j)!} (F(x))^{i-1} (F(y) - F(x))^{j-i-1} (1 - F(y))^{n-j} f(x) f(y)$.
+2. $g_{ij}(x, y) = \frac{n!}{(i-1)! (j-i-1)! (n-j)!} (F(x))^{i-1} (F(y) - F(x))^{j-i-1} (1 - F(y))^{n-j} f(x) f(y)$.
 3. By convolution, $h_i(d) = \int_0^{1} g_{i, i+1} (x, x + d) \dd x$.
 
 [^wikipedia]: https://en.wikipedia.org/wiki/Order_statistic
