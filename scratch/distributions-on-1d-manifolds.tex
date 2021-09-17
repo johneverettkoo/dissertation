@@ -163,8 +163,10 @@ h_i(d) = \int_0^{1-d} \frac{n!}{(i-1)! (n-i-1)!} (F(x))^{i-1} (1 - F(x+d))^{n-i-
 \end{lemma}
 
 \begin{proof}
-This is just given by setting the integrand as $g_{i, i+1}(x, x+d)$.
-We briefly note that the integral can only be evaluated from 0 to $1-d$ in this case because of the $x+d$ terms.
+This is just a direct consequence of 2 and 3 under the given statements. 
+We also note that because the support of $X_i$ is $[0, 1]$, 
+the integral only needs to be evaluated from $0$ to $1 - d$ 
+because of the $f(x+d)$ and $1 - F(x+d)$ terms.
 \end{proof}
 
 \begin{lemma}[The cumulative distribution function of $D_i$]
