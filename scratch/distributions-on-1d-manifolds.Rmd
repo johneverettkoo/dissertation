@@ -175,6 +175,7 @@ In the limit $n \to \infty$, this goes to 1.
 ### General case
 
 \begin{theorem}
+\ref{thm:generalized}
 Let $X_1, ..., X_n \iid F$ with support $[0, 1]$, and suppose $f(x)$ is continuous and $f(x) \geq a > 0$ everywhere on the support. 
 Let $D_i = X_{(i+1)} - X_{(i)}$. 
 Then for any $\epsilon > 0$, there exists $N \in \mathbb{N}$ such that $P(\max_i D_i < \delta) \geq 1 - \epsilon$ when $n > N$.
@@ -205,11 +206,14 @@ $$
 P(\max_i D_i < \delta) & = P(\text{all } D_i < \delta) \\
 & = 1 - P(\text{some } D_i > \delta) \\
 & \geq 1 - \sum_i^{n-1} P(D_i > \delta) \\
-& = 1 + (n - 1) (1 - a \delta)^n - (n - 1) (1 - F(1 - \delta) - a \delta)^n
+& = 1 - (n - 1) (1 - a \delta)^n + (n - 1) (1 - F(1 - \delta) - a \delta)^n
 \end{aligned}
 $$
 
 This converges to $1$ in the limit $n \to \infty$.
+
+We can also approximate $F(1 - \delta) \approx 1 - a \delta$, which yields 
+$1 - (n - 1) (1 - a \delta)^n$. Setting this $\geq 1 - \epsilon$ ...
 \end{proof}
 
 ## Extension to multidimensional manifolds
@@ -217,12 +221,30 @@ This converges to $1$ in the limit $n \to \infty$.
 Here, we extend the results on the line to the unit hypercube. The following theorem is a direct consequence of Lemma 2 of \citet{trosset2020rehabilitating}.
 
 \begin{theorem}
-Let $X_1, ..., X_n \iid F$ with support $[0, 1]^r$, and $f(x) \geq a > 0$ everywhere on the support. Define $E_n$ as the event that every point on the support is within distance $\delta / 2$ to $X_i$ for $i \in [n]$. Then for any $\epsilon > 0$, there exists $N = O(-\log \epsilon)$ such that $P(E_n) > 1 - \epsilon$ when $n \geq N$.
+\ref{thm:multidim}
+Let $X_1, ..., X_n \iid F$ with support $[0, 1]^r$, and $f(x) \geq a > 0$ everywhere on the support. 
+Define $E_n$ as the event that an $\eta$-neighborhood graph constructed from the sample is connected. 
+Then for any $\epsilon > 0$, there exists $N = O \bigg( \frac{\log \epsilon \eta}{\log (1 - \frac{a \eta^r}{r^{r / 2}})} \bigg)$ such that $P(E_n) > 1 - \epsilon$ when $n \geq N$.
 \end{theorem}
+
+\begin{proof}[Proof (sketch)]
+Divide the hypercube $[0, 1]^r$ into a grid of sub-hypercubes of side length at most $\eta / \sqrt{r}$. 
+$E_n$ is satisfied if each sub-hypercube contains at least one $X_i$ from the sample. 
+
+$$
+\begin{aligned}
+P(E_n) & = 1 - P(\text{some cells don't contain } X_i) \\
+& \geq 1 - \sum_k^{\lceil \sqrt{r} / \eta \rceil} \prod_i^n P(X_i \text{ is not in the } k^{th} \text{ hypercube}) \\
+& \geq 1 - \lceil \sqrt{r} / \eta \rceil (1 - a \eta^r / r^{r/2})^n
+\end{aligned}
+$$
+
+Setting this $\geq 1 - \epsilon$ and solving for $n$ yields the desired rate. 
+\end{proof}
 
 # Algorithms
 
-TBD
+
 
 # Computational Results
 
