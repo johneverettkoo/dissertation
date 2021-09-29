@@ -95,6 +95,9 @@
 \newcommand{\Uniform}{\mathrm{Uniform}}
 \newcommand{\BG}{\mathrm{BernoulliGraph}}
 \newcommand{\Categorical}{\mathrm{Categorical}}
+\newcommand{\Multinomial}{\mathrm{Multinomial}}
+\newcommand{\RDPG}{\mathrm{RDPG}}
+\newcommand{\GRDPG}{\mathrm{GRDPG}}
 \newtheorem{definition}{Definition}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -110,17 +113,23 @@
 
 Suppose we have two manifolds \(\mathcal{M}_1\) and \(\mathcal{M}_2\)
 \(\in \mathbb{R}^d\), each of length 1, defined by \(f_1(t)\) and
-\(f_2(t)\) respectively (\(f_i : [0, 1] \mapsto \mathbb{R}^d\)). Define
-\(\delta\) as the minimum distance between the two manifolds, i.e.,
-\(\delta = \min_t \|f_1(t) - f_2(t)\|\), and let \(\delta > 0\). For
-now, restrict each \(f_i\) such that the distance along the manifold
-between \(f_i(t)\) and \(f_i(s)\) is equal to the difference between
-\(t\) and \(s\) (this also implies that each manifold is of length 1).
-We sample \(T_1, ..., T_n \stackrel{iid}{\sim} F\) for continuous \(F\)
-with support \([0, 1]\) and use \(f_1\) to map the first \(n_1\) points
-to \(\mathcal{M}_1\) and \(f_2\) to map the remaining \(n_2 = n - n_1\)
-points to \(\mathcal{M}_2\). Let \(X_i = f_1(T_i)\) and
-\(Y_j = f_2(T_j)\). Without loss of generality, assume \(n_1 \leq n_2\).
+\(f_2(t)\) respectively (\(f_k : [0, 1] \mapsto \mathbb{R}^d\)). Define
+\(\delta\) as the minimum distance between any two manifolds, i.e.,
+\(\delta = \max_{k, \ell} \min_{s, t} \|f_k(s) - f_\ell(t)\|\), and let
+\(\delta > 0\). Restrict each \(f_k\) such that the distance along the
+manifold between \(f_k(t)\) and \(f_k(s)\) is equal to the difference
+between \(t\) and \(s\), i.e., \(f_k\) is the arclength parameterization
+of \(\mathcal{M}_k\) (this also implies that each manifold is of length
+1). Labels are sampled as
+\(Z_1, ..., Z_n \stackrel{\mathrm{iid}}{\sim}\mathrm{Multinomial}(\alpha_1, \alpha_2)\),
+and we define \(n_k\) as the number of labels with label \(k\). Sample
+\(T_1, ..., T_n \stackrel{\mathrm{iid}}{\sim}F\) for some distribution
+\(F\) with support \([0, 1]\). Finally, let \(X_i = f_{Z_i}(T_i)\) for
+each \(i \in [n]\) be the latent vector of vertex \(i\), and gather the
+latent vectors as
+\(X = \begin{bmatrix} X_1 & \cdots & X_n \end{bmatrix}\). We observe
+\(A \sim \mathrm{RDPG}(X)\) (or \(A \sim \mathrm{GRDPG}_{p,q}(X)\)) and
+wish to recover \(Z_1, ..., Z_n\).
 
 \hypertarget{preliminary-theory}{%
 \section{Preliminary Theory}\label{preliminary-theory}}
@@ -198,9 +207,6 @@ $$
 $$
 \end{proof}
 
-Thus if we are able to show that Eq. (\ref{eq:cdf}) converges to 1, we
-are done.
-
 \hypertarget{uniform-case}{%
 \subsubsection{Uniform case}\label{uniform-case}}
 
@@ -239,8 +245,9 @@ This the density function for $\mathrm{Beta}(1, n)$, completing the proof.
 
 \begin{theorem}
 Let $X_1, ..., X_n \stackrel{\mathrm{iid}}{\sim}\mathrm{Uniform}(0, 1)$. 
-Then for any $\delta > 0$, $P(\max_i X_{(i+1)} - X_{(i)} < \delta) \to 1$ as 
-$n \to \infty$.
+Then for any $\epsilon$ and $\delta > 0$, 
+there exists an $N = O \big(\frac{-\log \epsilon}{\delta} \big)$ such that 
+$P(\max_i X_{(i+1)} - X_{(i)} < \delta) \geq 1 - \epsilon$ when $n > N$.
 \end{theorem}
 
 \begin{proof}[Proof (sketch)]
@@ -264,7 +271,7 @@ In the limit $n \to \infty$, this goes to 1.
 \begin{theorem}
 Let $X_1, ..., X_n \stackrel{\mathrm{iid}}{\sim}F$ with support $[0, 1]$, and suppose $f(x)$ is continuous and $f(x) \geq a > 0$ everywhere on the support. 
 Let $D_i = X_{(i+1)} - X_{(i)}$. 
-Then for any $\epsilon > 0$, there exists $N \in \mathbb{N}$ such that $P(\max_i D_i < \delta) > 1 - \epsilon$ when $n > N$.
+Then for any $\epsilon > 0$, there exists $N \in \mathbb{N}$ such that $P(\max_i D_i < \delta) \geq 1 - \epsilon$ when $n > N$.
 \end{theorem}
 
 \begin{proof}[Proof (sketch)]
@@ -289,13 +296,27 @@ Then as before,
 
 $$
 \begin{aligned}
-P(\max_i D_i < \delta) & \geq (P(D_i < \delta))^{n-1} \\
-& \approx (1 - (1 - a \delta)^n + (1 - F(1-\delta) - a \delta)^n)^{n-1} \\
-& \to 1
+P(\max_i D_i < \delta) & = P(\text{all } D_i < \delta) \\
+& = 1 - P(\text{some } D_i > \delta) \\
+& \geq 1 - \sum_i^{n-1} P(D_i > \delta) \\
+& = 1 + (n - 1) (1 - a \delta)^n - (n - 1) (1 - F(1 - \delta) - a \delta)^n
 \end{aligned}
 $$
 
+This converges to $1$ in the limit $n \to \infty$.
 \end{proof}
+
+\hypertarget{extension-to-multidimensional-manifolds}{%
+\subsection{Extension to multidimensional
+manifolds}\label{extension-to-multidimensional-manifolds}}
+
+Here, we extend the results on the line to the unit hypercube. The
+following theorem is a direct consequence of Lemma 2 of
+\citet{trosset2020rehabilitating}.
+
+\begin{theorem}
+Let $X_1, ..., X_n \stackrel{\mathrm{iid}}{\sim}F$ with support $[0, 1]^r$, and $f(x) \geq a > 0$ everywhere on the support. Define $E_n$ as the event that every point on the support is within distance $\delta / 2$ to $X_i$ for $i \in [n]$. Then for any $\epsilon > 0$, there exists $N = O(-\log \epsilon)$ such that $P(E_n) > 1 - \epsilon$ when $n \geq N$.
+\end{theorem}
 
 \hypertarget{algorithms}{%
 \section{Algorithms}\label{algorithms}}
@@ -307,6 +328,7 @@ TBD
 
 TBD
 
-  \bibliography{proposal.bib}
+\renewcommand\refname{References}
+  \bibliography{misc.bib}
 
 \end{document}
