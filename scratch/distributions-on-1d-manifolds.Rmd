@@ -224,7 +224,7 @@ Here, we extend the results on the line to the unit hypercube. The following the
 \label{thm:multidim}
 Let $X_1, ..., X_n \iid F$ with support $[0, 1]^r$, and $f(x) \geq a > 0$ everywhere on the support. 
 Define $E_n$ as the event that an $\eta$-neighborhood graph constructed from the sample is connected. 
-Then for any $\epsilon > 0$, there exists $N = O \bigg( \frac{\log \epsilon \eta}{\log (1 - \frac{a \eta^r}{r^{r / 2}})} \bigg)$ such that $P(E_n) > 1 - \epsilon$ when $n \geq N$.
+Then for any $\epsilon > 0$, there exists $N = O \bigg( \frac{\log \epsilon \eta^r / r^{r/2}}{\log (1 - \frac{a \eta^r}{r^{r / 2}})} \bigg)$ such that $P(E_n) > 1 - \epsilon$ when $n \geq N$.
 \end{theorem}
 
 \begin{proof}[Proof (sketch)]
@@ -234,8 +234,8 @@ $E_n$ is satisfied if each sub-hypercube contains at least one $X_i$ from the sa
 $$
 \begin{aligned}
 P(E_n) & = 1 - P(\text{some cells don't contain } X_i) \\
-& \geq 1 - \sum_k^{\lceil \sqrt{r} / \eta \rceil} \prod_i^n P(X_i \text{ is not in the } k^{th} \text{ hypercube}) \\
-& \geq 1 - \lceil \sqrt{r} / \eta \rceil (1 - a \eta^r / r^{r/2})^n
+& \geq 1 - \sum_k^{\lceil \sqrt{r} / \eta \rceil^r} \prod_i^n P(X_i \text{ is not in the } k^{th} \text{ hypercube}) \\
+& \geq 1 - \lceil \sqrt{r} / \eta \rceil^r (1 - a \eta^r / r^{r/2})^n
 \end{aligned}
 $$
 
@@ -243,6 +243,8 @@ Setting this $\geq 1 - \epsilon$ and solving for $n$ yields the desired rate.
 \end{proof}
 
 # Algorithms
+
+TBD
 
 # Computational Results
 
