@@ -208,7 +208,7 @@ $$
 \end{proof}
 
 \hypertarget{uniform-case}{%
-\subsubsection{Uniform case}\label{uniform-case}}
+\subsection{Uniform case}\label{uniform-case}}
 
 \begin{lemma}[Differences between order statistics of a uniform distribution]
 If $X_1, ..., X_n \stackrel{\mathrm{iid}}{\sim}\mathrm{Uniform}(0, 1)$, then each $D_i \sim \mathrm{Beta}(1, n)$.
@@ -265,8 +265,21 @@ $$
 In the limit $n \to \infty$, this goes to 1.
 \end{proof}
 
+\hypertarget{test-for-intersecting-manifolds}{%
+\subsubsection{Test for intersecting
+manifolds}\label{test-for-intersecting-manifolds}}
+
+\begin{theorem}
+Let $\mathcal{M}_1$ and $\mathcal{M}_2$ be two one-dimensional manifolds of unit length with $n_1$ and $n_2$ points drawn uniformly along them ($n = n_1 + n_2$). 
+
+Suppose we want to perform a hypothesis test for whether the ends of the manifolds meet. 
+The $H_0$ is the case where $\delta = 0$ and $H_1$ is the case where $\delta > 0$. 
+Define the test statistic $T_n = \|X_{(n_1)} - Y_{(1)}\|$ (or similar, depending on which ends meet). 
+Then $T_n / 2 \stackrel{d}{\to} \mathrm{Beta}(1, n)$ under $H_0$. 
+\end{theorem}
+
 \hypertarget{general-case}{%
-\subsubsection{General case}\label{general-case}}
+\subsection{General case}\label{general-case}}
 
 \begin{theorem}
 \label{thm:generalized}
@@ -309,6 +322,10 @@ This converges to $1$ in the limit $n \to \infty$.
 We can also approximate $F(1 - \delta) \approx 1 - a \delta$, which yields 
 $1 - (n - 1) (1 - a \delta)^n$. Setting this $\geq 1 - \epsilon$ ...
 \end{proof}
+
+\hypertarget{community-detection-for-manifolds-that-emanate-from-the-origin}{%
+\subsubsection{Community detection for manifolds that emanate from the
+origin}\label{community-detection-for-manifolds-that-emanate-from-the-origin}}
 
 \hypertarget{extension-to-multidimensional-manifolds}{%
 \subsection{Extension to multidimensional
