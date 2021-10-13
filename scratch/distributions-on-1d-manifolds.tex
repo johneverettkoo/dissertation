@@ -270,13 +270,73 @@ In the limit $n \to \infty$, this goes to 1.
 manifolds}\label{test-for-intersecting-manifolds}}
 
 \begin{theorem}
-Let $\mathcal{M}_1$ and $\mathcal{M}_2$ be two one-dimensional manifolds of unit length with $n_1$ and $n_2$ points drawn uniformly along them ($n = n_1 + n_2$). 
+Let $\mathcal{M}_1$ and $\mathcal{M}_2$ be two one-dimensional manifolds of unit length with $n / 2$ points drawn uniformly along each manifold.
 
 Suppose we want to perform a hypothesis test for whether the ends of the manifolds meet. 
 The $H_0$ is the case where $\delta = 0$ and $H_1$ is the case where $\delta > 0$. 
-Define the test statistic $T_n = \|X_{(n_1)} - Y_{(1)}\|$ (or similar, depending on which ends meet). 
+We define the test statistic $T_n$ as follows: 
+Construct an $\epsilon$-neighborhood graph using the smallest $\epsilon$ required to make the graph connected. 
+Let $\{d_i\}$ be the set of edge lengths of this graph. 
+Define $T_n = \max_i d_i$. 
 Then $T_n / 2 \stackrel{d}{\to} \mathrm{Beta}(1, n)$ under $H_0$. 
 \end{theorem}
+
+This theorem isn't 100\% correct---in reality, we want to draw edges
+along the ``super-manifold'' that is created by joining the two
+manifolds (under \(H_0\)). But if \(H_0\) is true, then these lengths
+should converge to the true distances along the super-manifold.
+
+\hypertarget{community-detection-for-non-affine-one-dimensional-manifolds}{%
+\subsubsection{Community detection for ``non-affine'' one-dimensional
+manifolds}\label{community-detection-for-non-affine-one-dimensional-manifolds}}
+
+For non-intersecting manifolds, distance-based graph techniques provide
+a straightforward method for community detection. However, this is not
+the case in many models with community structure. For example, the
+latent structure that induces the degree-corrected block model consists
+of line segments that emanate from the origin, so each community is a
+one-dimensional subspace, or linear manifold, and these manifolds meet
+at the origin. For the DCBM, a straightforward approach to community
+detection involves an ASE followed by clustering based on angles (e.g.,
+cosine similarity). As an extension to this case, we consider community
+detection for two one-dimensional manifolds that meet at the origin.
+
+The method that is proposed is as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  For each point \(x_i\), compute \(\|x_i\|\).
+\item
+  Construct an \(\epsilon\)-neighborhood graph for \(X\), choosing
+  \(\epsilon\) large enough that the graph is connected. Alternatively,
+  construct a \(K\)-NN graph, again, choosing \(K\) so that the graph is
+  connected.
+\item
+  Remove the vertex \(v_j\) that corresponds to the point
+  \(x_j = \min_i \|x_i\|\). If this results in two disconnected
+  subgraphs, we are done. Otherwise, continue removing vertices in
+  ascending order of magnitude until the graph is disconnected. Then map
+  each component to a community.
+\item
+  Estimate curves for each community (e.g., using polynomial
+  regression). Map each removed point to a community based on its
+  distance to the curve.
+\end{enumerate}
+
+In the following example, we draw \(64\) points each uniformly along two
+manifolds in \(\mathbb{R}^2\) that intersect at the origin:
+
+\begin{center}\includegraphics{distributions-on-1d-manifolds_files/figure-latex/unnamed-chunk-2-1} \end{center}
+
+The \(5\)-NN graph is as follows:
+
+\begin{center}\includegraphics{distributions-on-1d-manifolds_files/figure-latex/unnamed-chunk-3-1} \end{center}
+
+Removing the 10 points closest to the origin results in the following:
+
+\begin{center}\includegraphics{distributions-on-1d-manifolds_files/figure-latex/unnamed-chunk-5-1} \end{center}
 
 \hypertarget{general-case}{%
 \subsection{General case}\label{general-case}}
@@ -322,10 +382,6 @@ This converges to $1$ in the limit $n \to \infty$.
 We can also approximate $F(1 - \delta) \approx 1 - a \delta$, which yields 
 $1 - (n - 1) (1 - a \delta)^n$. Setting this $\geq 1 - \epsilon$ ...
 \end{proof}
-
-\hypertarget{community-detection-for-manifolds-that-emanate-from-the-origin}{%
-\subsubsection{Community detection for manifolds that emanate from the
-origin}\label{community-detection-for-manifolds-that-emanate-from-the-origin}}
 
 \hypertarget{extension-to-multidimensional-manifolds}{%
 \subsection{Extension to multidimensional

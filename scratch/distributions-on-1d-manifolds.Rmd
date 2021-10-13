@@ -21,6 +21,19 @@ header-includes:
 bibliography: misc.bib
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      comment = NA, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.pos = 'H', 
+                      fig.align = 'center', 
+                      fig.height = 4, 
+                      fig.width = 4)
+options(xtable.comment = FALSE, 
+        xtable.table.placement = 'H')
+```
+
 \newcommand{\diag}{\mathrm{diag}}
 \newcommand{\tr}{\mathrm{Tr}}
 \newcommand{\blockdiag}{\mathrm{blockdiag}}
@@ -175,13 +188,106 @@ In the limit $n \to \infty$, this goes to 1.
 ### Test for intersecting manifolds
 
 \begin{theorem}
-Let $\mathcal{M}_1$ and $\mathcal{M}_2$ be two one-dimensional manifolds of unit length with $n_1$ and $n_2$ points drawn uniformly along them ($n = n_1 + n_2$). 
+Let $\mathcal{M}_1$ and $\mathcal{M}_2$ be two one-dimensional manifolds of unit length with $n / 2$ points drawn uniformly along each manifold.
 
 Suppose we want to perform a hypothesis test for whether the ends of the manifolds meet. 
 The $H_0$ is the case where $\delta = 0$ and $H_1$ is the case where $\delta > 0$. 
-Define the test statistic $T_n = \|X_{(n_1)} - Y_{(1)}\|$ (or similar, depending on which ends meet). 
+We define the test statistic $T_n$ as follows: 
+Construct an $\epsilon$-neighborhood graph using the smallest $\epsilon$ required to make the graph connected. 
+Let $\{d_i\}$ be the set of edge lengths of this graph. 
+Define $T_n = \max_i d_i$. 
 Then $T_n / 2 \stackrel{d}{\to} \Betadist(1, n)$ under $H_0$. 
 \end{theorem}
+
+This theorem isn't 100\% correct---in reality, we want to draw edges along the "super-manifold" that is created by joining the two manifolds (under $H_0$). But if $H_0$ is true, then these lengths should converge to the true distances along the super-manifold. 
+
+### Community detection for "non-affine" one-dimensional manifolds
+
+For non-intersecting manifolds, distance-based graph techniques provide a straightforward method for community detection. 
+However, this is not the case in many models with community structure. 
+For example, the latent structure that induces the degree-corrected block model consists of line segments that emanate from the origin, so each community is a one-dimensional subspace, or linear manifold, and these manifolds meet at the origin. 
+For the DCBM, a straightforward approach to community detection involves an ASE followed by clustering based on angles (e.g., cosine similarity). 
+As an extension to this case, we consider community detection for two one-dimensional manifolds that meet at the origin. 
+
+The method that is proposed is as follows:
+
+1. For each point $x_i$, compute $\|x_i\|$.
+2. Construct an $\epsilon$-neighborhood graph for $X$, choosing $\epsilon$ large enough that the graph is connected. 
+Alternatively, construct a $K$-NN graph, again, choosing $K$ so that the graph is connected. 
+3. Remove the vertex $v_j$ that corresponds to the point $x_j = \min_i \|x_i\|$. 
+If this results in two disconnected subgraphs, we are done. 
+Otherwise, continue removing vertices in ascending order of magnitude until the graph is disconnected. 
+Then map each component to a community.
+4. Estimate curves for each community (e.g., using polynomial regression). 
+Map each removed point to a community based on its distance to the curve.
+
+In the following example, we draw $64$ points each uniformly along two manifolds in $\mathbb{R}^2$ that intersect at the origin:
+
+```{r}
+import::from(magrittr, `%>%`)
+
+source('~/dev/pabm-grdpg/functions.R')
+source('https://mtrosset.pages.iu.edu/Courses/675/graph.r')
+
+f1 <- function(t) {
+  x1 <- t / sqrt(.5 + sqrt(5) / 2)
+  x2 <- x1 ** 2
+  return(cbind(x1, x2))
+}
+
+f2 <- function(t) {
+  x1 <- t / (.5 + sqrt(5) / 2)
+  x2 <- x1 ** .5
+  return(cbind(x1, x2))
+}
+
+set.seed(1)
+```
+
+```{r}
+n1 <- 2 ** 6
+n2 <- n1
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+
+a <- 1
+b <- 1
+t1 <- rbeta(n1, a, b)
+t2 <- rbeta(n2, a, b)
+
+X1 <- f1(t1)
+X2 <- f2(t2)
+X <- rbind(X1, X2)
+plot(X, col = z, xlim = c(0, 1), ylim = c(0, 1))
+
+r <- apply(X, 1, function(x) sum(x ** 2))
+order.r <- order(r)
+```
+
+The $5$-NN graph is as follows:
+
+```{r}
+W <- X %>% 
+  dist() %>% 
+  as.matrix() %>% 
+  graph.knn(5)
+W <- W + t(W)
+W <- sign(W)
+diag(W) <- 0
+
+qgraph::qgraph(W, groups = as.factor(z))
+```
+
+Removing the 10 points closest to the origin results in the following: 
+
+```{r}
+remove <- which(order.r <= 10)
+```
+
+```{r}
+W <- W[-remove, -remove]
+qgraph::qgraph(W, groups = as.factor(z[-remove]))
+```
 
 ## General case
 
@@ -226,8 +332,6 @@ This converges to $1$ in the limit $n \to \infty$.
 We can also approximate $F(1 - \delta) \approx 1 - a \delta$, which yields 
 $1 - (n - 1) (1 - a \delta)^n$. Setting this $\geq 1 - \epsilon$ ...
 \end{proof}
-
-### Community detection for manifolds that emanate from the origin
 
 ## Extension to multidimensional manifolds
 
