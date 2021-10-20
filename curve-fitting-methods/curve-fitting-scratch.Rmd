@@ -302,7 +302,7 @@ Next, suppose we have K curves parameterized by $g^{(k)}$, with points drawn alo
 
 1. Assign an initial clustering (e.g., via spectral clustering).
 2. Estimate the curve for each cluster.
-3. Reassign the clusters by proximity to each cluster.
+3. Reassign the clusters by proximity to each curve.
 4. Repeat 2 and 3 until convergence.
 
 \begin{example}
