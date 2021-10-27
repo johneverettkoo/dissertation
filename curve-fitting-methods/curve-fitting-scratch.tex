@@ -136,12 +136,12 @@ For now, we limit \(d = 2\) and \(g\) to quadratic functions.
 
 \begin{example}
 
-Let $g(t) = (t^2, 2 t (1 - t) ) = (t^2, 2 t - 2 t^2)$. 
+Let $g(t) = (t^2, 2 t (1 - t) ) = (0 + 0 t + t^2, 0 + 2 t - 2 t^2)$. 
 (This is the first two dimensions of the Hardy-Weinberg curve). 
 Then $\theta = (0, 0, 1, 0, 2, -2)$.
 
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-3-1} \end{center}
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-2-1} \end{center}
 
 \end{example}
 
@@ -153,8 +153,7 @@ them, the proposed iterative method is as follows:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Initialize \(\hat{\theta}^{(0)}\) (e.g., by drawing from a probability
-  distribution).
+  Initialize \(\hat{\theta}^{(0)}\) (e.g., randomly).
 \item
   Estimate each \(\hat{t}_i^{(s)}\) by minimizing
   \(L(t_i, \hat{\theta}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{\theta}^{(s)})\|^2\).
@@ -169,7 +168,8 @@ them, the proposed iterative method is as follows:
 \end{enumerate}
 
 If we restrict \(g\) to be polynomials, then steps (2) and (4) have
-closed-form solutions.
+closed-form solutions. Alternatively, we can estimate \(g\) using more
+general forms, e.g., splines, which may require approximation.
 
 \begin{example}
 
@@ -184,7 +184,7 @@ The red line is the curve that was fit using the above method.
 
 \end{example}
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-4-1} \end{center}
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-3-1} \end{center}
 
 One problem with this method is the parameterization of the curve is not
 unique.
@@ -195,11 +195,10 @@ unique.
 \begin{example}
 
 In the next example, we draw $A \sim \mathrm{RDPG}(X)$ using the same H-W curve and sample size as above and estimate the true latent positions (up to rotation). 
-In this example, we force the intercept terms to be zero.
 
 \end{example}
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-6-1} \end{center}
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-5-1} \end{center}
 
 \hypertarget{clustering}{%
 \section{Clustering}\label{clustering}}
@@ -224,26 +223,78 @@ follows:
 \begin{example}
 
 We again limit these to be quadratic functions in $\mathbb{R}^2$. 
-Here, $K = 2$ and $n_1 = n_2 = 256$.
+Here, $K = 2$ and $n_1 = n_2 = 256$. 
+
+
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-6-1} \end{center}
+
+Next, we draw $A \sim \mathrm{RDPG}(X)$ from the above example and apply the clustering and curve fitting to the ASE of $A$.
+The community detection error in this example is 30\%.
+In the following plot, the points are colored according to their true labels.
+
+
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-7-1} \end{center}
 
 \end{example}
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-8-1} \end{center}
+A possibly more robust modification to this is to use Bezier curves for
+\(g\). This is the same functional form as the polynomial curves we used
+before, but with different basis functions. For the following examples,
+we consider the quadratic Bezier curve, which has the following basis
+form:
+
+\[
+g(t) = (1 - t)^2 p_0 + 2 t (1 - t) p_1 + t^2 p_2
+\]
+
+Where as before, \(g : [0, 1] \mapsto \mathbb{R}^d\) and
+\(t \in [0, 1]\), and each \(p_r \in \mathbb{R}^d\). Thus if we can fit
+each \(p_r\), then the procedure is the same as before.
+
+Common methods for Bezier curve fitting do not require specification of
+\(t_1, ..., t_n\). However, an ordering is required. The curve fitting
+method is then modified as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Initialize \(\hat{\theta}^{(0)}\) (e.g., randomly).
+\item
+  Estimate each \(\hat{t}_i^{(s)}\) by minimizing
+  \(L(t_i, \hat{\theta}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{\theta}^{(s)})\|^2\).
+\item
+  Reorder \(X\) according to \(t_1, ..., t_n\).
+\item
+  Estimate \(\hat{p}_0^{(s)}, \hat{p}_1^{(s)}, \hat{p}_2^{(s)}\) for the
+  reordered \(X\) using Bezier curve fitting.
+\item
+  Compute \(\hat{\theta}^{(s+1)}\) from \(\{\hat{p}_r^{(s)}\}\).
+\item
+  Repeat steps 2-5 until convergence.
+\end{enumerate}
 
 \begin{example}
 
-Finally, we draw $A \sim \mathrm{RDPG}(X)$ from the above example and apply the clustering and curve fitting to the ASE of $A$.
 
-\end{example}
 
-\begin{verbatim}
-   zhat.manifold
-z     1   2
-  1 187  69
-  2  87 169
-\end{verbatim}
+We have two intersecting curves, $g_1(t) = \begin{bmatrix} t^2 & 2 t (1 - t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1 - t) & (1 - t) ^ 2 \end{bmatrix}^\top$. $n_1 = n_2 = 128$ points are drawn uniformly from each.
+
 
 \begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-9-1} \end{center}
+
+We draw $A \sim \mathrm{RDPG}(X)$ and obtain the following ASE:
+
+
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-10-1} \end{center}
+
+Fitting two quadratic Bezier curves to these data yields a community detection error rate of 10\%. 
+In the following plot, the points are labeled according to their estimated labels.
+
+
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-11-1} \end{center}
+
+\end{example}
 
   \bibliography{misc.bib}
 

@@ -37,28 +37,6 @@ library(ggplot2)
 import::from(magrittr, `%>%`)
 ```
 
-```{r}
-source('~/dev/pabm-grdpg/functions.R')
-source('https://mtrosset.pages.iu.edu/Courses/675/graph.r')
-
-laplacian.eigenmap <- function(W, d = 2, normalized = TRUE) {
-  n <- nrow(W)
-  if (normalized) {
-    L <- normalized.laplacian(W)
-  } else {
-    L <- graph.laplacian(W)
-  }
-  L.eigen <- eigen(L, symmetric = TRUE)
-  sweep(L.eigen$vectors[, seq(n - 1, n - d)], 2, 
-        sqrt(L.eigen$values[seq(n - 1, n - d)]), `/`)
-}
-
-spectral.clustering <- function(W, K = 2, d = K, normalized = TRUE) {
-  Y <- laplacian.eigenmap(W, d, normalized)
-  kmeans(Y, K)$cluster
-}
-```
-
 \newcommand{\diag}{\mathrm{diag}}
 \newcommand{\tr}{\mathrm{Tr}}
 \newcommand{\blockdiag}{\mathrm{blockdiag}}
@@ -98,105 +76,13 @@ We observe $X_i$ but not $T_i$.
 For now, we limit $d = 2$ and $g$ to quadratic functions. 
 
 ```{r}
-param.curve.quadr.2 <- function(t., 
-                                beta10, beta11, beta12, 
-                                beta20, beta21, beta22) {
-  x1 <- beta10 + beta11 * t. + beta12 * t. ^ 2
-  x2 <- beta20 + beta21 * t. + beta22 * t. ^ 2
-  return(cbind(x1, x2))
-}
-
-estimate.one.t.quadr.2 <- function(x1, x2, 
-                                   beta10, beta11, beta12, 
-                                   beta20, beta21, beta22) {
-  gamma0 <- beta10 * beta11 + beta20 * beta21 - beta11 * x1 - beta21 * x2
-  gamma1 <- 2 * beta10 * beta12 + 2 * beta20 * beta22 + 
-    beta11 ^ 2 + beta21 ^ 2 - 
-    2 * beta12 * x1 - 2 * beta22 * x2
-  gamma2 <- 3 * beta11 * beta12 + 3 * beta21 * beta22
-  gamma3 <- 2 * (beta12 ^ 2 + beta22 ^ 2)
-  roots <- polyroot(c(gamma0, gamma1, gamma2, gamma3))
-  roots <- roots[abs(roots) == abs(Re(roots))]
-  roots <- Re(roots)
-  return(max(roots))
-}
-
-estimate.t.quadr.2 <- function(X, 
-                               beta10, beta11, beta12, 
-                               beta20, beta21, beta22) {
-  apply(X, 1, function(x) {
-    estimate.one.t.quadr.2(x[1], x[2], 
-                           beta10, beta11, beta12, 
-                           beta20, beta21, beta22)
-  })
-}
-
-estimate.quadr.coefs.2 <- function(X, t.hat, intercept = TRUE) {
-  sum.X <- colSums(X)
-  sum.Xt <- colSums(sweep(X, 1, t.hat, `*`))
-  sum.Xt2 <- colSums(sweep(X, 1, t.hat ^ 2, `*`))
-  sum.t <- sum(t.hat)
-  sum.t2 <- sum(t.hat ^ 2)
-  sum.t3 <- sum(t.hat ^ 3)
-  sum.t4 <- sum(t.hat ^ 4)
-  
-  if (intercept) {
-    A.sub <- matrix(c(1, sum.t, sum.t2, 
-                      sum.t, sum.t2, sum.t3, 
-                      sum.t2, sum.t3, sum.t4), 
-                    nrow = 3, ncol = 3)
-    A <- Matrix::bdiag(A.sub, A.sub)
-    
-    b <- c(sum.X[1], sum.Xt[1], sum.Xt2[1], 
-           sum.X[2], sum.Xt[2], sum.Xt2[2])
-    return(solve(A, b))
-  } else {
-    A.sub <- matrix(c(sum.t2, sum.t3, sum.t3, sum.t4),
-                    nrow = 2, ncol = 2)
-    A <- Matrix::bdiag(A.sub, A.sub)
-    b <- c(sum.Xt[1], sum.Xt2[1], sum.Xt[2], sum.Xt2[2])
-    theta <- solve(A, b)
-    return(c(0, theta[1:2], 0, theta[3:4]))
-  }
-}
-
-estimate.quadr.curve.2 <- function(X, init.params, 
-                                   intercept = TRUE,
-                                   eps = 1e-6, maxit = 100) {
-  if (missing(init.params)) {
-    theta <- rnorm(6)
-  } else {
-    theta <- init.params
-  }
-  d.theta <- 1 / eps
-  
-  niter <- 0
-  while (d.theta > eps) {
-    theta.prev <- theta
-    t.hat <- estimate.t.quadr.2(X,
-                                theta[1], theta[2], theta[3],
-                                theta[4], theta[5], theta[6])
-    X.hat <- param.curve.quadr.2(t.hat, theta[1], theta[2], theta[3], 
-                                 theta[4], theta[5], theta[6])
-    theta <- estimate.quadr.coefs.2(X, t.hat, intercept)
-    
-    d.theta <- sum((theta - theta.prev) ^ 2) / sum(theta ^ 2)
-    
-    niter <- niter + 1
-    if (niter >= maxit) {
-      warning('failed to converge to a quadratic curve')
-      break
-    }
-  }
-  return(list(theta = theta, 
-              X = X.hat,
-              t = t.hat))
-}
+source('~/dev/pabm-grdpg/functions.R')
+source('~/dev/dissertation/curve-fitting-methods/functions.R')
 ```
 
 \begin{example}
 
-Let $g(t) = (t^2, 2 t (1 - t) ) = (t^2, 2 t - 2 t^2)$. 
+Let $g(t) = (t^2, 2 t (1 - t) ) = (0 + 0 t + t^2, 0 + 2 t - 2 t^2)$. 
 (This is the first two dimensions of the Hardy-Weinberg curve). 
 Then $\theta = (0, 0, 1, 0, 2, -2)$.
 
@@ -215,13 +101,14 @@ ggplot() +
 
 If we observe the $T_i$'s, then we can use a standard polynomial regression method to obtain $\hat{\theta}$. Since we do not observe them, the proposed iterative method is as follows:
 
-1. Initialize $\hat{\theta}^{(0)}$ (e.g., by drawing from a probability distribution). 
+1. Initialize $\hat{\theta}^{(0)}$ (e.g., randomly). 
 2. Estimate each $\hat{t}_i^{(s)}$ by minimizing $L(t_i, \hat{\theta}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{\theta}^{(s)})\|^2$.
 3. Compute each $\hat{x}_i^{(s)} = g(\hat{t}_i^{(s)} | \hat{\theta}^{(s)})$
 4. Estimate $\hat{\theta}^{(s+1)}$ by minimizing $L(\{\hat{t}_i^{(s)}\}, \theta | X) = \sum_i \|x_i - g(\hat{t}_i^{(s)} | \theta)\|^2$.
 5. Repeat steps 2-4 until convergence.
 
 If we restrict $g$ to be polynomials, then steps (2) and (4) have closed-form solutions. 
+Alternatively, we can estimate $g$ using more general forms, e.g., splines, which may require approximation.
 
 \begin{example}
 
@@ -265,7 +152,6 @@ One problem with this method is the parameterization of the curve is not unique.
 \begin{example}
 
 In the next example, we draw $A \sim \RDPG(X)$ using the same H-W curve and sample size as above and estimate the true latent positions (up to rotation). 
-In this example, we force the intercept terms to be zero.
 
 \end{example}
 
@@ -277,12 +163,12 @@ Y <- embedding(A, 2, 0)
 ```
 
 ```{r, cache = TRUE}
-out <- estimate.quadr.curve.2(Y,
+out1 <- estimate.quadr.curve.2(Y,
                               init.params = c(0, 0, 1, 0, 2, -2),
-                              intercept = FALSE,
+                              intercept = TRUE,
                               maxit = 200)
-thetahat <- out$theta
-t.hat <- sort(out$t)
+thetahat <- out1$theta
+t.hat <- sort(out1$t)
 Yhat <- param.curve.quadr.2(t.hat, 
                             thetahat[1], thetahat[2], thetahat[3],
                             thetahat[4], thetahat[5], thetahat[6])
@@ -308,59 +194,7 @@ Next, suppose we have K curves parameterized by $g^{(k)}$, with points drawn alo
 \begin{example}
 
 We again limit these to be quadratic functions in $\mathbb{R}^2$. 
-Here, $K = 2$ and $n_1 = n_2 = 256$.
-
-\end{example}
-
-```{r}
-compute.distances.quadr.2 <- function(X, theta) {
-  t. <- estimate.t.quadr.2(X, 
-                           theta[1], theta[2], theta[3], 
-                           theta[4], theta[5], theta[6])
-  X.hat <- param.curve.quadr.2(t., 
-                               theta[1], theta[2], theta[3], 
-                               theta[4], theta[5], theta[6])
-  apply(X - X.hat, 1, function(x) sum(x ^ 2))
-}
-
-manifold.clustering.quadr.2 <- function(A, K = 2, 
-                                        intercept = TRUE, 
-                                        maxit = 100) {
-  n <- nrow(A)
-  
-  z.hat <- spectral.clustering(A, K)
-  X <- embedding(A, 2, 0)
-  z.hat.prev <- sample(seq(K), n, replace = TRUE)
-  
-  niter <- 0
-  
-  while (!all(z.hat.prev == z.hat)) {
-    z.hat.prev <- z.hat
-    
-    X1 <- X[z.hat == 1, ]
-    X2 <- X[z.hat == 2, ]
-    
-    curve1 <- estimate.quadr.curve.2(X1, intercept = intercept)
-    curve2 <- estimate.quadr.curve.2(X2, intercept = intercept)
-    
-    d1 <- compute.distances.quadr.2(X, curve1$theta)
-    d2 <- compute.distances.quadr.2(X, curve2$theta)
-    distances <- cbind(d1, d2)
-    
-    z.hat <- apply(distances, 1, which.min)
-    
-    niter <- niter + 1
-    if (niter >= maxit) {
-      warning('failed to converge to a clustering')
-      break
-    }
-  }
-  
-  return(list(z = z.hat, 
-              X = X,
-              theta = list(curve1$theta, curve2$theta)))
-}
-```
+Here, $K = 2$ and $n_1 = n_2 = 256$. 
 
 ```{r}
 f1 <- function(t) {
@@ -386,7 +220,9 @@ X <- rbind(X1, X2)
 P <- X %*% t(X)
 Xhat <- embedding(P, 2, 0)
 
-manifold.out <- manifold.clustering.quadr.2(P, 2, intercept = FALSE)
+manifold.out <- manifold.clustering.quadr.2(P, 2, 
+                                            intercept = FALSE, 
+                                            method = 'polynomial')
 zhat.manifold <- manifold.out$z
 if (mean(z == zhat.manifold) < .5) {
   zhat.manifold <- 2 - zhat.manifold
@@ -408,29 +244,29 @@ ggplot() +
   geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z))) + 
   labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
   theme_bw() + 
-  geom_line(aes(x = Y[, 1], y = Y[, 2],
-                groups = factor(z.))) + 
+  # geom_line(aes(x = Y[, 1], y = Y[, 2],
+  #               groups = factor(z.))) + 
   xlim(-1, 0) + ylim(-.5, .5) + 
   coord_fixed()
 ```
 
-\begin{example}
+Next, we draw $A \sim \RDPG(X)$ from the above example and apply the clustering and curve fitting to the ASE of $A$.
+The community detection error in this example is 30\%.
+In the following plot, the points are colored according to their true labels.
 
-Finally, we draw $A \sim \RDPG(X)$ from the above example and apply the clustering and curve fitting to the ASE of $A$.
-
-\end{example}
-
-```{r cache = TRUE, fig.width = 4, fig.height = 4}
+```{r cache = TRUE, fig.width = 3, fig.height = 3}
 set.seed(12345)
 
 A <- draw.graph(P)
 Xhat <- embedding(A, 2, 0)
 
-manifold.out <- manifold.clustering.quadr.2(A, 2, intercept = FALSE)
+manifold.out <- manifold.clustering.quadr.2(A, 2, 
+                                            intercept = FALSE,
+                                            method = 'polynomial')
 zhat.manifold <- manifold.out$z
-table(z, zhat.manifold)
+# table(z, zhat.manifold)
 
-plot(Xhat, col = z, asp = 1)
+# plot(Xhat, col = z, asp = 1)
 t. <- seq(-1, 1, .01)
 theta1 <- manifold.out$theta[[1]]
 theta2 <- manifold.out$theta[[2]]
@@ -440,6 +276,133 @@ Y1 <- param.curve.quadr.2(t.,
 Y2 <- param.curve.quadr.2(t.,
                           theta2[1], theta2[2], theta2[3],
                           theta2[4], theta2[5], theta2[6])
-lines(Y1)
-lines(Y2, col = 2)
+Y <- rbind(Y1, Y2)
+z. <- c(rep(1, length(t.)),
+        rep(2, length(t.)))
+# lines(Y1)
+# lines(Y2, col = 2)
+
+ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z))) + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw() + 
+  geom_path(aes(x = Y[, 1], y = Y[, 2],
+                groups = factor(z.))) + 
+  xlim(-.25, 1.25) + ylim(-.75, .75) + 
+  coord_fixed()
 ```
+
+\end{example}
+
+A possibly more robust modification to this is to use Bezier curves for $g$. 
+This is the same functional form as the polynomial curves we used before, but with different basis functions. 
+For the following examples, we consider the quadratic Bezier curve, which has the following basis form:
+
+$$
+g(t) = (1 - t)^2 p_0 + 2 t (1 - t) p_1 + t^2 p_2
+$$
+
+Where as before, $g : [0, 1] \mapsto \mathbb{R}^d$ and $t \in [0, 1]$, and each $p_r \in \mathbb{R}^d$. Thus if we can fit each $p_r$, then the procedure is the same as before. 
+
+Common methods for Bezier curve fitting do not require specification of $t_1, ..., t_n$. However, an ordering is required. The curve fitting method is then modified as follows:
+
+1. Initialize $\hat{\theta}^{(0)}$ (e.g., randomly). 
+2. Estimate each $\hat{t}_i^{(s)}$ by minimizing $L(t_i, \hat{\theta}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{\theta}^{(s)})\|^2$.
+3. Reorder $X$ according to $t_1, ..., t_n$.
+4. Estimate $\hat{p}_0^{(s)}, \hat{p}_1^{(s)}, \hat{p}_2^{(s)}$ for the reordered $X$ using Bezier curve fitting.
+5. Compute $\hat{\theta}^{(s+1)}$ from $\{\hat{p}_r^{(s)}\}$.
+6. Repeat steps 2-5 until convergence.
+
+\begin{example}
+
+```{r}
+f1 <- function(t) {
+  x1 <- t ^ 2
+  x2 <- 2 * t - 2 * t ^ 2
+  return(cbind(x1, x2))
+}
+
+f2 <- function(t) {
+  x1 <- 2 * t - 2 * t ^ 2
+  x2 <- 1 - 2 * t + t ^ 2
+  return(cbind(x1, x2))
+}
+```
+
+We have two intersecting curves, $g_1(t) = \begin{bmatrix} t^2 & 2 t (1 - t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1 - t) & (1 - t) ^ 2 \end{bmatrix}^\top$. $n_1 = n_2 = 128$ points are drawn uniformly from each.
+
+```{r}
+n1 <- 2 ** 7
+n2 <- n1
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+
+a <- 1
+b <- 1
+t1 <- rbeta(n1, a, b)
+t2 <- rbeta(n2, a, b)
+T <- rbind(t1, t2)
+
+X1 <- f1(t1)
+X2 <- f2(t2)
+X <- rbind(X1, X2)
+
+ggplot() + 
+  geom_point(aes(x = X[, 1], y = X[, 2], colour = factor(z))) + 
+  coord_fixed() + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw()
+```
+
+We draw $A \sim \RDPG(X)$ and obtain the following ASE:
+
+```{r}
+P <- X %*% t(X)
+diag(P) <- 0
+A <- draw.graph(P)
+Xhat <- embedding(A, 2, 0)
+if (mean(Xhat[, 1]) < 0) Xhat[, 1] <- -Xhat[, 1]
+
+ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z))) + 
+  coord_fixed() + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw()
+```
+
+Fitting two quadratic Bezier curves to these data yields a community detection error rate of 10\%. 
+In the following plot, the points are labeled according to their estimated labels.
+
+```{r cache = TRUE}
+set.seed(314159265)
+manifold.out <- manifold.clustering.quadr.2(A, 2, 
+                                            # initialization = z,
+                                            # initialization = 'spectral',
+                                            initialization = 'random', 
+                                            method = 'bezier')
+zhat.manifold <- manifold.out$z
+
+t. <- seq(-1, 1, .01)
+theta1 <- manifold.out$theta[[1]]
+theta2 <- manifold.out$theta[[2]]
+Y1 <- param.curve.quadr.2(t., 
+                          theta1[1], theta1[2], theta1[3], 
+                          theta1[4], theta1[5], theta1[6])
+Y2 <- param.curve.quadr.2(t.,
+                          theta2[1], theta2[2], theta2[3],
+                          theta2[4], theta2[5], theta2[6])
+Y <- rbind(Y1, Y2)
+z. <- c(rep(1, length(t.)),
+        rep(2, length(t.)))
+
+ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(zhat.manifold))) + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw() + 
+  geom_path(aes(x = Y[, 1], y = Y[, 2],
+                groups = factor(z.))) + 
+  xlim(-.25, 1.25) + ylim(-.75, .75) + 
+  coord_fixed()
+```
+
+\end{example}
