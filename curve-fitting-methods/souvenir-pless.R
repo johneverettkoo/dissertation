@@ -66,7 +66,7 @@ plot(Xhat, col = z, asp = 1)
 D <- Xhat %>% 
   dist() %>% 
   as.matrix() %>% 
-  graph.eps(.1) %>% 
+  graph.eps(.2) %>% 
   graph.short()
 
 W <- runif(n * 2) %>% 

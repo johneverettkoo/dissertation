@@ -244,7 +244,7 @@ we consider the quadratic Bezier curve, which has the following basis
 form:
 
 \[
-g(t) = (1 - t)^2 p_0 + 2 t (1 - t) p_1 + t^2 p_2
+g(t | p) = (1 - t)^2 p_0 + 2 t (1 - t) p_1 + t^2 p_2
 \]
 
 Where as before, \(g : [0, 1] \mapsto \mathbb{R}^d\) and
@@ -252,27 +252,42 @@ Where as before, \(g : [0, 1] \mapsto \mathbb{R}^d\) and
 each \(p_r\), then the procedure is the same as before.
 
 Common methods for Bezier curve fitting do not require specification of
-\(t_1, ..., t_n\). However, an ordering is required. The curve fitting
-method is then modified as follows:
+\(t_1, ..., t_n\). However, an ordering is required.
+
+The curve fitting method is then modified as follows:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Initialize \(\hat{\theta}^{(0)}\) (e.g., randomly).
+  Initialize \(\hat{p}^{(0)}\) (e.g., randomly).
 \item
   Estimate each \(\hat{t}_i^{(s)}\) by minimizing
-  \(L(t_i, \hat{\theta}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{\theta}^{(s)})\|^2\).
+  \(L(t_i, \hat{p}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{p}^{(s)})\|^2\).
 \item
   Reorder \(X\) according to \(t_1, ..., t_n\).
 \item
-  Estimate \(\hat{p}_0^{(s)}, \hat{p}_1^{(s)}, \hat{p}_2^{(s)}\) for the
-  reordered \(X\) using Bezier curve fitting.
+  Estimate \(\hat{p}^{(s)}\) for the reordered \(X\) using Bezier curve
+  fitting.
 \item
-  Compute \(\hat{\theta}^{(s+1)}\) from \(\{\hat{p}_r^{(s)}\}\).
-\item
-  Repeat steps 2-5 until convergence.
+  Repeat steps 2-4 until convergence.
 \end{enumerate}
+
+Then this becomes step 2 of the clustering method outlined above.
+
+We can also estimate \(\hat{p} = (T^\top T)^{-1} T^\top X\) where
+\(T = \begin{bmatrix} t_1 & \cdots & t_R \end{bmatrix}\) and each
+\(t_r = \binom{R}{r} (1-t)^{R-r} t^r\), where \(R\) is the order of the
+Bezier curve, so using the method for estimating \(t_1, ..., t_n\) as
+described before, we can iteratively solve for \(\hat{p}\) in the same
+manner. If we use soft clustering (e.g., EM as opposed to \(K\)-means),
+we can also insert a diagonal matrix of weights \(W_k\) to obtain
+
+\[\hat{p}_k = (T^\top W_k T)^{-1} T^\top W_k X\]
+
+where \(X\) is the full data matrix, \(T\) is the full model matrix, and
+\(W_k = w_k\) with the entries of \(w_k\) being the estimated
+probability of each \(x_i\) being in cluster \(k\).
 
 \begin{example}
 
