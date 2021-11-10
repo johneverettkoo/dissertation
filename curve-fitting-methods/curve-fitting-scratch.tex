@@ -186,8 +186,7 @@ The red line is the curve that was fit using the above method.
 
 \begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-3-1} \end{center}
 
-One problem with this method is the parameterization of the curve is not
-unique.
+Note: the parameterization of the curve is not unique.
 
 \hypertarget{estimation-with-noise}{%
 \section{Estimation with Noise}\label{estimation-with-noise}}
@@ -199,6 +198,47 @@ In the next example, we draw $A \sim \mathrm{RDPG}(X)$ using the same H-W curve 
 \end{example}
 
 \begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-5-1} \end{center}
+
+A modification to this that is possibly more robust is to use Bezier
+curves for \(g\). This is the same functional form as the polynomial
+curves used before, but with orthogonal bases:
+
+\[g(t | p) = \sum_{r = 0}^{R} p_r \binom{R}{r} (1 - t)^{R - r} t^r\]
+
+where \(R\) is the order of the Bezier curve, each \(p_s\) is a vector
+of length \(d\), and, as before, \(g : [0, 1] \mapsto \mathbb{R}^d\).
+Thus, if we fit each \(p_r\), then the procedure is the same as before.
+
+The least squares estimate for \(p \in \mathbb{R}^{R \times d}\) is
+
+\[\hat{p} = (T^\top T)^{-1} T^\top X\]
+
+where \(T = \begin{bmatrix} t^{(1)} & \cdots & t^{(R)} \end{bmatrix}\)
+and each \(t^{(r)}_i = \binom{R}{r} (1 - t_i)^{R - r} t_i^r\), and
+\(X \in \mathbb{R}^{n \times d}\). The same procedure for estimating
+\(t_1, ..., t_n\) can be applied here.
+
+The parameterization for a given curve is not unique. In particular, the
+above procedure will not necessarily provide
+\(t_1, ..., t_n \in [0, 1]\). One possible remedy for this is to, after
+estimating the \(t_i\)'s, normalize them to the unit interval. If we
+assume \(t_1, ..., t_n \stackrel{\mathrm{iid}}{\sim}Uniform(a, b)\),
+then the UMVUE are
+
+\[\hat{a} = \frac{n t_{(1)} - t_{(n)}}{n - 1},
+\hat{b} = \frac{n t_{(n)} - t_{(1)}}{n - 1}\]
+
+which yields the normalization transformation
+\(t \leftarrow (t - \hat{a}) / (\hat{b} - \hat{a})\).
+
+Alternatively, we can force the \(t_i\)'s to be approxiately uniform on
+the unit interval by the transformation \(t \leftarrow \hat{F}(t)\),
+where \(\hat{F}\) is the empirical CDF of \(t_1, ..., t_n\).
+
+For initialization, we can use a one-dimensional Isomap embedding to
+estimate the \(t_i\)'s and use that to estimate \(\hat{p}\). Experiments
+suggest that if the data are well-behaved (i.e., it looks like the curve
+we are trying to fit), this results in much faster convergence.
 
 \hypertarget{clustering}{%
 \section{Clustering}\label{clustering}}
@@ -213,7 +253,8 @@ follows:
 \item
   Assign an initial clustering (e.g., via spectral clustering).
 \item
-  Estimate the curve for each cluster.
+  Estimate the curve for each cluster (using the same curve-fitting
+  procedure as before).
 \item
   Reassign the clusters by proximity to each curve.
 \item
@@ -222,94 +263,48 @@ follows:
 
 \begin{example}
 
-We again limit these to be quadratic functions in $\mathbb{R}^2$. 
-Here, $K = 2$ and $n_1 = n_2 = 256$. 
 
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-6-1} \end{center}
-
-Next, we draw $A \sim \mathrm{RDPG}(X)$ from the above example and apply the clustering and curve fitting to the ASE of $A$.
-The community detection error in this example is 30\%.
-In the following plot, the points are colored according to their true labels.
+We have two intersecting curves, $g_1(t) = \begin{bmatrix} t^2 & 2 t (1 - t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1 - t) & (1 - t) ^ 2 \end{bmatrix}^\top$. $n_1 = n_2 = 256$ points are drawn uniformly from each.
 
 
 \begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-7-1} \end{center}
 
-\end{example}
-
-A possibly more robust modification to this is to use Bezier curves for
-\(g\). This is the same functional form as the polynomial curves we used
-before, but with different basis functions. For the following examples,
-we consider the quadratic Bezier curve, which has the following basis
-form:
-
-\[
-g(t | p) = (1 - t)^2 p_0 + 2 t (1 - t) p_1 + t^2 p_2
-\]
-
-Where as before, \(g : [0, 1] \mapsto \mathbb{R}^d\) and
-\(t \in [0, 1]\), and each \(p_r \in \mathbb{R}^d\). Thus if we can fit
-each \(p_r\), then the procedure is the same as before.
-
-Common methods for Bezier curve fitting do not require specification of
-\(t_1, ..., t_n\). However, an ordering is required.
-
-The curve fitting method is then modified as follows:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Initialize \(\hat{p}^{(0)}\) (e.g., randomly).
-\item
-  Estimate each \(\hat{t}_i^{(s)}\) by minimizing
-  \(L(t_i, \hat{p}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{p}^{(s)})\|^2\).
-\item
-  Reorder \(X\) according to \(t_1, ..., t_n\).
-\item
-  Estimate \(\hat{p}^{(s)}\) for the reordered \(X\) using Bezier curve
-  fitting.
-\item
-  Repeat steps 2-4 until convergence.
-\end{enumerate}
-
-Then this becomes step 2 of the clustering method outlined above.
-
-We can also estimate \(\hat{p} = (T^\top T)^{-1} T^\top X\) where
-\(T = \begin{bmatrix} t_1 & \cdots & t_R \end{bmatrix}\) and each
-\(t_r = \binom{R}{r} (1-t)^{R-r} t^r\), where \(R\) is the order of the
-Bezier curve, so using the method for estimating \(t_1, ..., t_n\) as
-described before, we can iteratively solve for \(\hat{p}\) in the same
-manner. If we use soft clustering (e.g., EM as opposed to \(K\)-means),
-we can also insert a diagonal matrix of weights \(W_k\) to obtain
-
-\[\hat{p}_k = (T^\top W_k T)^{-1} T^\top W_k X\]
-
-where \(X\) is the full data matrix, \(T\) is the full model matrix, and
-\(W_k = w_k\) with the entries of \(w_k\) being the estimated
-probability of each \(x_i\) being in cluster \(k\).
-
-\begin{example}
-
-
-
-We have two intersecting curves, $g_1(t) = \begin{bmatrix} t^2 & 2 t (1 - t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1 - t) & (1 - t) ^ 2 \end{bmatrix}^\top$. $n_1 = n_2 = 128$ points are drawn uniformly from each.
-
-
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-9-1} \end{center}
-
 We draw $A \sim \mathrm{RDPG}(X)$ and obtain the following ASE:
 
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-10-1} \end{center}
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
 Fitting two quadratic Bezier curves to these data yields a community detection error rate of 10\%. 
 In the following plot, the points are labeled according to their estimated labels.
 
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-11-1} \end{center}
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 \end{example}
+
+\hypertarget{model-based-clustering}{%
+\subsection{Model-Based Clustering}\label{model-based-clustering}}
+
+The CLT property of the ASE may allow us to approximate
+\(W x - \hat{x} \sim \mathcal{N}(f_k(t), \Sigma_k)\). One possibly
+reasonable assumption for \(\Sigma_k\) is
+\(\Sigma_k = \Sigma_k(t) = \mathrm{diag}(\sigma_{k1}^2(t), ..., \sigma_{kd}^2(t))\).
+A plot of the squared errors of cluster 1 in the previous example
+reveals the following:
+
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-10-1} \end{center}
+
+Fitting some curve to each \(\sigma_{kr}^2(t)\) allows us to compute
+estimated probabilities of each point belonging to each
+cluster/manifold:
+\(\hat{q}_{ik} = \mathcal{N}(x_i \mid g_k(\hat{t}_i), \Sigma_k(\hat{t}_i))\).
+Then we can use weighted least squares to estimate the parameters of
+\(g\):
+
+\[\hat{p}_k = (T^\top Q_k T)^{-1} T^\top Q_k X\]
+
+where \(Q_k = \mathrm{diag}(q_{1k}, ..., q_{nk})\).
 
   \bibliography{misc.bib}
 

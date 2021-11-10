@@ -6,14 +6,34 @@ source('https://mtrosset.pages.iu.edu/Courses/675/stress.r')
 source('~/dev/pabm-grdpg/functions.R')
 source('~/dev/dissertation/curve-fitting-methods/functions.R')
 
-weighted.mds <- function(D, d = 2, w = rep(1, ncol(D))) {
+weighted.mds <- function(D, d = 2, w = rep(1, ncol(D)) / ncol(D)) {
   n <- ncol(D)
   e <- rep(1, n)
   H <- diag(n) - tcrossprod(e, w)
   B <- -H %*% D %*% H / 2
   eigen.B <- eigen(B, symmetric = TRUE)
-  Y <- sweep(eigen.B$vectors[, seq(d)], 2, sqrt(eigen.B$values[seq(d)]), `*`)
+  Y <- sweep(eigen.B$vectors[, seq(d), drop = FALSE], 2, sqrt(eigen.B$values[seq(d)]), `*`)
   Y <- Y / (sum(abs(eigen.B$values)) / sum(eigen.B$values[seq(d)]))
+  
+  eps <- 1e-3
+  W <- outer(w, w)
+  L <- graph.laplacian(W)
+  R <- chol(L + 1)
+  Linv <- chol2inv(R)
+  
+  stress <- sum(as.dist(W) * (dist(Y) - as.dist(D)) ^ 2)
+  stress.prev <- stress + 1 / eps
+  # stress.vec <- stress
+  
+  while (stress.prev - stress > eps) {
+    stress.prev <- stress
+    m <- as.dist(W) * as.dist(D) / dist(Y)
+    Y <- Linv %*% graph.laplacian(as.matrix(m)) %*% Y
+    stress <- sum(as.dist(W) * (dist(Y) - as.dist(D)) ^ 2)
+    # print(stress)
+    # stress.vec <- c(stress.vec, stress)
+  }
+  # plot(log(stress.vec))
   return(Y)
 }
 
@@ -69,22 +89,27 @@ D <- Xhat %>%
   graph.eps(.2) %>% 
   graph.short()
 
+d <- 1
+
 W <- runif(n * 2) %>% 
   matrix(nrow = n, ncol = 2) %>% 
   sweep(., 1, rowSums(.), `/`)
 
-Y1 <- weighted.mds(D, 2, W[, 1])
-Y2 <- weighted.mds(D, 2, W[, 2])
+W <- cbind(z - 1, 2 - z) + matrix(rbeta(n * 2, 1, 10), nrow = n, ncol = 2)
+W <- sweep(W, 1, rowSums(W), `/`)
+
+Y1 <- weighted.mds(D, d, W[, 1])
+Y2 <- weighted.mds(D, d, W[, 2])
 
 d1 <- compute.dist2.manifold(D, as.matrix(dist(Y1)), W[, 1])
 d2 <- compute.dist2.manifold(D, as.matrix(dist(Y2)), W[, 2])
 
-W <- update.weights(cbind(d1, d2), 1e1)
+W <- update.weights(cbind(d1, d2), 1e-1)
 
 zhat <- apply(W, 1, which.max)
 if (mean(z == zhat) < .5) zhat <- 3 - zhat
 table(z, zhat)
-plot(Xhat, col = (z == zhat) + 1)
+# plot(Xhat, col = (z == zhat) + 1)
 
 plot(Xhat, col = zhat, asp = 1)
 
@@ -102,3 +127,5 @@ while (Dw > eps) {
   print(Dw)
   print(table(z, apply(W, 1, which.max)))
 }
+
+W1 <- outer(W[, 1], W[, 1])

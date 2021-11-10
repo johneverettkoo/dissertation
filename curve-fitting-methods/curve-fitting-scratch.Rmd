@@ -124,12 +124,12 @@ The red line is the curve that was fit using the above method.
 \end{example}
 
 ```{r}
-set.seed(314159)
+set.seed(314)
 n <- 200
 t. <- runif(n)
 X <- param.curve.quadr.2(t., 0, 0, 1, 0, 2, -2)
 
-out <- estimate.quadr.curve.2(X)
+out <- estimate.quadr.curve.2(X, maxit = 100)
 thetahat <- out$theta
 t.hat <- sort(out$t)
 Xhat <- param.curve.quadr.2(t.hat, 
@@ -145,7 +145,7 @@ ggplot() +
             colour = 'red')
 ```
 
-One problem with this method is the parameterization of the curve is not unique. 
+Note: the parameterization of the curve is not unique. 
 
 # Estimation with Noise
 
@@ -164,7 +164,6 @@ Y <- embedding(A, 2, 0)
 
 ```{r, cache = TRUE}
 out1 <- estimate.quadr.curve.2(Y,
-                              init.params = c(0, 0, 1, 0, 2, -2),
                               intercept = TRUE,
                               maxit = 200)
 thetahat <- out1$theta
@@ -182,147 +181,43 @@ ggplot() +
             colour = 'red')
 ```
 
+A modification to this that is possibly more robust is to use Bezier curves for $g$. 
+This is the same functional form as the polynomial curves used before, but with orthogonal bases:
+
+$$g(t | p) = \sum_{r = 0}^{R} p_r \binom{R}{r} (1 - t)^{R - r} t^r$$
+
+where $R$ is the order of the Bezier curve, each $p_s$ is a vector of length $d$, and, as before, $g : [0, 1] \mapsto \mathbb{R}^d$. 
+Thus, if we fit each $p_r$, then the procedure is the same as before. 
+
+The least squares estimate for $p \in \mathbb{R}^{R \times d}$ is
+
+$$\hat{p} = (T^\top T)^{-1} T^\top X$$
+
+where $T = \begin{bmatrix} t^{(1)} & \cdots & t^{(R)} \end{bmatrix}$ and each $t^{(r)}_i = \binom{R}{r} (1 - t_i)^{R - r} t_i^r$, and $X \in \mathbb{R}^{n \times d}$. 
+The same procedure for estimating $t_1, ..., t_n$ can be applied here. 
+
+The parameterization for a given curve is not unique. 
+In particular, the above procedure will not necessarily provide $t_1, ..., t_n \in [0, 1]$. 
+One possible remedy for this is to, after estimating the $t_i$'s, normalize them to the unit interval. If we assume $t_1, ..., t_n \iid Uniform(a, b)$, then the UMVUE are
+
+$$\hat{a} = \frac{n t_{(1)} - t_{(n)}}{n - 1},
+\hat{b} = \frac{n t_{(n)} - t_{(1)}}{n - 1}$$
+
+which yields the normalization transformation $t \leftarrow (t - \hat{a}) / (\hat{b} - \hat{a})$.
+
+Alternatively, we can force the $t_i$'s to be approxiately uniform on the unit interval by the transformation $t \leftarrow \hat{F}(t)$, where $\hat{F}$ is the empirical CDF of $t_1, ..., t_n$.
+
+For initialization, we can use a one-dimensional Isomap embedding to estimate the $t_i$'s and use that to estimate $\hat{p}$.
+Experiments suggest that if the data are well-behaved (i.e., it looks like the curve we are trying to fit), this results in much faster convergence.
+
 # Clustering
 
 Next, suppose we have K curves parameterized by $g^{(k)}$, with points drawn along these curves. Then one possible clustering technique is as follows:
 
 1. Assign an initial clustering (e.g., via spectral clustering).
-2. Estimate the curve for each cluster.
+2. Estimate the curve for each cluster (using the same curve-fitting procedure as before).
 3. Reassign the clusters by proximity to each curve.
 4. Repeat 2 and 3 until convergence.
-
-\begin{example}
-
-We again limit these to be quadratic functions in $\mathbb{R}^2$. 
-Here, $K = 2$ and $n_1 = n_2 = 256$. 
-
-```{r}
-f1 <- function(t) {
-  x1 <- t / sqrt(.5 + sqrt(5) / 2)
-  x2 <- x1 ** 2
-  return(cbind(x1, x2))
-}
-
-f2 <- function(t) {
-  x2 <- t / sqrt(.5 + sqrt(5) / 2)
-  x1 <- x2 ** 2
-  return(cbind(x1, x2))
-}
-
-n1 <- n2 <- 2 ** 8
-z <- c(rep(1, n1), rep(2, n2))
-t1 <- sort(runif(n1))
-t2 <- sort(runif(n2))
-X1 <- f1(t1)
-X2 <- f2(t2)
-X <- rbind(X1, X2)
-
-P <- X %*% t(X)
-Xhat <- embedding(P, 2, 0)
-
-manifold.out <- manifold.clustering.quadr.2(P, 2, 
-                                            intercept = FALSE, 
-                                            method = 'polynomial')
-zhat.manifold <- manifold.out$z
-if (mean(z == zhat.manifold) < .5) {
-  zhat.manifold <- 2 - zhat.manifold
-}
-t. <- seq(0, 1, .01)
-theta1 <- manifold.out$theta[[1]]
-theta2 <- manifold.out$theta[[2]]
-Y1 <- param.curve.quadr.2(t., 
-                          theta1[1], theta1[2], theta1[3], 
-                          theta1[4], theta1[5], theta1[6])
-Y2 <- param.curve.quadr.2(t.,
-                          theta2[1], theta2[2], theta2[3],
-                          theta2[4], theta2[5], theta2[6])
-Y <- rbind(Y1, Y2)
-z. <- c(rep(1, length(t.)),
-        rep(2, length(t.)))
-
-ggplot() + 
-  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z))) + 
-  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
-  theme_bw() + 
-  # geom_line(aes(x = Y[, 1], y = Y[, 2],
-  #               groups = factor(z.))) + 
-  xlim(-1, 0) + ylim(-.5, .5) + 
-  coord_fixed()
-```
-
-Next, we draw $A \sim \RDPG(X)$ from the above example and apply the clustering and curve fitting to the ASE of $A$.
-The community detection error in this example is 30\%.
-In the following plot, the points are colored according to their true labels.
-
-```{r cache = TRUE, fig.width = 3, fig.height = 3}
-set.seed(12345)
-
-A <- draw.graph(P)
-Xhat <- embedding(A, 2, 0)
-
-manifold.out <- manifold.clustering.quadr.2(A, 2, 
-                                            intercept = FALSE,
-                                            method = 'polynomial')
-zhat.manifold <- manifold.out$z
-# table(z, zhat.manifold)
-
-# plot(Xhat, col = z, asp = 1)
-t. <- seq(-1, 1, .01)
-theta1 <- manifold.out$theta[[1]]
-theta2 <- manifold.out$theta[[2]]
-Y1 <- param.curve.quadr.2(t., 
-                          theta1[1], theta1[2], theta1[3], 
-                          theta1[4], theta1[5], theta1[6])
-Y2 <- param.curve.quadr.2(t.,
-                          theta2[1], theta2[2], theta2[3],
-                          theta2[4], theta2[5], theta2[6])
-Y <- rbind(Y1, Y2)
-z. <- c(rep(1, length(t.)),
-        rep(2, length(t.)))
-# lines(Y1)
-# lines(Y2, col = 2)
-
-ggplot() + 
-  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z))) + 
-  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
-  theme_bw() + 
-  geom_path(aes(x = Y[, 1], y = Y[, 2],
-                groups = factor(z.))) + 
-  xlim(-.25, 1.25) + ylim(-.75, .75) + 
-  coord_fixed()
-```
-
-\end{example}
-
-A possibly more robust modification to this is to use Bezier curves for $g$. 
-This is the same functional form as the polynomial curves we used before, but with different basis functions. 
-For the following examples, we consider the quadratic Bezier curve, which has the following basis form:
-
-$$
-g(t | p) = (1 - t)^2 p_0 + 2 t (1 - t) p_1 + t^2 p_2
-$$
-
-Where as before, $g : [0, 1] \mapsto \mathbb{R}^d$ and $t \in [0, 1]$, and each $p_r \in \mathbb{R}^d$. 
-Thus if we can fit each $p_r$, then the procedure is the same as before. 
-
-Common methods for Bezier curve fitting do not require specification of $t_1, ..., t_n$. 
-However, an ordering is required. 
-
-The curve fitting method is then modified as follows:
-
-1. Initialize $\hat{p}^{(0)}$ (e.g., randomly). 
-2. Estimate each $\hat{t}_i^{(s)}$ by minimizing $L(t_i, \hat{p}^{(s)} | x_i) = L_i = \|x_i - g(t_i | \hat{p}^{(s)})\|^2$.
-3. Reorder $X$ according to $t_1, ..., t_n$.
-4. Estimate $\hat{p}^{(s)}$ for the reordered $X$ using Bezier curve fitting.
-5. Repeat steps 2-4 until convergence.
-
-Then this becomes step 2 of the clustering method outlined above. 
-
-We can also estimate $\hat{p} = (T^\top T)^{-1} T^\top X$ where $T = \begin{bmatrix} t_1 & \cdots & t_R \end{bmatrix}$ and each $t_r = \binom{R}{r} (1-t)^{R-r} t^r$, where $R$ is the order of the Bezier curve, so using the method for estimating $t_1, ..., t_n$ as described before, we can iteratively solve for $\hat{p}$ in the same manner. If we use soft clustering (e.g., EM as opposed to $K$-means), we can also insert a diagonal matrix of weights $W_k$ to obtain
-
-$$\hat{p}_k = (T^\top W_k T)^{-1} T^\top W_k X$$
-
-where $X$ is the full data matrix, $T$ is the full model matrix, and $W_k = w_k$ with the entries of $w_k$ being the estimated probability of each $x_i$ being in cluster $k$. 
 
 \begin{example}
 
@@ -340,10 +235,11 @@ f2 <- function(t) {
 }
 ```
 
-We have two intersecting curves, $g_1(t) = \begin{bmatrix} t^2 & 2 t (1 - t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1 - t) & (1 - t) ^ 2 \end{bmatrix}^\top$. $n_1 = n_2 = 128$ points are drawn uniformly from each.
+We have two intersecting curves, $g_1(t) = \begin{bmatrix} t^2 & 2 t (1 - t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1 - t) & (1 - t) ^ 2 \end{bmatrix}^\top$. $n_1 = n_2 = 256$ points are drawn uniformly from each.
 
 ```{r}
-n1 <- 2 ** 7
+set.seed(314159265)
+n1 <- 2 ** 8
 n2 <- n1
 n <- n1 + n2
 z <- c(rep(1, n1), rep(2, n2))
@@ -363,17 +259,17 @@ ggplot() +
   coord_fixed() + 
   labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
   theme_bw()
-```
 
-We draw $A \sim \RDPG(X)$ and obtain the following ASE:
-
-```{r}
 P <- X %*% t(X)
 diag(P) <- 0
 A <- draw.graph(P)
 Xhat <- embedding(A, 2, 0)
-if (mean(Xhat[, 1]) < 0) Xhat[, 1] <- -Xhat[, 1]
+# if (mean(Xhat[, 1]) < 0) Xhat[, 1] <- -Xhat[, 1]
+```
 
+We draw $A \sim \RDPG(X)$ and obtain the following ASE:
+
+```{r, fig.height = 3}
 ggplot() + 
   geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z))) + 
   coord_fixed() + 
@@ -384,13 +280,14 @@ ggplot() +
 Fitting two quadratic Bezier curves to these data yields a community detection error rate of 10\%. 
 In the following plot, the points are labeled according to their estimated labels.
 
-```{r cache = TRUE}
-set.seed(314159265)
+```{r cache = TRUE, eval = TRUE}
+set.seed(314159)
 manifold.out <- manifold.clustering.quadr.2(A, 2, 
                                             # initialization = z,
                                             # initialization = 'spectral',
-                                            initialization = 'random', 
+                                            initialization = 'random',
                                             method = 'bezier')
+
 zhat.manifold <- manifold.out$z
 
 t. <- seq(-1, 1, .01)
@@ -411,9 +308,49 @@ ggplot() +
   labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
   theme_bw() + 
   geom_path(aes(x = Y[, 1], y = Y[, 2],
-                groups = factor(z.))) + 
-  xlim(-.25, 1.25) + ylim(-.75, .75) + 
+                group = factor(z.))) +
+  xlim(min(Xhat[, 1]), max(Xhat[, 1])) + ylim(min(Xhat[, 2]), max(Xhat[, 2])) + 
   coord_fixed()
 ```
 
 \end{example}
+
+## Model-Based Clustering
+
+The CLT property of the ASE may allow us to approximate $W x - \hat{x} \sim \mathcal{N}(f_k(t), \Sigma_k)$.
+One possibly reasonable assumption for $\Sigma_k$ is $\Sigma_k = \Sigma_k(t) =  \diag(\sigma_{k1}^2(t), ..., \sigma_{kd}^2(t))$. A plot of the squared errors of cluster 1 in the previous example reveals the following:
+
+```{r, fig.height = 2, fig.width = 8}
+theta1 <- manifold.out$theta[[1]]
+theta2 <- manifold.out$theta[[2]]
+t. <- manifold.out$t
+X1 <- param.curve.quadr.2(t.[[1]], 
+                          theta1[1], theta1[2], theta1[3],
+                          theta1[4], theta1[5], theta1[6])
+X2 <- param.curve.quadr.2(t.[[2]], 
+                          theta2[1], theta2[2], theta2[3],
+                          theta2[4], theta2[5], theta2[6])
+# plot(Xhat[zhat.manifold == 1, 1] - X1[, 1])
+# plot(Xhat[zhat.manifold == 1, 2] - X1[, 2])
+
+p1 <- ggplot() + 
+  geom_point(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 1] - X1[, 1]) ^ 2)) + 
+  stat_smooth(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 1] - X1[, 1]) ^ 2)) + 
+  theme_bw() + 
+  labs(x = 't', y = expression((x[1] - hat(x)[1])^2))
+
+p2 <- ggplot() + 
+  geom_point(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 2] - X1[, 2]) ^ 2)) + 
+  stat_smooth(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 2] - X1[, 2]) ^ 2)) + 
+  theme_bw() + 
+  labs(x = 't', y = expression((x[2] - hat(x)[2])^2))
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+Fitting some curve to each $\sigma_{kr}^2(t)$ allows us to compute estimated probabilities of each point belonging to each cluster/manifold: $\hat{q}_{ik} = \mathcal{N}(x_i \mid g_k(\hat{t}_i), \Sigma_k(\hat{t}_i))$. 
+Then we can use weighted least squares to estimate the parameters of $g$:
+
+$$\hat{p}_k = (T^\top Q_k T)^{-1} T^\top Q_k X$$
+
+where $Q_k = \diag(q_{1k}, ..., q_{nk})$.
