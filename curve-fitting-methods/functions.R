@@ -209,17 +209,18 @@ estimate.bezier.curve.2 <- function(X,
   while (d.mse > eps) {
     mse.prev <- mse
     t.hat <- estimate.t.bezier(X, p)
-    # min.t <- min(t.hat)
-    # max.t <- max(t.hat)
-    # a <- (n * (n + 1) * min.t - (n + 1) * max.t) / w
-    # b <- (-(n + 1) * min.t + n * (n + 1) * max.t) / w
-    # t.hat <- (t.hat - a) / (b - a)
-    t.hat <- ecdf(t.hat)(t.hat)
+    min.t <- min(t.hat)
+    max.t <- max(t.hat)
+    a <- (n * (n + 1) * min.t - (n + 1) * max.t) / w
+    b <- (-(n + 1) * min.t + n * (n + 1) * max.t) / w
+    t.hat <- (t.hat - a) / (b - a)
+    # t.hat <- ecdf(t.hat)(t.hat)
     T <- construct.bezier.model.matrix(t.hat, r)
     p <- solve(t(T) %*% W %*% T, t(T) %*% W %*% X)
     X.hat <- bezier.curve(t.hat, p)
-    # plot(X, asp = 1)
-    # lines(X.hat[order(t.hat), ])
+    print(bezier.mse(X, t.hat, p))
+    plot(X, asp = 1)
+    lines(X.hat[order(t.hat), ], col = 2)
     mse <- sum((X - X.hat) ^ 2)
     # print(mse)
     d.mse <- abs((mse - mse.prev) / mse)
@@ -382,4 +383,10 @@ manifold.clustering.quadr.2 <- function(A, K = 2, d = 2,
               t = list(curve1$t, curve2$t),
               theta = list(theta1, theta2),
               niter = niter))
+}
+
+bezier.mse <- function(X, t, p) {
+  r <- nrow(p) - 1L
+  T <- construct.bezier.model.matrix(t, r)
+  norm(X - T %*% p, 'F') ^ 2 / prod(dim(X))
 }

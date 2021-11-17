@@ -39,7 +39,7 @@ weighted.mds <- function(D, d = 2, w = rep(1, ncol(D)) / ncol(D)) {
 
 compute.dist2.manifold <- function(Dg, De, w) {
   w.sum <- sum(w)
-  (rowSums(sweep(Dg - De, 2, w, `*`)) / w.sum) ^ 2
+  (rowSums(sweep((Dg - De) ^ 2, 2, w, `*`)) / w.sum)
 }
 
 update.weights <- function(D2, sigma2 = 1e-1) {
@@ -104,7 +104,7 @@ Y2 <- weighted.mds(D, d, W[, 2])
 d1 <- compute.dist2.manifold(D, as.matrix(dist(Y1)), W[, 1])
 d2 <- compute.dist2.manifold(D, as.matrix(dist(Y2)), W[, 2])
 
-W <- update.weights(cbind(d1, d2), 1e-1)
+W <- update.weights(cbind(d1, d2), 1e-2)
 
 zhat <- apply(W, 1, which.max)
 if (mean(z == zhat) < .5) zhat <- 3 - zhat

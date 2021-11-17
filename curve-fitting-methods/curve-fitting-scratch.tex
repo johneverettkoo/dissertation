@@ -107,6 +107,7 @@
 \newtheorem{example}{Example}
 \newcommand{\dd}{\mathrm{d}}
 \newcommand{\as}{\stackrel{\mathrm{a.s.}}{\to}}
+\newcommand{\ind}{\stackrel{\mathrm{ind}}{\sim}}
 
 \hypertarget{estimating-polynomial-curves}{%
 \section{Estimating Polynomial
@@ -239,6 +240,27 @@ For initialization, we can use a one-dimensional Isomap embedding to
 estimate the \(t_i\)'s and use that to estimate \(\hat{p}\). Experiments
 suggest that if the data are well-behaved (i.e., it looks like the curve
 we are trying to fit), this results in much faster convergence.
+
+\hypertarget{theoretical-framework}{%
+\subsection{Theoretical Framework}\label{theoretical-framework}}
+
+If we assume that the points are distributed as
+\(X_i \stackrel{\mathrm{ind}}{\sim}\mathcal{N}(f(t_i | p), \Sigma(t_i | \phi))\),
+then we can write the (incomplete) log likelihood as:
+
+\[\ell(p, \phi) = -\frac{1}{2} \sum_i |\Sigma(t_i | \phi)| - \frac{1}{2} \sum_i (x_i - f(t_i | p))^\top (\Sigma(t_i | \phi))^{-1} (x_i - f(t_i | p))\]
+
+In the case \(\Sigma(t_i | \phi) = \sigma^2 I\) and
+\(f(t_i | p) = p^\top t_i\) where \(t_i \in \mathbb{R}^{R+1}\) is the
+Bezier polynomial expansion of order \(R\), then this becomes
+
+\[\ell(p, \sigma^2) = -\frac{n d}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \|X - T p\|^2_F\]
+
+Then given \(t_1, ..., t_n\), the MLE of \(p\) is again
+\((T^\top T)^{-1} T^\top X\), and the MLE of \(\sigma^2\) is just
+\(\frac{1}{n d} \|X - T \hat{p}\|^2_F\). And given \(p\), we can
+estimate each \(t_i\) in the same way as before to maximize \(\ell\)
+(\(\sigma^2\) is unnecessary here).
 
 \hypertarget{clustering}{%
 \section{Clustering}\label{clustering}}
