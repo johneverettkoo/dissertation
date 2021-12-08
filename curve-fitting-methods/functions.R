@@ -42,34 +42,53 @@ estimate.one.t.quadr.2 <- function(x1, x2,
   roots <- optimize(
     function(t) crossprod(c(x1 - beta10 - beta11 * t - beta12 * t^2, 
                             x2 - beta20 - beta21 * t - beta22 * t^2)), 
-                    c(-1, 1)
+    c(-1, 1)
   )$minimum
   if (length(roots) > 1) print(roots)
   if (abs(roots) == 1) print(roots)
   return(max(roots))
 }
 
-estimate.one.t.bezier <- function(x, p) {
+estimate.one.t.bezier <- function(x, p, min.t = -2, max.t = 2, tol = 1e-9) {
   polynomial <- function(t, p) {
-    d <- ncol(p)
+    # d <- ncol(p)
     r <- nrow(p) - 1
     T <- sapply(seq(0, r), function(s) {
       choose(r, s) * (1 - t) ^ (r - s) * t ^ s
     })
-    T <- matrix(rep(T, d), ncol = d, nrow = r + 1, byrow = FALSE)
-    colSums(T * p)
+    as.numeric(T %*% p)
   }
-  l <- function(t) crossprod(polynomial(t, p) - x)
-  minima <- optimize(l, c(-1, 1))$minimum
-  if (abs(minima) == 1) print(minima)
-  if (length(minima) > 1) print(minima)
+  l <- function(t) log(as.numeric(crossprod(polynomial(t, p) - x)))
+  minima <- optimize(l, c(min.t, max.t), tol = tol)$minimum
+  if (abs(minima) == max.t) warning(minima)
+  if (length(minima) > 1) warning(minima)
   return(max(minima))
 }
 
-estimate.t.bezier <- function(X, p) {
-  apply(X, 1, function(x) {
-    estimate.one.t.bezier(x, p)
-  })
+estimate.t.bezier <- function(X, p, t.prev, tol = 1e-9) {
+  if (missing(t.prev)) {
+    t.hat <- apply(X, 1, function(x) {
+      estimate.one.t.bezier(x, p, tol = tol)
+    })
+  } else {
+    t.hat <- sapply(seq_along(t.prev), function(i) {
+      estimate.one.t.bezier(X[i, ], p, t.prev[i] - 1, t.prev[i] + 1, tol = tol)
+    })
+    loss.new <- sapply(seq_along(t.hat),
+                       function(i) loss.one.t(X[i, ], t.hat[i], p))
+    loss.prev <- sapply(seq_along(t.prev),
+                        function(i) loss.one.t(X[i, ], t.prev[i], p))
+    prop.change <- (mean(loss.new < loss.prev))
+    if (prop.change < 1) {
+      warning(paste('Failed to find new t for', 1 - prop.change))
+    }
+    t.hat <- ifelse(loss.new <= loss.prev, t.hat, t.prev)
+  }
+  
+  # if (mean(t.hat) < 0) t.hat <- -t.hat
+  # t.hat[t.hat < 0] <- 0
+  
+  return(t.hat)
 }
 
 estimate.t.quadr.2 <- function(X, 
@@ -160,71 +179,112 @@ construct.bezier.model.matrix <- function(t.hat, r = 2) {
 }
 
 bezier.curve <- function(t, p) {
-  d <- ncol(p)
   r <- nrow(p) - 1
-  sapply(t, function(tt) {
-    T <- sapply(seq(0, r), function(s) {
-      choose(r, s) * (1 - tt) ^ (r - s) * tt ^ s
-    })
-    T <- matrix(rep(T, d), ncol = d, nrow = r + 1, byrow = FALSE)
-    colSums(T * p)
-  }) %>% 
-    t()
+  T <- construct.bezier.model.matrix(t, r)
+  return(T %*% p)
+}
+
+normalize.umvue <- function(t.hat) {
+  n <- length(t.hat)
+  w <- n ^ 2 - 1
+  min.t <- min(t.hat)
+  max.t <- max(t.hat)
+  a <- (n * (n + 1) * min.t - (n + 1) * max.t) / w
+  b <- (-(n + 1) * min.t + n * (n + 1) * max.t) / w
+  return((t.hat - a) / (b - a))
+}
+
+normalize.ecdf <- function(t.hat) {
+  ecdf(t.hat)(t.hat)
 }
 
 estimate.bezier.curve.2 <- function(X, 
                                     init.params, 
                                     weights,
-                                    eps = 1e-3, maxit = 100,
+                                    eps = 1e-3, maxit = 200,
                                     initialization = 'random', 
+                                    normalize.t = FALSE, 
+                                    normalization.method = 'umvue',
                                     eps.isomap = 2e-1) {
   n <- nrow(X)
   d <- 2
   r <- 2
-  w <- n ^ 2 - 1
+  
+  if (missing(weights)) {
+    weights <- rep(1, n)
+  }
   
   if (missing(init.params)) {
     if (initialization == 'random') {
       p <- matrix(rnorm(d * (r + 1)), nrow = r + 1, ncol = d)
+      t.hat <- estimate.t.bezier(X, p)
     } else if (initialization == 'isomap') {
       isomap.out <- estimate.bezier.curve.isomap(X, eps.isomap, weights)
       p <- isomap.out$p
+      t.hat <- isomap.out$t
     } else {
       stop('initialization must be random or isomap')
     }
   } else {
     p <- init.params
-  }
-  if (missing(weights)) {
-    W <- diag(n)
-  } else {
-    W <- diag(weights)
+    t.hat <- estimate.t.bezier(X, p)
   }
   
-  mse <- 1 / eps
-  d.mse <- mse
+  if (normalize) {
+    if (normalize.method == 'umvue') {
+      t.hat <- normalize.umvue(t.hat)
+    } else if (normalize.method == 'ecdf') {
+      t.hat <- normalize.ecdf(t.hat)
+    } else {
+      stop('normalize.method must be umvue or ecdf')
+    }
+  }
   
+  W <- diag(weights)
+  
+  mse <- bezier.mse(X, t.hat, p)
+  d.mse <- 1 / eps
+  
+  mse.b <- c()
+  update.what <- c()
   
   niter <- 0
   while (d.mse > eps) {
     mse.prev <- mse
-    t.hat <- estimate.t.bezier(X, p)
-    min.t <- min(t.hat)
-    max.t <- max(t.hat)
-    a <- (n * (n + 1) * min.t - (n + 1) * max.t) / w
-    b <- (-(n + 1) * min.t + n * (n + 1) * max.t) / w
-    t.hat <- (t.hat - a) / (b - a)
-    # t.hat <- ecdf(t.hat)(t.hat)
+    
     T <- construct.bezier.model.matrix(t.hat, r)
     p <- solve(t(T) %*% W %*% T, t(T) %*% W %*% X)
-    X.hat <- bezier.curve(t.hat, p)
-    print(bezier.mse(X, t.hat, p))
-    plot(X, asp = 1)
-    lines(X.hat[order(t.hat), ], col = 2)
-    mse <- sum((X - X.hat) ^ 2)
+    # X.hat <- bezier.curve(t.hat, p)
+    # print(bezier.mse(X, t.hat, p))
+    mse.b <- c(mse.b, bezier.mse(X, t.hat, p))
+    update.what <- c(update.what, 'p')
+    # plot(X, asp = 1, main = 'update p')
+    # lines(X.hat[order(t.hat), ], col = 2)
+    
+    t.hat <- estimate.t.bezier(X, p, t.hat)
+    summary(t.hat)
+    # print(bezier.mse(X, t.hat, p))
+    mse.b <- c(mse.b, bezier.mse(X, t.hat, p))
+    update.what <- c(update.what, 't')
+    # X.hat <- bezier.curve(t.hat, p)
+    # plot(X, asp = 1, main = 'update t')
+    # lines(X.hat[order(t.hat), ], col = 2)
+    # 
+    mse <- bezier.mse(X, t.hat, p)
+    
+    if (normalize) {
+      if (normalize.method == 'umvue') {
+        t.hat <- normalize.umvue(t.hat)
+      } else if (normalize.method == 'ecdf') {
+        t.hat <- normalize.ecdf(t.hat)
+      } else {
+        stop('normalize.method must be umvue or ecdf')
+      }
+    }
     # print(mse)
-    d.mse <- abs((mse - mse.prev) / mse)
-    # d.mse <- (mse.prev - mse) / mse.prev
+    # d.mse <- abs((mse - mse.prev) / mse)
+    if (mse < eps ^ 3) break
+    d.mse <- (mse.prev - mse) / mse.prev
     # print(d.mse)
     # print(p)
     
@@ -235,6 +295,7 @@ estimate.bezier.curve.2 <- function(X,
     }
   }
   
+  X.hat <- bezier.curve(t.hat, p)
   theta <- extract.quad.params.from.bezier.fit(lapply(seq(ncol(p)),
                                                       function(i) p[, i]))
   
@@ -388,5 +449,15 @@ manifold.clustering.quadr.2 <- function(A, K = 2, d = 2,
 bezier.mse <- function(X, t, p) {
   r <- nrow(p) - 1L
   T <- construct.bezier.model.matrix(t, r)
-  norm(X - T %*% p, 'F') ^ 2 / prod(dim(X))
+  # norm(X - T %*% p, 'F') ^ 2 / prod(dim(X))
+  norm(X - T %*% p, 'F') ^ 2
+}
+
+loss.one.t <- function(x, t, p) {
+  r <- nrow(p) - 1
+  T <- sapply(seq(0, r), function(s) {
+    choose(r, s) * (1 - t) ^ (r - s) * t ^ s
+  })
+  g <- as.numeric(T %*% p)
+  as.numeric(crossprod(x - g))
 }

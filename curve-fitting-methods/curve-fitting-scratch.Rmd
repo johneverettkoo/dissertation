@@ -194,7 +194,7 @@ The least squares estimate for $p \in \mathbb{R}^{R \times d}$ is
 
 $$\hat{p} = (T^\top T)^{-1} T^\top X$$
 
-where $T = \begin{bmatrix} t^{(1)} & \cdots & t^{(R)} \end{bmatrix}$ and each $t^{(r)}_i = \binom{R}{r} (1 - t_i)^{R - r} t_i^r$, and $X \in \mathbb{R}^{n \times d}$. 
+where $T = \begin{bmatrix} t_{\cdot, 1} & \cdots & t_{\cdot, R} \end{bmatrix}$ and each $t_{ir} = \binom{R}{r} (1 - t_i)^{R - r} t_i^r$, and $X \in \mathbb{R}^{n \times d}$. 
 The same procedure for estimating $t_1, ..., t_n$ can be applied here. 
 
 The parameterization for a given curve is not unique. 
@@ -215,14 +215,70 @@ Experiments suggest that if the data are well-behaved (i.e., it looks like the c
 
 If we assume that the points are distributed as $X_i \ind \mathcal{N}(f(t_i | p), \Sigma(t_i | \phi))$, then we can write the (incomplete) log likelihood as:
 
-$$\ell(p, \phi) = -\frac{1}{2} \sum_i |\Sigma(t_i | \phi)| - \frac{1}{2} \sum_i (x_i - f(t_i | p))^\top (\Sigma(t_i | \phi))^{-1} (x_i - f(t_i | p))$$
+$$\ell(p, \phi) = -\frac{1}{2} \sum_i \log |\Sigma(t_i | \phi)| - \frac{1}{2} \sum_i (x_i - f(t_i | p))^\top (\Sigma(t_i | \phi))^{-1} (x_i - f(t_i | p))$$
 
-In the case $\Sigma(t_i | \phi) = \sigma^2 I$ and $f(t_i | p) = p^\top t_i$ where $t_i \in \mathbb{R}^{R+1}$ is the Bezier polynomial expansion of order $R$, then this becomes
+In the case $\Sigma(t_i | \phi) = \phi I$ and $f(t_i | p) = p^\top \tilde{t}_i$ where $\tilde{t}_i \in \mathbb{R}^{R+1}$ is the Bezier polynomial expansion of order $R$, then this becomes
 
-$$\ell(p, \sigma^2) = -\frac{n d}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \|X - T p\|^2_F$$
+$$\ell(p, \phi) = -\frac{n d}{2} \log \phi - \frac{1}{2 \phi} \|X - T p\|^2_F$$
 
-Then given $t_1, ..., t_n$, the MLE of $p$ is again $(T^\top T)^{-1} T^\top X$, and the MLE of $\sigma^2$ is just $\frac{1}{n d} \|X - T \hat{p}\|^2_F$.
-And given $p$, we can estimate each $t_i$ in the same way as before to maximize $\ell$ ($\sigma^2$ is unnecessary here). 
+Then given $t_1, ..., t_n$, the MLE of $p$ is again $(T^\top T)^{-1} T^\top X$, and the MLE of $\phi$ is just $\frac{1}{n d} \|X - T \hat{p}\|^2_F$.
+And given $p$, we can estimate each $t_i$ in the same way as before to maximize $\ell$ (the variance is unnecessary here). 
+
+As noted before, the parameterization given by $T$ and $p$ is not unique. 
+We can arbitrarily scale the $t_i$'s and $p$ to obtain the same value of $\ell$. 
+Naively performing the proposed algorithm sometimes results in estimates for $p$ that diverge and estimates for $t_i$'s that converge to a single value. 
+To remedy this, we can either scale the $t_i$'s as before, 
+or we can scale $p$ by forcing $f$ to be an arclength parameterization. 
+
+\begin{theorem}
+Let $x_1, ..., x_n \ind \mathcal{N}(p^\top \tilde{t}_i, \phi I_d)$,
+where each $x_i \in \mathbb{R}^d$, $\tilde{t}_i \in \mathbb{R}^{R+1}$ such that $\tilde{t}_{i,r} = \binom{R}{r} (1 - t_i)^{R-r} t_i^r$ for $i = 1, ..., n$ and $r = 0, ..., R$, 
+and $p \in \mathbb{R}^{(R+1) \times d}$.
+
+Then each iteration of the following decreases the negative log likelihood:
+
+\begin{enumerate}
+  \item $p^{(s)} \leftarrow (T^\top T)^{-1} T^\top X$, 
+where $T = \begin{bmatrix} \tilde{t}_1 & \cdots & \tilde{t}_n \end{bmatrix}^\top$ and 
+$X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$.
+  \item $t_i^{(s)} \leftarrow \arg\min_t \|x_i - p^\top \tilde{t}_i\|^2$
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}[Proof (sketch)]
+
+For $\Sigma(t_i | \phi) = \phi I$, the negative log likelihood is, 
+up to some additive and multiplicative constants:
+
+$$l(p, \{t_i\}) = \|X - T p\|^2_F = X^\top X - 2 X^\top T p + p^\top T^\top T p$$
+
+To find the minimizer $\hat{p}$ given $t_1, ..., t_n$:
+
+$\nabla_p l = -2 T^\top X + 2 T^\top T p = 0$  
+$\implies \hat{p} = (T^\top T)^{-1} T^\top X$
+
+To find the minimizer $\hat{t}_i$ given $p$:
+
+We can rewrite the negative log likelihood as 
+$l(p, \{t_i\}) = \sum_i \|x_i - p^\top \tilde{t}_i\|^2$. 
+
+Then each entry of $\nabla_{t} l$ depends only on $t_i$, so each $t_i$ can be optimized independently. 
+Furthermore, each $\frac{\partial}{\partial t_i} \|x_i - p^\top \tilde{t}_i\|^2$ is a polynomial in $t_i$, so it can be minimized by simply finding the roots of the polynomial. 
+
+Thus this algorithm is a coordinate descent algorithm, which reduces the objective function with each iteration. 
+\end{proof}
+
+\begin{theorem}
+
+Let $A^{(n)} \sim \RDPG(F(p, \theta), n)$, and let $X^{(n)}$ be the ASE of $A^{(n)}$. 
+Let $\hat{p}, \{\hat{t}_i\}$ be the global minimizer of $l$ given $X^{(n)}$. 
+Then $l(\hat{p}, \{\hat{t}_i\}) \stackrel{a.s.}{\to} 0$. 
+
+\end{theorem}
+
+### Covariance Structures
+
+While the CLT property of the ASE allows us to approximate $x_i \sim \mathcal{N} (W f(t_i | p), W \Sigma(t_i | \phi) W^\top)$, it is unclear what $\Sigma(t_i | \phi)$ looks like, and we cannot in general say $\Sigma(t_i | \phi) = \phi I_d$. 
 
 # Clustering
 
