@@ -280,10 +280,11 @@ and $p \in \mathbb{R}^{(R+1) \times d}$.
 Then each iteration of the following decreases the negative log likelihood:
 
 \begin{enumerate}
-  \item $p^{(s)} \leftarrow (T^\top T)^{-1} T^\top X$, 
-where $T = \begin{bmatrix} \tilde{t}_1 & \cdots & \tilde{t}_n \end{bmatrix}^\top$ and 
-$X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$.
-  \item $t_i^{(s)} \leftarrow \arg\min_t \|x_i - p^\top \tilde{t}_i\|^2$
+  \item $p \leftarrow (T^\top T)^{-1} T^\top X$, 
+  where $T = \begin{bmatrix} \tilde{t}_1 & \cdots & \tilde{t}_n \end{bmatrix}^\top$ 
+  and $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$.
+  \item $t_i \leftarrow \arg\min_t \|x_i - p^\top \tilde{t}_i\|^2$,
+  which can be solved by finding the roots of a polynomial of degree $2 R - 1$.
 \end{enumerate}
 \end{theorem}
 
@@ -368,6 +369,13 @@ In the following plot, the points are labeled according to their estimated label
 \begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 \end{example}
+
+The objective function that this method aims to minimize is:
+
+\[\sum_{k=1}^K \sum_{i \in C_k} \|x_i - g(t_i | p_k)\|^2\]
+
+It can be shown that each iteration decreases the objective unless we
+are at a stationary point.
 
 \hypertarget{model-based-clustering}{%
 \subsection{Model-Based Clustering}\label{model-based-clustering}}
