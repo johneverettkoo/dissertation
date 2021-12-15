@@ -388,7 +388,9 @@ ggplot() +
 
 The objective function that this method aims to minimize is:
 
-$$\sum_{k=1}^K \sum_{i \in C_k} \|x_i - g(t_i | p_k)\|^2$$
+$$\sum_{k=1}^K \sum_{i \in C_k} \|x_i - g_k(t_i | p_k)\|^2$$
+
+Where $g_k : [0, 1] \mapsto \mathbb{R}^d$ with parameters $p_k$ is the curve for community $k$. 
 
 It can be shown that each iteration decreases the objective unless we are at a stationary point.
 
