@@ -377,31 +377,20 @@ The objective function that this method aims to minimize is:
 Where \(g_k : [0, 1] \mapsto \mathbb{R}^d\) with parameters \(p_k\) is
 the curve for community \(k\).
 
-It can be shown that each iteration decreases the objective unless we
-are at a stationary point.
+\textbf{TBD}: It can be shown that each iteration decreases the
+objective unless we are at a stationary point.
 
-\hypertarget{model-based-clustering}{%
-\subsection{Model-Based Clustering}\label{model-based-clustering}}
+\hypertarget{harry-potter-emnity-graph}{%
+\subsection{Harry Potter Emnity Graph}\label{harry-potter-emnity-graph}}
 
-The CLT property of the ASE may allow us to approximate
-\(W x - \hat{x} \sim \mathcal{N}(f_k(t), \Sigma_k)\). One possibly
-reasonable assumption for \(\Sigma_k\) is
-\(\Sigma_k = \Sigma_k(t) = \mathrm{diag}(\sigma_{k1}^2(t), ..., \sigma_{kd}^2(t))\).
-A plot of the squared errors of cluster 1 in the previous example
-reveals the following:
+\begin{example}
+In this section, we analyze the Harry Potter emnity graph. 
+Rubin-Delanchy et al. suggested applying the GRDPG ASE to this graph with $p = 1$ and $q = 1$, revealing a DCBM-like structure in the latent space. 
+Passino and Heard instead fit Gaussian processes to the embedding. 
+Here, we consider what happens when we apply the Bezier curve clustering method. 
+\end{example}
 
-\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-10-1} \end{center}
-
-Fitting some curve to each \(\sigma_{kr}^2(t)\) allows us to compute
-estimated probabilities of each point belonging to each
-cluster/manifold:
-\(\hat{q}_{ik} = \mathcal{N}(x_i \mid g_k(\hat{t}_i), \Sigma_k(\hat{t}_i))\).
-Then we can use weighted least squares to estimate the parameters of
-\(g\):
-
-\[\hat{p}_k = (T^\top Q_k T)^{-1} T^\top Q_k X\]
-
-where \(Q_k = \mathrm{diag}(q_{1k}, ..., q_{nk})\).
+\begin{center}\includegraphics{curve-fitting-scratch_files/figure-latex/unnamed-chunk-11-1} \end{center}
 
   \bibliography{misc.bib}
 

@@ -34,7 +34,7 @@ options(xtable.comment = FALSE,
         xtable.table.placement = 'H')
 
 library(ggplot2)
-import::from(magrittr, `%>%`)
+import::from(magrittr, `%>%`, `%<>%`)
 ```
 
 \newcommand{\diag}{\mathrm{diag}}
@@ -79,6 +79,7 @@ For now, we limit $d = 2$ and $g$ to quadratic functions.
 ```{r}
 source('~/dev/pabm-grdpg/functions.R')
 source('~/dev/dissertation/curve-fitting-methods/functions.R')
+source('https://mtrosset.pages.iu.edu/Courses/675/graph.r')
 ```
 
 \begin{example}
@@ -392,44 +393,81 @@ $$\sum_{k=1}^K \sum_{i \in C_k} \|x_i - g_k(t_i | p_k)\|^2$$
 
 Where $g_k : [0, 1] \mapsto \mathbb{R}^d$ with parameters $p_k$ is the curve for community $k$. 
 
-It can be shown that each iteration decreases the objective unless we are at a stationary point.
+**TBD**: It can be shown that each iteration decreases the objective unless we are at a stationary point.
 
-## Model-Based Clustering
+## Harry Potter Emnity Graph
 
-The CLT property of the ASE may allow us to approximate $W x - \hat{x} \sim \mathcal{N}(f_k(t), \Sigma_k)$.
-One possibly reasonable assumption for $\Sigma_k$ is $\Sigma_k = \Sigma_k(t) =  \diag(\sigma_{k1}^2(t), ..., \sigma_{kd}^2(t))$. A plot of the squared errors of cluster 1 in the previous example reveals the following:
+\begin{example}
+In this section, we analyze the Harry Potter emnity graph. 
+Rubin-Delanchy et al. suggested applying the GRDPG ASE to this graph with $p = 1$ and $q = 1$, revealing a DCBM-like structure in the latent space. 
+Passino and Heard instead fit Gaussian processes to the embedding. 
+Here, we consider what happens when we apply the Bezier curve clustering method. 
+\end{example}
 
-```{r, fig.height = 2, fig.width = 8}
-theta1 <- manifold.out$theta[[1]]
-theta2 <- manifold.out$theta[[2]]
-t. <- manifold.out$t
-X1 <- param.curve.quadr.2(t.[[1]], 
-                          theta1[1], theta1[2], theta1[3],
-                          theta1[4], theta1[5], theta1[6])
-X2 <- param.curve.quadr.2(t.[[2]], 
-                          theta2[1], theta2[2], theta2[3],
-                          theta2[4], theta2[5], theta2[6])
-# plot(Xhat[zhat.manifold == 1, 1] - X1[, 1])
-# plot(Xhat[zhat.manifold == 1, 2] - X1[, 2])
+```{r, fig.width = 8}
+relations.df <- readr::read_csv('~/dev/potter-network/data/relations.csv') %>% 
+  dplyr::mutate(source = source + 1, target = target + 1)
+characters.df <- readr::read_csv('~/dev/potter-network/data/characters.csv') %>% 
+  dplyr::mutate(id = id + 1)
+n <- nrow(characters.df)
 
-p1 <- ggplot() + 
-  geom_point(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 1] - X1[, 1]) ^ 2)) + 
-  stat_smooth(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 1] - X1[, 1]) ^ 2)) + 
-  theme_bw() + 
-  labs(x = 't', y = expression((x[1] - hat(x)[1])^2))
+A <- matrix(0, nrow = n, ncol = n)
+rownames(A) <- colnames(A) <- characters.df$name
+for (i in seq(nrow(relations.df))) {
+  if (relations.df$type[i] == '-') {
+    A[relations.df$source[i], relations.df$target[i]] %<>% magrittr::add(1)
+  } else {
+    A[relations.df$source[i], relations.df$target[i]] %<>% magrittr::subtract(1)
+  }
+}
+A[A < 0] <- 0
+A <- A + t(A)
+A <- sign(A)
+diag(A) <- 0
+deg.A <- colSums(A)
 
-p2 <- ggplot() + 
-  geom_point(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 2] - X1[, 2]) ^ 2)) + 
-  stat_smooth(aes(x = t.[[1]], y = (Xhat[zhat.manifold == 1, 2] - X1[, 2]) ^ 2)) + 
-  theme_bw() + 
-  labs(x = 't', y = expression((x[2] - hat(x)[2])^2))
+A <- A[deg.A > 0, deg.A > 0]
 
-gridExtra::grid.arrange(p1, p2, nrow = 1)
+A.eigen <- eigen(A, symmetric = TRUE)
+Xhat <- embedding(A, p = 1, q = 1)
+
+# ggplot() + 
+#   geom_point(aes(x = Xhat[, 1], y = Xhat[, 2])) + 
+#   ggrepel::geom_text_repel(aes(x = Xhat[, 1], y = Xhat[, 2], 
+#                                label = characters.df$name[deg.A > 0]))
+
+z.init <- kmeans(sweep(Xhat, 1, apply(Xhat, 1, function(x) sqrt(sum(x ^ 2))), `/`), 2)$cluster
 ```
 
-Fitting some curve to each $\sigma_{kr}^2(t)$ allows us to compute estimated probabilities of each point belonging to each cluster/manifold: $\hat{q}_{ik} = \mathcal{N}(x_i \mid g_k(\hat{t}_i), \Sigma_k(\hat{t}_i))$. 
-Then we can use weighted least squares to estimate the parameters of $g$:
+```{r, fig.width = 10, fig.height = 4, cache = TRUE}
+manifold.out <- manifold.clustering.quadr.2(A, 2, p = 1, q = 1, 
+                                            initialization = z.init, 
+                                            eps.isomap = .7,
+                                            method = 'bezier')
 
-$$\hat{p}_k = (T^\top Q_k T)^{-1} T^\top Q_k X$$
+zhat.manifold <- manifold.out$z
 
-where $Q_k = \diag(q_{1k}, ..., q_{nk})$.
+t. <- seq(-1, 1, .01)
+theta1 <- manifold.out$theta[[1]]
+theta2 <- manifold.out$theta[[2]]
+Y1 <- param.curve.quadr.2(t., 
+                          theta1[1], theta1[2], theta1[3], 
+                          theta1[4], theta1[5], theta1[6])
+Y2 <- param.curve.quadr.2(t.,
+                          theta2[1], theta2[2], theta2[3],
+                          theta2[4], theta2[5], theta2[6])
+Y <- rbind(Y1, Y2)
+z. <- c(rep(1, length(t.)),
+        rep(2, length(t.)))
+
+ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(zhat.manifold))) + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw() + 
+  theme(legend.position = 'none') +
+  geom_path(aes(x = Y[, 1], y = Y[, 2],
+                group = factor(z.))) +
+  ggrepel::geom_text_repel(aes(x = Xhat[, 1], y = Xhat[, 2],
+                               label = characters.df$name[deg.A > 0])) + 
+  xlim(min(Xhat[, 1]), max(Xhat[, 1])) + ylim(min(Xhat[, 2]), max(Xhat[, 2]))
+```

@@ -202,9 +202,9 @@ estimate.bezier.curve.2 <- function(X,
                                     init.params, 
                                     weights,
                                     eps = 1e-3, maxit = 200,
-                                    initialization = 'random', 
-                                    normalize.t = FALSE, 
-                                    normalization.method = 'umvue',
+                                    initialization = 'isomap', 
+                                    normalize = TRUE, 
+                                    normalize.method = 'umvue',
                                     eps.isomap = 2e-1) {
   n <- nrow(X)
   d <- 2
@@ -373,11 +373,12 @@ extract.quad.params.from.bezier.fit <- function(p) {
     p2[1], 2 * (p2[2] - p2[1]), p2[1] - 2 * p2[2] + p2[3])
 }
 
-manifold.clustering.quadr.2 <- function(A, K = 2, d = 2, 
+manifold.clustering.quadr.2 <- function(A, K = 2, p = 2, q = 0, 
                                         method = 'bezier',
                                         initialization = 'random',
                                         intercept = TRUE, 
-                                        maxit = 200) {
+                                        maxit = 200,
+                                        eps.isomap = 1e-2) {
   n <- nrow(A)
   
   if (length(initialization) == n) {
@@ -389,11 +390,13 @@ manifold.clustering.quadr.2 <- function(A, K = 2, d = 2,
   } else {
     stop('choose a valid initialization')
   }
-  X <- embedding(A, d, 0)
+  X <- embedding(A, p, q)
   # if (mean(X[, 1]) < 0) X[, 1] <- -X[, 1]
   z.hat.prev <- sample(seq(K), n, replace = TRUE)
   
   niter <- 0
+  
+  loss <- c()
   
   while (!all(z.hat.prev == z.hat)) {
     z.hat.prev <- z.hat
@@ -410,13 +413,15 @@ manifold.clustering.quadr.2 <- function(A, K = 2, d = 2,
       d2 <- compute.distances.quadr.2(X, theta2)
       distances <- cbind(d1, d2)
     } else if (method == 'bezier') {
-      if (!exists('curve1')) {
-        curve1 <- estimate.bezier.curve.2(X1)
-        curve2 <- estimate.bezier.curve.2(X2)
-      } else {
-        curve1 <- estimate.bezier.curve.2(X1, curve1$p)
-        curve2 <- estimate.bezier.curve.2(X2, curve2$p)
-      }
+      curve1 <- estimate.bezier.curve.2(X1, eps.isomap = eps.isomap)
+      curve2 <- estimate.bezier.curve.2(X2, eps.isomap = eps.isomap)
+      # if (!exists('curve1')) {
+      #   curve1 <- estimate.bezier.curve.2(X1)
+      #   curve2 <- estimate.bezier.curve.2(X2)
+      # } else {
+      #   curve1 <- estimate.bezier.curve.2(X1, curve1$p)
+      #   curve2 <- estimate.bezier.curve.2(X2, curve2$p)
+      # }
       # curve1 <- estimate.bezier.curve.isomap(X1, .25)
       # curve2 <- estimate.bezier.curve.isomap(X2, .25)
       theta1 <- curve1$theta
@@ -428,9 +433,14 @@ manifold.clustering.quadr.2 <- function(A, K = 2, d = 2,
       stop('choose a valid method')
     }
     
+    loss <- c(loss, clustering.loss(X, z.hat, 
+                                    list(curve1$p, curve2$p), 
+                                    list(curve1$t, curve2$t)))
+    
     z.hat <- apply(distances, 1, which.min)
     # table(z.hat, z)
     # plot(X, col = z.hat)
+    # loss
     
     niter <- niter + 1
     if (niter >= maxit) {
@@ -443,7 +453,8 @@ manifold.clustering.quadr.2 <- function(A, K = 2, d = 2,
               X = list(curve1$X, curve2$X),
               t = list(curve1$t, curve2$t),
               theta = list(theta1, theta2),
-              niter = niter))
+              niter = niter,
+              loss = loss))
 }
 
 bezier.mse <- function(X, t, p) {
@@ -460,4 +471,15 @@ loss.one.t <- function(x, t, p) {
   })
   g <- as.numeric(T %*% p)
   as.numeric(crossprod(x - g))
+}
+
+clustering.loss <- function(X, z.hat, p.list, t.list) {
+  K <- max(z.hat)
+  sapply(seq(K), function(k) {
+    X.k <- X[z.hat == k, ]
+    p.k <- p.list[[k]]
+    t.k <- t.list[[k]]
+    bezier.mse(X.k, t.k, p.k)
+  }) %>% 
+    sum()
 }
