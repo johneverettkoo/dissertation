@@ -49,13 +49,19 @@ estimate.one.t.quadr.2 <- function(x1, x2,
   return(max(roots))
 }
 
-estimate.one.t.bezier <- function(x, p, min.t = -2, max.t = 2, tol = 1e-9) {
+estimate.one.t.bezier <- function(x, p, min.t = 0, max.t = 2, intercept = TRUE, tol = 1e-9) {
   polynomial <- function(t, p) {
-    # d <- ncol(p)
-    r <- nrow(p) - 1
-    T <- sapply(seq(0, r), function(s) {
-      choose(r, s) * (1 - t) ^ (r - s) * t ^ s
-    })
+    if (intercept) {
+      r <- nrow(p) - 1
+      T <- sapply(seq(0, r), function(s) {
+        choose(r, s) * (1 - t) ^ (r - s) * t ^ s
+      })
+    } else {
+      r <- nrow(p)
+      T <- sapply(seq(r), function(s) {
+        choose(r, s) * (1 - t) ^ (r - s) * t ^ s
+      })
+    }
     as.numeric(T %*% p)
   }
   l <- function(t) log(as.numeric(crossprod(polynomial(t, p) - x)))
@@ -65,14 +71,15 @@ estimate.one.t.bezier <- function(x, p, min.t = -2, max.t = 2, tol = 1e-9) {
   return(max(minima))
 }
 
-estimate.t.bezier <- function(X, p, t.prev, tol = 1e-9) {
+estimate.t.bezier <- function(X, p, t.prev, intercept = TRUE, tol = 1e-9) {
   if (missing(t.prev)) {
     t.hat <- apply(X, 1, function(x) {
-      estimate.one.t.bezier(x, p, tol = tol)
+      estimate.one.t.bezier(x, p, tol = tol, intercept = intercept)
     })
   } else {
     t.hat <- sapply(seq_along(t.prev), function(i) {
-      estimate.one.t.bezier(X[i, ], p, t.prev[i] - 1, t.prev[i] + 1, tol = tol)
+      estimate.one.t.bezier(X[i, ], p, t.prev[i] - 1, t.prev[i] + 1, 
+                            tol = tol, intercept = intercept)
     })
     loss.new <- sapply(seq_along(t.hat),
                        function(i) loss.one.t(X[i, ], t.hat[i], p))
@@ -172,15 +179,25 @@ estimate.quadr.curve.2 <- function(X, init.params,
               t = t.hat))
 }
 
-construct.bezier.model.matrix <- function(t.hat, r = 2) {
-  sapply(seq(0, r), function(s) {
-    choose(r, s) * (1 - t.hat) ^ (r - s) * t.hat ^ s
-  })
+construct.bezier.model.matrix <- function(t.hat, r = 2, intercept = TRUE) {
+  if (intercept) {
+    sapply(seq(0, r), function(s) {
+      choose(r, s) * (1 - t.hat) ^ (r - s) * t.hat ^ s
+    })
+  } else {
+    sapply(seq(r), function(s) {
+      choose(r, s) * (1 - t.hat) ^ (r - s) * t.hat ^ s
+    })
+  }
 }
 
-bezier.curve <- function(t, p) {
-  r <- nrow(p) - 1
-  T <- construct.bezier.model.matrix(t, r)
+bezier.curve <- function(t, p, intercept = TRUE) {
+  if (intercept) {
+    r <- nrow(p) - 1
+  } else {
+    r <- nrow(p)
+  }
+  T <- construct.bezier.model.matrix(t, r, intercept = intercept)
   return(T %*% p)
 }
 
@@ -201,13 +218,15 @@ normalize.ecdf <- function(t.hat) {
 estimate.bezier.curve.2 <- function(X, 
                                     init.params, 
                                     weights,
-                                    eps = 1e-3, maxit = 200,
+                                    eps = 1e-3, 
+                                    maxit = 200,
                                     initialization = 'isomap', 
                                     normalize = TRUE, 
                                     normalize.method = 'umvue',
-                                    eps.isomap = 2e-1) {
+                                    eps.isomap = 2e-1, 
+                                    intercept = TRUE) {
   n <- nrow(X)
-  d <- 2
+  d <- ncol(X)
   r <- 2
   
   if (missing(weights)) {
@@ -216,10 +235,15 @@ estimate.bezier.curve.2 <- function(X,
   
   if (missing(init.params)) {
     if (initialization == 'random') {
-      p <- matrix(rnorm(d * (r + 1)), nrow = r + 1, ncol = d)
-      t.hat <- estimate.t.bezier(X, p)
+      if (intercept) {
+        p <- matrix(rnorm(d * (r + 1)), nrow = r + 1, ncol = d)
+      } else {
+        p <- matrix(rnorm(d * r), nrow = r, ncol = d)
+      }
+      t.hat <- estimate.t.bezier(X, p, intercept = intercept)
     } else if (initialization == 'isomap') {
-      isomap.out <- estimate.bezier.curve.isomap(X, eps.isomap, weights)
+      isomap.out <- estimate.bezier.curve.isomap(X, eps.isomap, weights, 
+                                                 intercept = intercept)
       p <- isomap.out$p
       t.hat <- isomap.out$t
     } else {
@@ -227,7 +251,7 @@ estimate.bezier.curve.2 <- function(X,
     }
   } else {
     p <- init.params
-    t.hat <- estimate.t.bezier(X, p)
+    t.hat <- estimate.t.bezier(X, p, intercept = intercept)
   }
   
   if (normalize) {
@@ -252,7 +276,7 @@ estimate.bezier.curve.2 <- function(X,
   while (d.mse > eps) {
     mse.prev <- mse
     
-    T <- construct.bezier.model.matrix(t.hat, r)
+    T <- construct.bezier.model.matrix(t.hat, r, intercept = intercept)
     p <- solve(t(T) %*% W %*% T, t(T) %*% W %*% X)
     # X.hat <- bezier.curve(t.hat, p)
     # print(bezier.mse(X, t.hat, p))
@@ -261,7 +285,7 @@ estimate.bezier.curve.2 <- function(X,
     # plot(X, asp = 1, main = 'update p')
     # lines(X.hat[order(t.hat), ], col = 2)
     
-    t.hat <- estimate.t.bezier(X, p, t.hat)
+    t.hat <- estimate.t.bezier(X, p, t.hat, intercept = intercept)
     summary(t.hat)
     # print(bezier.mse(X, t.hat, p))
     mse.b <- c(mse.b, bezier.mse(X, t.hat, p))
@@ -297,7 +321,8 @@ estimate.bezier.curve.2 <- function(X,
   
   X.hat <- bezier.curve(t.hat, p)
   theta <- extract.quad.params.from.bezier.fit(lapply(seq(ncol(p)),
-                                                      function(i) p[, i]))
+                                                      function(i) p[, i]),
+                                               intercept = intercept)
   
   return(list(theta = theta, 
               p = p, 
@@ -306,14 +331,15 @@ estimate.bezier.curve.2 <- function(X,
 }
 
 knn.graph <- function(X, k) {
-  X %>% 
-    mds.edm1() %>% 
-    graph.knn(k) %>% 
-    graph.adj() %>% 
-    return()
+  dist.matrix <- mds.edm1(X)
+  knn.graph <- graph.knn(dist.matrix, k) * dist.matrix
+  dist.matrix[dist.matrix == 0] <- Inf
+  diag(dist.matrix) <- 0
+  return(graph.short(dist.matrix))
 }
 
-estimate.bezier.curve.isomap <- function(X, eps = .1, weights) {
+estimate.bezier.curve.isomap <- function(X, k = lower(sqrt(nrow(X))), eps = .1, 
+                                         weights, intercept = TRUE) {
   n <- nrow(X)
   d <- 2
   r <- 2
@@ -326,11 +352,12 @@ estimate.bezier.curve.isomap <- function(X, eps = .1, weights) {
     W <- diag(weights)
   }
   
-  D <- X %>% 
-    dist() %>% 
-    as.matrix() %>% 
-    graph.eps(eps) %>% 
-    graph.short()
+  # D <- X %>% 
+  #   dist() %>% 
+  #   as.matrix() %>% 
+  #   graph.eps(eps) %>% 
+  #   graph.short()
+  D <- knn.graph(X, k)
   
   t.hat <- as.vector(cmdscale(sqrt(D), 1))
   t.hat <- ecdf(t.hat)(t.hat)
@@ -340,15 +367,16 @@ estimate.bezier.curve.isomap <- function(X, eps = .1, weights) {
   # b <- (-(n + 1) * min.t + n * (n + 1) * max.t) / w
   # t.hat <- (t.hat - a) / (b - a)
   
-  T <- construct.bezier.model.matrix(t.hat, r)
+  T <- construct.bezier.model.matrix(t.hat, r, intercept = intercept)
   p <- solve(t(T) %*% W %*% T, t(T) %*% W %*% X)
   
-  X.hat <- bezier.curve(t.hat, p)
+  X.hat <- bezier.curve(t.hat, p, intercept = intercept)
   # plot(X, asp = 1)
   # lines(X.hat[order(t.hat), ])
   
   theta <- extract.quad.params.from.bezier.fit(lapply(seq(ncol(p)),
-                                                      function(i) p[, i]))
+                                                      function(i) p[, i]),
+                                               intercept = intercept)
   
   return(list(theta = theta, 
               p = p, 
@@ -366,19 +394,23 @@ compute.distances.quadr.2 <- function(X, theta) {
   apply(X - X.hat, 1, function(x) sum(x ^ 2))
 }
 
-extract.quad.params.from.bezier.fit <- function(p) {
+extract.quad.params.from.bezier.fit <- function(p, intercept = TRUE) {
   p1 <- p[[1]]
   p2 <- p[[2]]
+  if (!intercept) {
+    p1 <- c(0, p1)
+    p2 <- c(0, p2)
+  }
   c(p1[1], 2 * (p1[2] - p1[1]), p1[1] - 2 * p1[2] + p1[3],
     p2[1], 2 * (p2[2] - p2[1]), p2[1] - 2 * p2[2] + p2[3])
 }
 
 manifold.clustering.quadr.2 <- function(A, K = 2, p = 2, q = 0, 
-                                        method = 'bezier',
                                         initialization = 'random',
                                         intercept = TRUE, 
                                         maxit = 200,
-                                        eps.isomap = 1e-2) {
+                                        eps.isomap = 1e-2, 
+                                        eps = 1e-3) {
   n <- nrow(A)
   
   if (length(initialization) == n) {
@@ -397,45 +429,38 @@ manifold.clustering.quadr.2 <- function(A, K = 2, p = 2, q = 0,
   niter <- 0
   
   loss <- c()
+  d.loss <- eps + 1
+  new.loss <- eps + 1
   
-  while (!all(z.hat.prev == z.hat)) {
+  while (d.loss > eps) {
     z.hat.prev <- z.hat
     
     X1 <- X[z.hat == 1, ]
     X2 <- X[z.hat == 2, ]
     
-    if (method == 'polynomial') {
-      curve1 <- estimate.quadr.curve.2(X1, intercept = intercept)
-      curve2 <- estimate.quadr.curve.2(X2, intercept = intercept)
-      theta1 <- curve1$theta
-      theta2 <- curve2$theta
-      d1 <- compute.distances.quadr.2(X, theta1)
-      d2 <- compute.distances.quadr.2(X, theta2)
-      distances <- cbind(d1, d2)
-    } else if (method == 'bezier') {
-      curve1 <- estimate.bezier.curve.2(X1, eps.isomap = eps.isomap)
-      curve2 <- estimate.bezier.curve.2(X2, eps.isomap = eps.isomap)
-      # if (!exists('curve1')) {
-      #   curve1 <- estimate.bezier.curve.2(X1)
-      #   curve2 <- estimate.bezier.curve.2(X2)
-      # } else {
-      #   curve1 <- estimate.bezier.curve.2(X1, curve1$p)
-      #   curve2 <- estimate.bezier.curve.2(X2, curve2$p)
-      # }
-      # curve1 <- estimate.bezier.curve.isomap(X1, .25)
-      # curve2 <- estimate.bezier.curve.isomap(X2, .25)
-      theta1 <- curve1$theta
-      theta2 <- curve2$theta
-      d1 <- compute.distances.quadr.2(X, theta1)
-      d2 <- compute.distances.quadr.2(X, theta2)
-      distances <- cbind(d1, d2)
-    } else {
-      stop('choose a valid method')
-    }
+    curve1 <- estimate.bezier.curve.2(X1, eps.isomap = eps.isomap, intercept = intercept)
+    curve2 <- estimate.bezier.curve.2(X2, eps.isomap = eps.isomap, intercept = intercept)
+    # if (!exists('curve1')) {
+    #   curve1 <- estimate.bezier.curve.2(X1)
+    #   curve2 <- estimate.bezier.curve.2(X2)
+    # } else {
+    #   curve1 <- estimate.bezier.curve.2(X1, curve1$p)
+    #   curve2 <- estimate.bezier.curve.2(X2, curve2$p)
+    # }
+    # curve1 <- estimate.bezier.curve.isomap(X1, .25)
+    # curve2 <- estimate.bezier.curve.isomap(X2, .25)
+    theta1 <- curve1$theta
+    theta2 <- curve2$theta
+    d1 <- compute.distances.quadr.2(X, theta1)
+    d2 <- compute.distances.quadr.2(X, theta2)
+    distances <- cbind(d1, d2)
     
-    loss <- c(loss, clustering.loss(X, z.hat, 
-                                    list(curve1$p, curve2$p), 
-                                    list(curve1$t, curve2$t)))
+    prev.loss <- new.loss
+    new.loss <- clustering.loss(X, z.hat, 
+                                list(curve1$p, curve2$p),
+                                list(curve1$t, curve2$t))
+    d.loss <- abs(prev.loss - new.loss) / new.loss
+    loss <- c(loss, new.loss)
     
     z.hat <- apply(distances, 1, which.min)
     # table(z.hat, z)
@@ -457,29 +482,40 @@ manifold.clustering.quadr.2 <- function(A, K = 2, p = 2, q = 0,
               loss = loss))
 }
 
-bezier.mse <- function(X, t, p) {
-  r <- nrow(p) - 1L
-  T <- construct.bezier.model.matrix(t, r)
+bezier.mse <- function(X, t, p, intercept = TRUE) {
+  if (intercept) {
+    r <- nrow(p) - 1L
+  } else {
+    r <- nrow(p)
+  }
+  T <- construct.bezier.model.matrix(t, r, intercept = intercept)
   # norm(X - T %*% p, 'F') ^ 2 / prod(dim(X))
   norm(X - T %*% p, 'F') ^ 2
 }
 
-loss.one.t <- function(x, t, p) {
-  r <- nrow(p) - 1
-  T <- sapply(seq(0, r), function(s) {
-    choose(r, s) * (1 - t) ^ (r - s) * t ^ s
-  })
+loss.one.t <- function(x, t, p, intercept = TRUE) {
+  if (intercept) {
+    r <- nrow(p) - 1
+    T <- sapply(seq(0, r), function(s) {
+      choose(r, s) * (1 - t) ^ (r - s) * t ^ s
+    })
+  } else {
+    r <- nrow(p)
+    T <- sapply(seq(r), function(s) {
+      choose(r, s) * (1 - t) ^ (r - s) * t ^ s
+    })
+  }
   g <- as.numeric(T %*% p)
   as.numeric(crossprod(x - g))
 }
 
-clustering.loss <- function(X, z.hat, p.list, t.list) {
+clustering.loss <- function(X, z.hat, p.list, t.list, intercept = TRUE) {
   K <- max(z.hat)
   sapply(seq(K), function(k) {
     X.k <- X[z.hat == k, ]
     p.k <- p.list[[k]]
     t.k <- t.list[[k]]
-    bezier.mse(X.k, t.k, p.k)
+    bezier.mse(X.k, t.k, p.k, intercept = intercept)
   }) %>% 
     sum()
 }

@@ -404,7 +404,7 @@ Passino and Heard instead fit Gaussian processes to the embedding.
 Here, we consider what happens when we apply the Bezier curve clustering method. 
 \end{example}
 
-```{r, fig.width = 8}
+```{r, fig.width = 4, fig.cap = 'Labels based on output of disassortative DCBM clustering'}
 relations.df <- readr::read_csv('~/dev/potter-network/data/relations.csv') %>% 
   dplyr::mutate(source = source + 1, target = target + 1)
 characters.df <- readr::read_csv('~/dev/potter-network/data/characters.csv') %>% 
@@ -437,17 +437,19 @@ Xhat <- embedding(A, p = 1, q = 1)
 #                                label = characters.df$name[deg.A > 0]))
 
 z.init <- kmeans(sweep(Xhat, 1, apply(Xhat, 1, function(x) sqrt(sum(x ^ 2))), `/`), 2)$cluster
+
+qgraph::qgraph(A, groups = factor(z.init))
 ```
 
 ```{r, fig.width = 10, fig.height = 4, cache = TRUE}
 manifold.out <- manifold.clustering.quadr.2(A, 2, p = 1, q = 1, 
-                                            initialization = z.init, 
+                                            # initialization = z.init, 
                                             eps.isomap = .7,
-                                            method = 'bezier')
+                                            intercept = FALSE)
 
 zhat.manifold <- manifold.out$z
 
-t. <- seq(-1, 1, .01)
+t. <- seq(0, 1, .01)
 theta1 <- manifold.out$theta[[1]]
 theta2 <- manifold.out$theta[[2]]
 Y1 <- param.curve.quadr.2(t., 
@@ -459,6 +461,9 @@ Y2 <- param.curve.quadr.2(t.,
 Y <- rbind(Y1, Y2)
 z. <- c(rep(1, length(t.)),
         rep(2, length(t.)))
+Y <- rbind(manifold.out$X[[1]], manifold.out$X[[2]])
+z. <- sort(zhat.manifold)
+
 
 ggplot() + 
   geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(zhat.manifold))) + 
