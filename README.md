@@ -1,1 +1,1 @@
-Notes, code, and drafts for dissertation material
+Notes, code, and drafts for dissertation materials
