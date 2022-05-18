@@ -1,0 +1,145 @@
+---
+output:
+  pdf_document:
+    includes:
+      before_body: title.sty
+    keep_tex: true
+    citation_package: natbib
+    number_sections: yes
+# output:
+#   bookdown::pdf_document2:
+#     citation_package: natbib
+#     number_citations: yes
+# output: html_document
+# output: rticles::rss_article
+fontsize: 11pt
+geometry: "left=1in,right=1in,top=1in,bottom=1in"
+urlcolor: blue
+header-includes:
+- \usepackage{setspace}
+- \usepackage{float}
+- \usepackage{mathtools}
+- \usepackage{natbib}
+- \usepackage[linesnumbered,ruled,vlined]{algorithm2e} 
+- \setcitestyle{numbers,square,comma}
+- \usepackage{verbatim}
+- \usepackage{amsthm}
+- \usepackage{comment}
+bibliography: bibliography.bib
+abstract: |
+  asdf
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      # eval = FALSE,
+                      comment = NA, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      fig.pos = 'H', 
+                      fig.align = 'center', 
+                      fig.height = 3, 
+                      fig.width = 5, 
+                      fig.dpi = 300)
+
+options(xtable.comment = FALSE, 
+        xtable.table.placement = 'H')
+
+import::from(magrittr, `%>%`)
+library(ggplot2)
+```
+
+```{=tex}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\tr}{\mathrm{Tr}}
+\newcommand{\blockdiag}{\mathrm{blockdiag}}
+\newcommand{\indep}{\stackrel{\mathrm{ind}}{\sim}}
+\newcommand{\iid}{\stackrel{\mathrm{iid}}{\sim}}
+\newcommand{\Bernoulli}{\mathrm{Bernoulli}}
+\newcommand{\Betadist}{\mathrm{Beta}}
+\newcommand{\BG}{\mathrm{BernoulliGraph}}
+\newcommand{\Uniform}{\mathrm{Uniform}}
+\newcommand{\PABM}{\mathrm{PABM}}
+\newcommand{\RDPG}{\mathrm{RDPG}}
+\newcommand{\GRDPG}{\mathrm{GRDPG}}
+\newcommand{\Multinomial}{\mathrm{Multinomial}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\as}{\stackrel{\mathrm{a.s.}}{\to}}
+\newcommand{\ER}{\text{Erd\"{o}s-R\'{e}nyi}}
+```
+# Introduction
+
+## Graphs and Representations of Network Data
+
+Graph and network data have become increasingly widespread in various fields including sociology, neuroscience, biostatistics, and computer science. 
+This has resulted in various challenges for researchers who rely on traditional statistical and machine learning methods that are incompatible with graph data and instead assume that the data exist as feature vectors. 
+To illustrate this challenge, consider the typical approach to building a statistical or machine learning model. 
+Data are often represented as an $n \times p$ matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ in which each row $x_i \in \mathbb{R}^p$ is a vector of $p$ features and each column is a set of $n$ feature measurements. 
+An analysis task for these data might be to come up with a classification model $\phi : \mathbb{R}^p \to \{1, 2, ..., K\}$ that uses the numerical values of each feature of a vector. 
+For instance, $\phi(x)$ might first compute the distance from $x$ to one of $K$ points in $\mathbb{R}^p$ and assign $x$ to the label of the nearest point. 
+Examples of this include linear discriminant analysis (in the case of supervised learning) and Lloyd's algorithm or Gaussian mixture models (in the case of unsupervised learning). 
+However, this type of approach is incompatible with data that are represented as graphs, in which each observation is not a vector of numerical features but a set of relationships to other observations. 
+Instead of feature vector $x_i = \begin{bmatrix} x_{i1} & \cdots & x_{ip} \end{bmatrix}^\top$, we observe $a_i = \begin{bmatrix} a_{i1} & \cdots & a_{in} \end{bmatrix}$ where each $a_{ij}$ is object $i$'s relationship to object $j$. 
+
+A more formal description of graph data is as follows: 
+Suppose we observe a network of $n$ objects and pairwise relationships between them. 
+This network is represented by a graph object $G = (V, E)$ with vertex set $V$, representing the objects, and edge set $E$, representing the pairwise relationships. 
+The numeric representation of these data is in the form of *affinity matrix* $A \in \mathbb{R}^{n \times n}$ in which each $A_{ij}$ is object $i$'s relationship to object $j$. 
+We assume that the entries of $A$ represent affinities or similarities, i.e., the higher the value of $A_{ij}$, the stronger the relationship $i$ has to $j$. 
+If $A_{ij} = 0$, then $i$ has no direct relationship to $j$. 
+$A$ is symmetric if it represents an undirected graph in which the relationship from $i$ to $j$ is the same as the relationship from $j$ to $i$. 
+$A$ is binary, i.e., $A \in \{0, 1\}^{n \times n}$, if it represents an unweighted graph in which edges either exist or don't exist. 
+If $A$ is binary, we call it an *adjacency matrix*. 
+
+## Probabilistic Models for Graphs
+
+Given a sample or dataset, a typical analysis tasks are statistical inference, or the estimation of various parameters assuming the data come from a random distribution or process. 
+These estimated parameters are often then used for making predictions or deriving insights about the population. 
+For example, when fitting a Gaussian mixture model, the data are first assumed to come from a mixture of Gaussians. 
+The model fitting process then involves estimating the means and standard deviations of each Gaussian component, along with the mixture weights. 
+The resulting model provides insight into where each mixture component is located, how disperse each component is, and how the data are distributed between the components, as well as a prediction for which mixture a new observation belongs to. 
+In order to perform a similar type of analysis for graphs, we must first define probability distributions from which such data can be sampled. 
+
+Within the scope of this dissertation, we focus primarily on unweighted and undirected graphs without self-loops. 
+The adjacency matrix that describes such a graph is binary, symmetric, and hollow. 
+In this setting, a plausible model is to sample each edge independently from a Bernoulli distribution, i.e., $A_{ij} \indep P_{ij}$ for some $P_{ij} \in [0, 1]$ for each $i < j$ (setting $A_{ji} = A_{ij}$ since $A$ is symmetric, and $A_{ii} = 0$ since $A$ is hollow). 
+Then similar to how the edges are compiled into an adjacency matrix $A$, the edge probabilities can be compiled into an edge probability matrix $P \in [0, 1]^{n \times n}$. 
+In order to provide structure 
+
+## Block Models for Community Detection
+
+### The Stochastic Block Model
+
+### Generalizations of the Stochastic Block Model: the Degree Corrected Block Model and the Popularity Adjusted Block Model
+
+### Likelihood Maximization Approaches to Block Models
+
+\newpage
+
+# Random Dot Product Graphs and Generalized Random Dot Product Graphs
+
+## Connecting the Stochastic Block Model and the Degree Corrected Block Model to the Generalized Random Dot Product Graph
+
+\newpage
+
+# Popularity Adjusted Block Models are Generalized Random Dot Product Graphs
+
+\newpage
+
+# Generalized Random Dot Product Graphs with Community Structure
+
+\newpage
+
+\section*{Appendix A}
+
+\newpage
+
+# References
