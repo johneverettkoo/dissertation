@@ -172,22 +172,30 @@ Graph and network data, in which samples are represented not as a collection of 
 \pagenumbering{arabic}
 \hypersetup{linkcolor = blue}
 
-\newcommand{\diag}{\text{diag}}
-\newcommand{\tr}{\text{Tr}}
-\newcommand{\blockdiag}{\text{blockdiag}}
-\newcommand{\indep}{\stackrel{\text{ind}}{\sim}}
-\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
-\newcommand{\Bernoulli}{\text{Bernoulli}}
-\newcommand{\Betadist}{\text{Beta}}
-\newcommand{\BG}{\text{BernoulliGraph}}
-\newcommand{\Cat}{\text{Categorical}}
-\newtheorem{definition}{Definition}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\tr}{\mathrm{Tr}}
+\newcommand{\blockdiag}{\mathrm{blockdiag}}
+\newcommand{\indep}{\stackrel{\mathrm{ind}}{\sim}}
+\newcommand{\iid}{\stackrel{\mathrm{iid}}{\sim}}
+\newcommand{\Bernoulli}{\mathrm{Bernoulli}}
+\newcommand{\Betadist}{\mathrm{Beta}}
+\newcommand{\BG}{\mathrm{BernoulliGraph}}
+\newcommand{\Uniform}{\mathrm{Uniform}}
+\newcommand{\PABM}{\mathrm{PABM}}
+\newcommand{\RDPG}{\mathrm{RDPG}}
+\newcommand{\GRDPG}{\mathrm{GRDPG}}
+\newcommand{\Multinomial}{\mathrm{Multinomial}}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
 \theoremstyle{remark}
-\newtheorem*{remark}{Remark}
-\theoremstyle{example}
-\newtheorem*{example}{Example}
+\newtheorem{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\as}{\stackrel{\mathrm{a.s.}}{\to}}
+\newcommand{\ER}{\text{Erd\"{o}s-R\'{e}nyi}}
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -264,7 +272,7 @@ and undirected graphs without self-loops. The adjacency matrix that
 describes such a graph is binary, symmetric, and hollow. In this
 setting, a plausible model is to sample each edge independently from a
 Bernoulli distribution, i.e., \(A_{ij} \indep P_{ij}\) for some
-\(P_{ij \in [0, 1]\) for each \(i < j\) (setting \(A_{ji} = A_{ij}\)
+\(P_{ij} \in [0, 1]\) for each \(i < j\) (setting \(A_{ji} = A_{ij}\)
 since \(A\) is symmetric, and \(A_{ii} = 0\) since \(A\) is hollow).
 Then similar to how the edges are compiled into an adjacency matrix
 \(A\), the edge probabilities can be compiled into an edge probability
@@ -283,9 +291,9 @@ Model}\label{the-stochastic-block-model}}
 Corrected Block Model and the Popularity Adjusted Block
 Model}\label{generalizations-of-the-stochastic-block-model-the-degree-corrected-block-model-and-the-popularity-adjusted-block-model}}
 
-\hypertarget{likelihood-maximization-approaches-to-block-models}{%
-\subsubsection{Likelihood Maximization Approaches to Block
-Models}\label{likelihood-maximization-approaches-to-block-models}}
+\hypertarget{review-of-likelihood-maximization-approaches-to-block-models}{%
+\subsubsection{Review of Likelihood Maximization Approaches to Block
+Models}\label{review-of-likelihood-maximization-approaches-to-block-models}}
 
 \newpage
 
@@ -293,10 +301,18 @@ Models}\label{likelihood-maximization-approaches-to-block-models}}
 \section{Random Dot Product Graphs and Generalized Random Dot Product
 Graphs}\label{random-dot-product-graphs-and-generalized-random-dot-product-graphs}}
 
-\hypertarget{connecting-the-stochastic-block-model-and-the-degree-corrected-block-model-to-the-generalized-random-dot-product-graph}{%
-\subsection{Connecting the Stochastic Block Model and the Degree
-Corrected Block Model to the Generalized Random Dot Product
-Graph}\label{connecting-the-stochastic-block-model-and-the-degree-corrected-block-model-to-the-generalized-random-dot-product-graph}}
+\hypertarget{definitions}{%
+\subsection{Definitions}\label{definitions}}
+
+\hypertarget{connecting-the-stochastic-block-model-to-the-generalized-random-dot-product-graph}{%
+\subsection{Connecting the Stochastic Block Model to the Generalized
+Random Dot Product
+Graph}\label{connecting-the-stochastic-block-model-to-the-generalized-random-dot-product-graph}}
+
+\hypertarget{connecting-the-degree-corrected-block-model-to-the-generalized-random-dot-product-graph}{%
+\subsection{Connecting the Degree Corrected Block Model to the
+Generalized Random Dot Product
+Graph}\label{connecting-the-degree-corrected-block-model-to-the-generalized-random-dot-product-graph}}
 
 \newpage
 

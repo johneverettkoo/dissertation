@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.5.11)  18 MAY 2022 11:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.5.11)  18 MAY 2022 12:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -452,8 +452,7 @@ ckend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2022-02-07 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count299
 \l__pdf_internal_box=\box64
-)
-No file draft.aux.
+) (./draft.aux)
 \openout1 = `draft.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 84.
@@ -606,30 +605,48 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 118
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-) [2] [3] [4]
+) [2] [3] [4] (./draft.toc)
 \tf@toc=\write4
 \openout4 = `draft.toc'.
 
 [5]
-\c@definition=\count307
-\c@theorem=\count308
-\c@lemma=\count309
-
-Package amsthm Warning: Unknown theoremstyle `example' on input line 189.
-
-[1]
-! Missing } inserted.
-<inserted text> 
-                }
-l.267 \(P_{ij \in [0, 1]\)
-                           for each \(i < j\) (setting \(A_{ji} = A_{ij}\) 
+\c@theorem=\count307
+\c@lemma=\count308
+\c@proposition=\count309
+\c@remark=\count310
+\c@definition=\count311
+\c@example=\count312
+[1] [2] [3] [4] [5] [6]
+No file draft.bbl.
+(./draft.aux) ) 
 Here is how much of TeX's memory you used:
- 15930 strings out of 478268
- 255588 string characters out of 5846347
- 618443 words of memory out of 5000000
- 33799 multiletter control sequences out of 15000+600000
- 519578 words of font info for 97 fonts, out of 8000000 for 9000
+ 16011 strings out of 478268
+ 257508 string characters out of 5846347
+ 619687 words of memory out of 5000000
+ 33847 multiletter control sequences out of 15000+600000
+ 516635 words of font info for 96 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 74i,8n,77p,1170b,342s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 74i,8n,77p,1425b,342s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc
+}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/loc
+al/texlive/2022/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive
+/2022/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2022/texmf-di
+st/fonts/enc/dvips/lm/lm-mathex.enc}</usr/local/texlive/2022/texmf-dist/fonts/t
+ype1/public/lm/lmbx10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/publi
+c/lm/lmbx12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/lm/lmcsc
+10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/lm/lmex10.pfb></u
+sr/local/texlive/2022/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/t
+exlive/2022/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></usr/local/texlive/2022
+/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2022/texmf-dist
+/fonts/type1/public/lm/lmr17.pfb></usr/local/texlive/2022/texmf-dist/fonts/type
+1/public/lm/lmr8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/lm/
+lmri10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
+></usr/local/texlive/2022/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></usr/loca
+l/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on draft.pdf (11 pages, 221722 bytes).
+PDF statistics:
+ 226 PDF objects out of 1000 (max. 8388607)
+ 184 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
+ 26737 words of extra memory for PDF output out of 29859 (max. 10000000)
 
-!  ==> Fatal error occurred, no output PDF file produced!

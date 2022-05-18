@@ -120,13 +120,17 @@ In order to provide structure
 
 ### Generalizations of the Stochastic Block Model: the Degree Corrected Block Model and the Popularity Adjusted Block Model
 
-### Likelihood Maximization Approaches to Block Models
+### Review of Likelihood Maximization Approaches to Block Models
 
 \newpage
 
 # Random Dot Product Graphs and Generalized Random Dot Product Graphs
 
-## Connecting the Stochastic Block Model and the Degree Corrected Block Model to the Generalized Random Dot Product Graph
+## Definitions
+
+## Connecting the Stochastic Block Model to the Generalized Random Dot Product Graph
+
+## Connecting the Degree Corrected Block Model to the Generalized Random Dot Product Graph
 
 \newpage
 
