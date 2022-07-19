@@ -50,6 +50,7 @@ library(ggplot2)
 ```
 
 ```{=tex}
+\setlength{\parindent}{10.0pt}
 \newcommand{\diag}{\mathrm{diag}}
 \newcommand{\tr}{\mathrm{Tr}}
 \newcommand{\blockdiag}{\mathrm{blockdiag}}
@@ -80,9 +81,9 @@ library(ggplot2)
 ## Graphs and Representations of Network Data
 
 Graph and network data have become increasingly widespread in various fields including sociology, neuroscience, biostatistics, and computer science. 
-This has resulted in various challenges for researchers who rely on traditional statistical and machine learning methods that are incompatible with graph data and instead assume that the data exist as feature vectors. 
-To illustrate this challenge, consider the typical approach to building a statistical or machine learning model. 
-Data are often represented as an $n \times p$ matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ in which each row $x_i \in \mathbb{R}^p$ is a vector of $p$ features and each column is a set of $n$ feature measurements. 
+This has resulted in challenges for researchers who rely on traditional statistical and machine learning methods that are incompatible with graph data and instead assume that the data exist as feature vectors. 
+To illustrate this, consider the typical approach to building a statistical or machine learning model. 
+Data are often represented as an $n \times p$ matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ in which each row $x_i \in \mathbb{R}^p$ is an observation of $p$ features and each column is a set of $n$ feature measurements. 
 An analysis task for these data might be to come up with a classification model $\phi : \mathbb{R}^p \to \{1, 2, ..., K\}$ that uses the numerical values of each feature of a vector. 
 For instance, $\phi(x)$ might first compute the distance from $x$ to one of $K$ points in $\mathbb{R}^p$ and assign $x$ to the label of the nearest point. 
 Examples of this include linear discriminant analysis (in the case of supervised learning) and Lloyd's algorithm or Gaussian mixture models (in the case of unsupervised learning). 
@@ -101,18 +102,28 @@ If $A$ is binary, we call it an *adjacency matrix*.
 
 ## Probabilistic Models for Graphs
 
-Given a sample or dataset, a typical analysis tasks are statistical inference, or the estimation of various parameters assuming the data come from a random distribution or process. 
+Given a sample or dataset, a typical analysis task is statistical inference, or the estimation of various parameters assuming the data come from a random distribution or process. 
 These estimated parameters are often then used for making predictions or deriving insights about the population. 
 For example, when fitting a Gaussian mixture model, the data are first assumed to come from a mixture of Gaussians. 
 The model fitting process then involves estimating the means and standard deviations of each Gaussian component, along with the mixture weights. 
-The resulting model provides insight into where each mixture component is located, how disperse each component is, and how the data are distributed between the components, as well as a prediction for which mixture a new observation belongs to. 
+The resulting model provides insight into where each mixture component is located, how disperse each component is, and how the data are distributed between the components, as well as a prediction indicating to which mixture a new observation belongs. 
 In order to perform a similar type of analysis for graphs, we must first define probability distributions from which such data can be sampled. 
 
-Within the scope of this dissertation, we focus primarily on unweighted and undirected graphs without self-loops. 
-The adjacency matrix that describes such a graph is binary, symmetric, and hollow. 
+Within the scope of this dissertation, we focus primarily on unweighted and undirected graphs without self-loops, with a brief discussion on generalizing these methods to weighted or directed graphs. 
+The adjacency matrix that describes these graphs is binary, symmetric, and hollow. 
 In this setting, a plausible model is to sample each edge independently from a Bernoulli distribution, i.e., $A_{ij} \indep P_{ij}$ for some $P_{ij} \in [0, 1]$ for each $i < j$ (setting $A_{ji} = A_{ij}$ since $A$ is symmetric, and $A_{ii} = 0$ since $A$ is hollow). 
 Then similar to how the edges are compiled into an adjacency matrix $A$, the edge probabilities can be compiled into an edge probability matrix $P \in [0, 1]^{n \times n}$. 
-In order to provide structure 
+This type of graph model is defined as a *Bernoulli graph*. 
+
+\begin{definition}[Bernoulli graph]
+\end{definition}
+
+Statistical inference is not possible on a general Bernoulli graph with arbitrary edge probabilities since the number of parameters is equal to the number of observations. 
+Additional structure must be introduced. 
+One such structured Bernoulli graph model is the $\ER$ graph, which is defined as follows.
+
+\begin{definition}[$\ER$ graph]
+\end{definition}
 
 ## Block Models for Community Detection
 
@@ -120,7 +131,9 @@ In order to provide structure
 
 ### Generalizations of the Stochastic Block Model: the Degree Corrected Block Model and the Popularity Adjusted Block Model
 
-### Review of Likelihood Maximization Approaches to Block Models
+### The Hierarchy of Block Models
+
+### Review of Traditional Statistical Inference Approaches to Block Model Estimation
 
 \newpage
 
