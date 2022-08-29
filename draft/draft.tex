@@ -582,7 +582,7 @@ In example \ref{ex:sbm-dating}, we modeled an online dating network as an SBM in
 In this model, we assume that for each pair of genders, there is a constant probability of a match. 
 This does not take into account that some individuals are more likely to form connections than others, based on each individual's activity on the online service or popularity with other users. 
 Modeling this as a DCBM allows us to take this into account by adjusting each user's degree by $\omega_i$. 
-The following is a visualization of this network with parameters $\theta_{11} = \theta_{22} = 0.04$, $\theta_{12} = 0.4$, and each $\omega_i$ drawn uniformly between $0$ and $1$. 
+The following is a visualization of the network from example \ref{ex:sbm-dating} modified as a DCBM with parameters $\theta_{11} = \theta_{22} = 0.03$, $\theta_{12} = 0.3$, each $\omega_i$ drawn uniformly between $1/3$ and $1$, and $\rho_n \equiv 1$. 
 
 \begin{figure}[H]
 
@@ -594,10 +594,6 @@ The following is a visualization of this network with parameters $\theta_{11} = 
 \end{figure}
 \end{example}
 
-\begin{remark}
-Unlike the SBM (when excluding the sparsity factor), each DCBM is not unique and therefore non-identifiable. 
-\end{remark}
-
 \begin{definition}[Popularity adjusted block model]
 \label{def:pabm}
 Let $G = (V, E)$ be an undirected Bernoulli graph with $n$ vertices, described by random adjacency matrix $A$. 
@@ -605,7 +601,16 @@ Let $K \geq 1$ be an integer that describes the number of communities, and let
 $z_1, ..., z_n \in \{1, ..., K\}$ be community labels associated with each vertex. 
 Suppose that each vertex $v_i$ has $K$ popularity parameters $\lambda_{i1}, ..., \lambda_{iK}$ for which each $\lambda_{ik}$ describes $v_i$'s affinity toward community $k$. 
 Then if the edge probability matrix $P$ for this graph is such that $P_{ij} = \rho_n \lambda_{i, z_j} \lambda_{j, z_i}$ and $A \sim \BG(P)$, then $G$ is a popularity adjusted block model.
+We use the notation $A \sim \PABM(z, \{\lambda_{i, k}\}_K; \rho_n)$ to denote a random adjacency matrix drawn from the PABM with labels $z$ and popularity parameters $\{\lambda_{i, k}\}_K$. 
+Under the sampling scheme in which the labels are drawn from a multivariate distribution with class probabilities $\alpha$, we use the notation $A \sim \PABM(\alpha, \{\lambda_{i, k}\}_K; \rho_n)$. 
 \end{definition}
+
+\begin{remark}
+Unlike the SBM (when excluding the sparsity factor), each DCBM is not unique and therefore non-identifiable. 
+For example, doubling each $\theta_{k \ell}$ and dividing each $\omega_i$ by $\sqrt{2}$ results in the same edge probability matrix. 
+Nevertheless, a naive EM type algorithm similar to the one in section \ref{sec:sbm} results in high community detection accuracy for most networks, although it is not clear what its asymptotic properties are or whether there are any theoretical guarantees. 
+Likewise, it is not clear 
+\end{remark}
 
 \begin{example}[Dating network as a PABM]
 \label{ex:pabm-dating}
