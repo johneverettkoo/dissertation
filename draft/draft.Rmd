@@ -95,7 +95,7 @@ However, it is not obvious how this method would translate to data that are repr
 Instead of feature vector $x_i = \begin{bmatrix} x_{i1} & \cdots & x_{ip} \end{bmatrix}^\top \in \mathbb{R}^p$, we observe $a_i = \begin{bmatrix} a_{i1} & \cdots & a_{in} \end{bmatrix}^\top \in \mathbb{R}^n$ in which each $a_{ij}$ is object $i$'s relationship to object $j$. 
 For such data, it is often necessary to alter existing algorithms, transform the graph data into Euclidean data, often called *graph embedding* or *spectral clustering* \citep{vonLuxburg2007}, and apply algorithms for Euclidean data on the embedding, or come up with new algorithms altogether. 
 
-\begin{example}
+\begin{example}[Graph clustering]
 $K$-means clustering \citep{MacQueen1967} is a nonparametric clustering method that minimizes the objective function
 \begin{equation}
 \label{eq:kmeans}
@@ -106,18 +106,19 @@ A popular implementation of $K$-means clustering is Lloyd's algorithm \citep{105
 
 If instead of vectors in $\mathbb{R}^p$ we have a graph, it is not obvious how to translate $K$-means clustering to these data. 
 In particular, there is no inherent notion of centroid or sample mean for graph data. 
-However, there are inherent notions of distances among vectors, such as shortest path distance, expected commute time, or resistance distance. 
+However, there are inherent notions of distances among vertices, such as shortest path distance, expected commute time, or resistance distance. 
 One way to adapt $K$-means to graph data is to use an equivalent objective function as Eq.~\eqref{eq:kmeans} that doesn't use centroids (which are just nuisance parameters) and is stated only in terms of distances:  
 $$
-\tilde{W}(x_1, ..., x_n) = \sum_{k=1}^K \sum_{x_i, x_j : z_i = z_j = k} d(x_i, x_j)^2.
+\tilde{W}(x_1, ..., x_n) = \sum_{k=1}^K \sum_{x_i, x_j : z_i = z_j = k} \big( d(x_i, x_j) \big)^2.
 $$
 Here, $d(x_i, x_j)$ is the distance between objects $x_i$ and $x_j$. 
-If the data live in a Euclidean vector space, then $d(x_i, x_j) = \|x_i - x_j\|_2$, 
-or if the data are represented as a graph, then $d(x_i, x_j)$ represents some notion of graph distance. 
+If they are vectors in Euclidean space, then $d(x_i, x_j) = \|x_i - x_j\|_2$, 
+or if they are vertices on a graph, then $d(x_i, x_j)$ represents some notion of graph distance. 
 While this formulation of $K$-means clustering takes care of the lack of centroids, the implementation still requires some thought since Lloyd's algorithm includes the computation of centroids. 
 An alternative algorithm is MacQueen's exchange algorithm \citep{MacQueen1967}, which involves cycling through each vertex and then, for each vertex, cycling through the labels and choosing the label that minimizes the objective function. 
 
 Yet another approach to adapting $K$-means clustering to graph data is to embed the graph to Euclidean space and then apply Lloyd's algorithm on the embedding. 
+One way to combine the graph distance approach and the graph embedding approach is to apply Lloyd's algorithm on an embedding that approximates graph distances \citep{vonLuxburg2007}. 
 \end{example}
 
 We now provide a more formal description of graph data: 
@@ -129,6 +130,7 @@ If $A_{ij} = 0$, then $i$ has no direct relationship to $j$.
 $A$ is symmetric if it represents an undirected graph in which the relationship from $i$ to $j$ is the same as the relationship from $j$ to $i$. 
 $A$ is binary, i.e., $A \in \{0, 1\}^{n \times n}$, if it represents an unweighted graph in which edges either exist or don't exist. 
 If $A$ is binary, we call it an *adjacency matrix*. 
+In this work, we focus primarily on undirected and unweighted graphs without self loops. 
 
 \begin{example}
 \label{ex:uk-faculty}
@@ -216,6 +218,16 @@ Setting the gradient to zero yields $n$ equations with $n$ unknowns, but it is n
 Alternatively, we can use gradient ascent or some other numerical optimization method, since this particular log-likelihood function is concave. 
 \end{example}
 
+\begin{definition}[Degree of a vertex]
+\label{def:degree}
+Let $G = (V, E)$ be an undirected graph with vertex set $V = \{v_1, ..., v_n\}$. 
+$d_i$, the degree of vertex $v_i$ is the sum of the weights of edges that connect to $v_i$. 
+If $G$ is unweighted, then $v_i$ is equivalently the number of edges that connect to $v_i$. 
+If $G$ is represented by affinity or adjacency matrix $A$, then $d_i = \sum_j A_{ij}$. 
+
+If $G$ is a Bernoulli graph with edge probability matrix $P$, then the expected degree of vertex $v_i$ is $E[d_i] = \sum_j P_{ij}$. 
+\end{definition}
+
 ## Contributions of This Work
 
 In this work, we explore three types of block models, the stochastic block model, the degree corrected block model, and the popularity adjusted block model, as well as a family of latent space models called generalized random dot product graphs. 
@@ -241,7 +253,7 @@ We will later return to these block models and the relationship to another class
 
 ## The Stochastic Block Model {#sec:sbm}
 
-The stochastic block model (SBM) \citep{doi:10.1080/0022250X.1971.9989788} is the simplest of the three block models and assumes that each pair of communities has a constant edge probability $\theta_{k \ell}$. 
+The stochastic block model (SBM) \citep{doi:10.1080/0022250X.1971.9989788} is the simplest of the three block models and assumes that each pair of communities $(k, \ell)$ has a constant edge probability $\theta_{k \ell}$. 
 We now give the formal definition of the SBM within the context of Bernoulli graphs:
 
 \begin{definition}[Stochastic block model]
@@ -257,18 +269,24 @@ There are a few conventions for exactly how a graph is sampled as an SBM.
 Within the context of this work, we assume that for a particular SBM, the number of communities, $K$, and the community edge probabilities, $\theta_{k \ell}$, are fixed. 
 Then some possible ways of sampling from an SBM are as follows:
 
-1. Assume the size of the graph $n$ is fixed. 
-Then each vertex $v_i$ has a label $z_i$, and the edge probability matrix $P$ is fixed.
-2. We sample the vertices and edges in sequence and suppose that each vertex $v_i$ comes with a label $z_i$, which determines its edge probabilities to the other vertices.
-3. The vertices are sampled in sequence, and each $z_i$ is sampled as $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$, $\sum_k^K \alpha_k = 1$. The edge probabilities are then determined by the sample $\{z_i\}$ and the parameters $\{\theta_{k \ell}\}$
+1. Let the size of the graph, $n$, be fixed. 
+Then each vertex $v_i$, and its corresponding label, $z_i$, are also fixed, in addition to the pairwise community edge probabilities $\{\theta_{k \ell}\}_K$, which are all treated as model parameters. 
+Under this sampling scheme, there is no notion of increasing $n$. 
+2. The vertices and edges are sampled in sequence, and we suppose that each vertex $v_i$ comes with a corresponding label, $z_i$, which determines its edge probabilities to the other vertices. 
+Under this sampling scheme, there is no assumed distribution on the labels, which are treated as fixed parameters rather than random variables, along with $\{\theta_{k \ell}\}_K$, but there is a notion of increasing sample size $n$, which allows for asymptotics. 
+3. The vertices are sampled in sequence, and each label, $z_i$, is sampled as $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$, $\sum_k^K \alpha_k = 1$. 
+The edge probabilities are then determined by the sample $\{z_i\}$ and the parameters $\{\theta_{k \ell}\}_K$.
+Under this sampling scheme, both the edges and the labels are random, with fixed parameters $\alpha = \begin{bmatrix} \alpha_1 & \cdots & \alpha_K \end{bmatrix}^\top$ and $\{\theta_{k \ell}\}_K$. 
 
-An extension to these sampling schema include Bayesian models, e.g., each $\theta_{k \ell}$ is sampled from a distribution with support $[0, 1]$. 
+We use the notation $A \sim \SBM(z, \{\theta_{k \ell}\}_K)$ for the first two sampling schemes, and we use $A \sim \SBM(\alpha, \{\theta_{k \ell}\}_K)$ for the third. 
+
+An extension to these include Bayesian models, e.g., each $\theta_{k \ell}$ is sampled from a distribution with support $[0, 1]$. 
 
 \begin{example}[Stochastic block model with $K = 2$ communities]
 \label{ex:assort-sbm}
 We construct an SBM with two communities in which $\theta_{11} = 1/2$, $\theta_{12} = 1/8$, and $\theta_{22} = 1/4$. 
 Note that in this example, the within-community edge probabilities are greater than the between-community edge probability. 
-A realization of this graph with $n_1 = n_2 = 32$ is illustrated by figure \ref{fig:assort-sbm}.
+A realization of this graph with $n_1 = n_2 = 32$ (where $n_k = |\{v_i : z_i = k\}|$) is illustrated in figure \ref{fig:assort-sbm}.
 
 ```{r assort-sbm, fig.width = 3, , fig.height = 2, fig.cap = 'Two-community stochastic block model with $\\theta_{11}=1/2$, $\\theta_{22}=1/4$, and $\\theta_{12} = \\theta_{21} = 1/8$.', cache = TRUE}
 n1 <- 2 ** 5
@@ -293,10 +311,11 @@ ggraph(A, layout = 'stress') +
 ```
 \end{example}
 
-In most conceptions of graph models, the within-community edge probability is greater than the between-community edge probability, as in example \ref{ex:assort-sbm}. 
-For instance, in the UK faculty friendship network in example \ref{ex:uk-faculty}, it is natural to expect that faculty within the same school are more likely to be friends than faculty from two different schools, and a cursory look at the visualization of the graph appears to confirm this. 
-However, SBMs are not restricted to this type of community structure. 
-We could just as easily construct an example in which $\theta_{11}$ and $\theta_{22}$ are less than $\theta_{12}$. Within the context of the SBM, we say that a graph is assortative if $P$ is positive semidefinite and disassortative otherwise, which roughly correspond to communities with higher within-community edge probabilities and higher between-community edge probabilities, respectively. 
+In most conceptions of block models, the within-community edge probability is greater than the between-community edge probability, as in example \ref{ex:assort-sbm}. 
+For instance, in the UK faculty friendship network in example \ref{ex:uk-faculty}, it is natural to expect that faculty within the same school are more likely to be friends than faculty from two different schools, and a cursory look at the visualization of the network appears to confirm this. 
+However, SBMs are not necessarily restricted to this type of community structure. 
+We could just as easily construct an example in which $\theta_{11}$ and $\theta_{22}$ are less than $\theta_{12}$. 
+Within the context of block models, we say that a graph is *assortative* if $P$ is positive semidefinite and *disassortative* otherwise, which roughly correspond to communities with higher within-community edge probabilities and lower between-community edge probabilities, respectively. 
 For example, the SBM in example \ref{ex:assort-sbm} is assortative and has edge probability matrix $P$ that is rank 2 with nonzero eigenvalues $n (\frac{3}{8} \pm \frac{\sqrt{2}}{8}) > 0$.
 In the following example, we describe a network which can be modeled as a disassortative SBM. 
 
@@ -377,25 +396,48 @@ As an example, we write the EM algorithm for the likelihood function in equation
   \DontPrintSemicolon
   \SetAlgoLined
   \KwData{Adjacency matrix $A$, number of communities $K$}
-  \KwResult{Estimated community label probabilities $\{\pi_{ik}\}$, estimated community edge probabilities $\{\hat{\theta}_{k \ell}\}$}
+  \KwResult{Estimated community label probabilities $\{\pi_{ik}\}$ for which each $\pi_{ik} = P(z_i = k \mid A)$, estimated community edge probabilities $\{\hat{\theta}_{k \ell}\}_K$}
   \caption{Approximate EM algorithm for the SBM}
   Initialize $\{\pi_{ik}\}$, $\{\theta_{k \ell}\}$.\;
   \While{$\|\nabla \ell\| > \epsilon$} {
     \For {$i = 1, ..., n$} {
       \For {$k = 1, ..., K$} {
-        E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log \theta_{k \ell} + (1 - A_{ij}) \log (1 - \theta_{k \ell})) \bigg)$.\;
-        M-step: $\theta_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
+        E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log \hat{\theta}_{k \ell} + (1 - A_{ij}) \log (1 - \hat{\theta}_{k \ell})) \bigg)$.\;
+        M-step: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
       }
     }
   }
 \end{algorithm}
 
-Applying algorithm \ref{algo:sbm-em} to example \ref{ex:assort-sbm} with initial guesses of $z_{ik} = 0.5$ for each $i, k$, $\hat{\theta}_{11} = \hat{\theta}_{22} = 0.9$, and $\hat{\theta}_{12} = 0.1$ results in a community detection error rate of 4.7\% and parameter estimates $\hat{\theta}_{11} = 0.503$, $\hat{\theta}_{22} = 0.241$, and $\hat{\theta}_{12} = 0.109$, compared to the true parameters $\theta_{11} = 0.5$, $\theta_{22} = 0.25$, and $\theta_{12} = 0.125$. 
-The same algorithm applied to example \ref{ex:sbm-dating}, which is a disassortative model, using initial guesses of $z_{ik} = 0.5$, $\hat{\theta}_{11} = \hat{\theta}_{22} = 0.1$, and $\hat{\theta}_{12} = 0.9$, results in a community detection error rate of 0\% and parameter estimates $\hat{\theta}_{11} = 0.034$, $\hat{\theta}_{22} = 0.018$, and $\hat{\theta}_{12} = 0.201$, compared to the true parameters $\theta_{11} = \theta_{22} = 0.02$ and $\theta_{12} = 0.2$.
+Applying algorithm \ref{algo:sbm-em} to example \ref{ex:assort-sbm} with initial guesses of $\pi_{ik} = 0.5$ for each $i, k$, $\hat{\theta}_{11} = \hat{\theta}_{22} = 0.9$, and $\hat{\theta}_{12} = 0.1$ results in a community detection error rate of 4.7\% and parameter estimates $\hat{\theta}_{11} = 0.503$, $\hat{\theta}_{22} = 0.241$, and $\hat{\theta}_{12} = 0.109$, compared to the true parameters $\theta_{11} = 0.5$, $\theta_{22} = 0.25$, and $\theta_{12} = 0.125$. 
+The same algorithm applied to example \ref{ex:sbm-dating}, which is a disassortative model, using initial guesses of $\pi_{ik} = 0.5$, $\hat{\theta}_{11} = \hat{\theta}_{22} = 0.1$, and $\hat{\theta}_{12} = 0.9$, results in a community detection error rate of 0\% and parameter estimates $\hat{\theta}_{11} = 0.034$, $\hat{\theta}_{22} = 0.018$, and $\hat{\theta}_{12} = 0.201$, compared to the true parameters $\theta_{11} = \theta_{22} = 0.02$ and $\theta_{12} = 0.2$.
 
-## Random Graph Models and Sparsity
+## Random Graph Models and Sparsity {#sec:sparsity}
+
+So far, we have described *dense* Bernoulli graphs. 
+For such models, as the sample size $n$ increases, the expected degree of each node grows linearly. 
+For example, consider the SBM with the third sampling setup described in section \@ref(sec:sbm).
+Then the expected degree of vertex $v_i$ is 
+$$
+\begin{split}
+E[d_i] & = \sum_j P_{ij} \\
+& = \sum_{j \neq i} \theta_{z_i, z_j} \\ 
+& = \Big( \sum_k n_k \theta_{z_i, k} \Big) - \theta_{z_i, z_i} \\
+& = n \Big( \sum_k \alpha_k \theta_{z_i, k} \Big) - \theta_{z_i, z_i} \\
+& = O(n).
+\end{split}
+$$
+
+In many real networks, the degree of each vertex often does not grow proportionally with the size of the network. 
+To account for this, a sparsity factor $\rho_n \in (0, 1]$ is introduced in the edge probabilities, i.e., $P_{ij} \leftarrow \rho_n P_{ij}$, for some sequence $\{\rho_n\}$ such that $\lim\limits_{n \to \infty} \rho_n = 0$.  
+For example, a sparse SBM has edge probabilities $P_{ij} = \rho_n \theta_{z_i, z_j}$, for which we use the notation $A \sim \SBM(z, \{\theta_{k \ell}\}_K; \rho_n)$ or $A \sim \SBM(\alpha, \{\theta_{k \ell}\}_K; \rho_n)$, depending on whether we treat the labels as random or fixed. 
+Then the expected degree grows as $O(n \rho_n)$ instead of linearly as $O(n)$. 
+For the sake of unifying the sparse and dense regimes, we also allow for the special case $\rho_n = 1$ and include the sparsity factor throughout, unless otherwise stated. 
+Finally, we also note that while $\rho_n$ limits the rate of growth of the expected degree, our theoretical results still require $n \rho_n$ to diverge to infinity, albeit at a slower rate than $O(n)$ (see \cite{JMLR:v18:16-480} and \cite{rubindelanchy2017statistical} for further discussion). 
 
 ## Generalizations of the Stochastic Block Model: The Degree Corrected Block Model and the Popularity Adjusted Block Model {#sec:dcbm-pabm}
+
+
 
 \begin{definition}[Degree corrected block model]
 \label{def:dcbm}
@@ -403,17 +445,51 @@ Let $G = (V, E)$ be a Bernoulli graph with $n$ vertices, described by random adj
 Let $K \geq 1$ be an integer and $\theta_{k \ell} \in [0, 1]$ for each $k, \ell \in \{1, ..., K\}$ (if $G$ is undirected, then $\theta_{k \ell} = \theta_{\ell k}$), as in the SBM. 
 Let $z_1, ..., z_n \in \{1, ..., K\}$ be community labels associated with each vertex. 
 In addition, each vertex $v_i$ has a degree correction parameter $\omega_i \in [0, 1]$. 
-If the edge probability matrix $P$ for this graph is such that $P_{ij} = \theta_{z_i, z_j} \omega_i \omega_j$ and $A \sim \BG(P)$, then $G$ is a degree corrected block model.
+If the edge probability matrix $P$ for this graph is such that $P_{ij} = \rho_n \theta_{z_i, z_j} \omega_i \omega_j$ and $A \sim \BG(P)$, then $G$ is a degree corrected block model. 
+We use the notation $A \sim \DCBM(z, \{\theta_{k \ell}\}_K, \omega; \rho_n)$ to denote a random adjacency matrix drawn from the DCBM with labels $z$, base edge probabilities $\{\theta_{k \ell}\}_K$, and degree correction factors $\omega$. 
+Under the sampling scheme in which the labels are drawn from a multivariate distribution with class probabilities $\alpha$, we use the notation $A \sim \DCBM(\alpha, \{\theta_{k \ell}\}_K, \omega; \rho_n)$.
 \end{definition}
 
 \begin{example}[Dating network as a disassortative DCBM]
 \label{ex:dcbm-dating}
 In example \ref{ex:sbm-dating}, we modeled an online dating network as an SBM in which the vertices correspond to individuals, the communities correspond to genders, and edges correspond to whether the online dating service successfully matched pairs of individuals. 
 In this model, we assume that for each pair of genders, there is a constant probability of a match. 
-This does not take into account that some individuals are more likely to form connections than others. 
-Modeling this as a DCBM allows us to take each individual's popularity into account. 
+This does not take into account that some individuals are more likely to form connections than others, based on each individual's activity on the online service or popularity with other users. 
+Modeling this as a DCBM allows us to take this into account by adjusting each user's degree by $\omega_i$. 
+The following is a visualization of this network with parameters $\theta_{11} = \theta_{22} = 0.04$, $\theta_{12} = 0.4$, and each $\omega_i$ drawn uniformly between $0$ and $1$. 
 
+```{r dating-dcbm, fig.width = 4, , fig.height = 2, fig.cap = 'A dating network modeled as a DCBM. This model is disassortative.', cache = TRUE}
+n <- 2 ** 6
+z <- sample(c(1, 2), n, replace = TRUE)
+z <- sort(z)
+n1 <- sum(z == 1)
+n2 <- sum(z == 2)
+z[z == 1] <- 'F'
+z[z == 2] <- 'M'
+theta11 <- .02
+theta22 <- .02
+theta12 <- .2
+omega <- runif(n)
+Omega <- omega %*% t(omega)
+P <- matrix(theta12, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- theta11
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- theta22
+P <- P * Omega
+A <- draw.graph(P)
+# qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
+ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = TRUE) + 
+  labs(colour = 'Gender') + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+```
 \end{example}
+
+\begin{remark}
+Unlike the SBM (when excluding the sparsity factor), each DCBM is not unique and therefore non-identifiable. 
+\end{remark}
 
 \begin{definition}[Popularity adjusted block model]
 \label{def:pabm}
@@ -421,7 +497,7 @@ Let $G = (V, E)$ be an undirected Bernoulli graph with $n$ vertices, described b
 Let $K \geq 1$ be an integer that describes the number of communities, and let 
 $z_1, ..., z_n \in \{1, ..., K\}$ be community labels associated with each vertex. 
 Suppose that each vertex $v_i$ has $K$ popularity parameters $\lambda_{i1}, ..., \lambda_{iK}$ for which each $\lambda_{ik}$ describes $v_i$'s affinity toward community $k$. 
-Then if the edge probability matrix $P$ for this graph is such that $P_{ij} = \lambda_{i, z_j} \lambda_{j, z_i}$ and $A \sim \BG(P)$, then $G$ is a popularity adjusted block model.
+Then if the edge probability matrix $P$ for this graph is such that $P_{ij} = \rho_n \lambda_{i, z_j} \lambda_{j, z_i}$ and $A \sim \BG(P)$, then $G$ is a popularity adjusted block model.
 \end{definition}
 
 \begin{example}[Dating network as a PABM]
@@ -482,7 +558,6 @@ In a PABM, each vertex $i$ has $K$ popularity parameters $\lambda_{i1}, \dots, \
 Another view of a PABM is as follows.
 Let $\tilde{P}$ be the matrix obtained by permuting the rows and columns of $P$ so that the vertices are reorganized by community memberships $z_i \in \{1,2,\dots,K\}$ in increasing order. 
 Denote by $\tilde{P}^{(k \ell)}$ the $n_k \times n_{\ell}$ submatrix of $\tilde{P}$ corresponding to the edge probabilities between vertices in communities $k$ and $\ell$. 
-Here $n_k = |\{ i \colon z_i = k\}|$ is the number of vertices assigned to community $k$, for $k = 1,2\dots,K$.
 Note that $\tilde{P}^{(k \ell)} = (\tilde{P}^{(\ell k)})^\top$. 
 Next let $\lambda^{(k \ell)} = \{\lambda_{i \ell} \colon z_i = k\} \in \mathbb{R}^{n_k}$; the elements of $\lambda^{(k \ell)}$ are the affinity parameters toward the $\ell$th community of all vertices in the $k^{th}$ community. 
 Define $\lambda^{(\ell k)}$ analogously. 
@@ -845,8 +920,8 @@ $$Y = \tilde{Y} I_{p,q} \tilde{Y}^{\top} Y (Y^{\top} Y)^{-1} I_{p,q}.$$
 Let $Q = I_{p,q} \tilde{Y}^{\top} Y (Y^{\top} Y)^{-1} I_{p,q}$ and note that
 $Y = \tilde{Y} Q$. We then have
 \begin{equation*}
-  \begin{split}
-  Q^{\top} I_{p,q} Q &= I_{p,q} (Y^{\top} Y)^{-1} Y^{\top} \tilde{Y} I_{p,q}
+\begin{split}
+Q^{\top} I_{p,q} Q &= I_{p,q} (Y^{\top} Y)^{-1} Y^{\top} \tilde{Y} I_{p,q}
 I_{p,q} I_{p,q} \tilde{Y}^{\top} Y (Y^{\top} Y)^{-1} I_{p,q} \\ 
 &= I_{p,q} (Y^{\top} Y)^{-1} Y^{\top} Y I_{p,q}
 Y^{\top} Y (Y^{\top} Y)^{-1} I_{p,q} =  I_{p,q}
@@ -1068,7 +1143,30 @@ $n^{-1/2} \|\rho_n^{-1/2} \hat{\Lambda} - \Lambda\|_{F} = o(1)$ as $n \rightarro
 
 # Generalized Random Dot Product Graphs with Nonlinear Community Structure
 
+## Community Detection as Clustering in the Latent Space
+
+As established in section \@ref(sec:grdpg), all Bernoulli random graphs are generalized random dot product graphs. 
+Whether this is useful for community detection in block models depends entirely on the configuration of the latent vectors. 
+In the case of the $\ER$ model, SBM, DCBM, and PABM, each community forms a linear structure, i.e., a subspace, and this rigid structure can be exploited for community detection. 
+In this section, we explore community-wise nonlinear latent structures. 
+
 ## The Manifold Block Model
+
+\begin{definition}[Manifold block model]
+Let $p, q \geq 0$, $d = p + q \geq 1$, $1 \leq r < d$, $K \geq 2$, and $n > K$ be integers. 
+Define manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \in \mathcal{X}$ for $\mathcal{X} = \{x, y \in \mathbb{R}^d : x^\top I_{p,q} y \in [0, 1]\}$ each by continuous function $g_k : [0, 1]^r \to \mathcal{X}$. 
+Define probability distributions $F_1, ..., F_K$ each with support $[0, 1]^r$. 
+Then the following mixture model is a {\em manifold block model}.
+
+\begin{enumerate}
+\item Draw labels $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$.
+\item Draw latent vectors by first taking each $t_i \indep F_{z_i}$ and then computing each $x_i = g_{z_i}(t_i)$. 
+\item Compile the latent vectors into data matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ and define the adjacency matrix as $A \sim \GRDPG_{p,q}(X; \rho_n)$. 
+\end{enumerate}
+\end{definition}
+
+\begin{example}
+\end{example}
 
 ## Algorithms for Nonintersecting Manifolds
 
