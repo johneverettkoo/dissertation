@@ -370,7 +370,8 @@ $d_i$, the degree of vertex $v_i$ is the sum of the weights of edges that connec
 If $G$ is unweighted, then $v_i$ is equivalently the number of edges that connect to $v_i$. 
 If $G$ is represented by affinity or adjacency matrix $A$, then $d_i = \sum_j A_{ij}$. 
 
-If $G$ is a Bernoulli graph with edge probability matrix $P$, then the expected degree of vertex $v_i$ is $E[d_i] = \sum_j P_{ij}$. 
+If $G$ is a Bernoulli random graph with edge probability matrix $P$, then the degree of each vertex $v_i$ is a random variable, and its expected value (also called expected degree) is $E[d_i] = \sum_j P_{ij}$. 
+For example, the expected degree of each vertex of an $\ER$ graph with $n$ vertices and constant edge probability $p$ is $(n - 1) p$. 
 \end{definition}
 
 \hypertarget{contributions-of-this-work}{%
@@ -383,8 +384,11 @@ Using estimators with well-established consistency properties for the generalize
 
 \newpage
 
+\hypertarget{preliminaries}{%
+\section{Preliminaries}\label{preliminaries}}
+
 \hypertarget{sec:blockmodel}{%
-\section{Block Models for Community Detection}\label{sec:blockmodel}}
+\subsection{Block Models for Community Detection}\label{sec:blockmodel}}
 
 Network analysis is often concerned with community detection.
 This has motivated statisticians to develop random graph models with inherent community structure in which the probability of an edge between vertices \(i\) and \(j\) depend on the communities to which vertices \(v_i\) and \(v_j\) belong.
@@ -560,10 +564,18 @@ To account for this, a sparsity factor \(\rho_n \in (0, 1]\) is introduced in th
 For example, a sparse SBM has edge probabilities \(P_{ij} = \rho_n \theta_{z_i, z_j}\), for which we use the notation \(A \sim \SBM(z, \{\theta_{k \ell}\}_K; \rho_n)\) or \(A \sim \SBM(\alpha, \{\theta_{k \ell}\}_K; \rho_n)\), depending on whether we treat the labels as random or fixed.
 Then the expected degree grows as \(O(n \rho_n)\) instead of linearly as \(O(n)\).
 For the sake of unifying the sparse and dense regimes, we also allow for the special case \(\rho_n = 1\) and include the sparsity factor throughout, unless otherwise stated.
-Finally, we also note that while \(\rho_n\) limits the rate of growth of the expected degree, our theoretical results still require \(n \rho_n\) to diverge to infinity, albeit at a slower rate than \(O(n)\) (see \cite{JMLR:v18:16-480} and \cite{rubindelanchy2017statistical} for further discussion).
+Finally, we also note that while \(\rho_n\) limits the rate of growth of the expected degree, our theoretical results still require \(n \rho_n\) to diverge to infinity, albeit at a slower rate than \(O(n)\).
+In general, for consistency in estimation and inference, most results on Bernoulli random graphs require \(n \rho_n = \omega \big( (\log n)^c \big)\) for some \(c > 1\).
+(See \cite{JMLR:v18:16-480}, \cite{https://doi.org/10.48550/arxiv.2106.09840}, and \cite{rubindelanchy2017statistical} for further discussion.)
 
 \hypertarget{sec:dcbm-pabm}{%
 \subsection{Generalizations of the Stochastic Block Model: The Degree Corrected Block Model and the Popularity Adjusted Block Model}\label{sec:dcbm-pabm}}
+
+The SBM assumes homogeneity within each community.
+In particular, in the SBM, each vertex's expected degree and affinity toward each community depends only on its community label.
+The Degree Corrected Block Model (DCBM) and Popularity Adjusted Block Model (PABM) are generalizations of the SBM that address these limitations.
+In particular, the DCBM allows each vertex to have an expected degree independent of its label, and the PABM allows each vertex to have edge probabilities to each community independent of its own label.
+We also show that the DCBM is a special case of the PABM and that the SBM, DCBM, and PABM are nested models.
 
 \begin{definition}[Degree corrected block model]
 \label{def:dcbm}
@@ -606,10 +618,11 @@ Under the sampling scheme in which the labels are drawn from a multivariate dist
 \end{definition}
 
 \begin{remark}
-Unlike the SBM (when excluding the sparsity factor), each DCBM is not unique and therefore non-identifiable. 
-For example, doubling each $\theta_{k \ell}$ and dividing each $\omega_i$ by $\sqrt{2}$ results in the same edge probability matrix. 
+Unlike the SBM (when excluding the sparsity factor), each DCBM and PABM is not unique and therefore non-identifiable. 
+For example, in the case of the DCBM, doubling each $\theta_{k \ell}$ and dividing each $\omega_i$ by $\sqrt{2}$ results in the same edge probability matrix. 
 Nevertheless, a naive EM type algorithm similar to the one in section \ref{sec:sbm} results in high community detection accuracy for most networks, although it is not clear what its asymptotic properties are or whether there are any theoretical guarantees. 
-Likewise, it is not clear 
+Likewise, it is not immediately obvious how to approach the estimation of the $\theta_{k \ell}$'s, $\omega_i$'s, or $\lambda_{ik}$'s due to their non-uniqueness. 
+Applying an EM algorithm to example \ref{ex:dcbm-dating} results in 84\% accuracy but fails to capture the original (which are not necessarily ``true'') parameters. 
 \end{remark}
 
 \begin{example}[Dating network as a PABM]
@@ -622,10 +635,7 @@ Likewise, it is not clear
 \newpage
 
 \hypertarget{sec:grdpg}{%
-\section{Random Dot Product Graphs and Generalized Random Dot Product Graphs}\label{sec:grdpg}}
-
-\hypertarget{definitions}{%
-\subsection{Definitions}\label{definitions}}
+\subsection{Random Dot Product Graphs and Generalized Random Dot Product Graphs}\label{sec:grdpg}}
 
 \begin{definition}[Generalized random dot product graph]
 \label{def:grdpg}
@@ -635,10 +645,10 @@ Denote $d = p + q$ and let $\mathcal{X}$ be the subset of $\mathbb{R}^d$ such th
 Let $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ be an $n \times d$ matrix with rows $x_i \in \mathcal{X}$. 
 A graph $G$ with adjacency matrix $A$ is said to be a generalized random dot product graph with latent positions $X$, sparsity parameter $\rho_n$, and signature $(p, q)$ if $A \sim \BG(P)$ where the edge probability matrix $P$ is given by $P = \rho_n X I_{p,q} X^\top$, i.e., the entries of $P$ are of the form $P_{ij} = \rho_n x_i^\top I_{p,q} x_j$. 
 
-We use the notation $A \sim \GRDPG_{p,q}(X; \rho_n)$ to denote a random adjacency matrix $A$ drawn from latent positions $X$, sparsity parameter $\rho_n$, and signature $(p, q)$. If the $n$ vectors in $X$ are drawn from probability distribution $F$ on support $\mathcal{X}$, we use the notation $A \sim \GRDPG_{p,q}(F, n; \rho_n)$. 
+We use the notation $A \sim \GRDPG_{p,q}(X; \rho_n)$ to denote a random adjacency matrix $A$ drawn from latent positions $X$, sparsity parameter $\rho_n$, and signature $(p, q)$. If the $n$ vectors in $X$ are drawn from probability distribution $F$ on support $\mathcal{X}$, we use the notation $A \sim \GRDPG_{p,q}(F; \rho_n)$. 
 
 If $q = 0$ and so $d = p$, (i.e., $P$ is positive semidefinite), then we call this a random dot product graph. 
-In this case, we use the notation $A \sim \RDPG(X; \rho_n)$ and $A \sim \RDPG(F, n; \rho_n)$. 
+In this case, we use the notation $A \sim \RDPG(X; \rho_n)$ and $A \sim \RDPG(F; \rho_n)$. 
 \end{definition}
 
 \begin{definition}[Adjacency spectral embedding]
