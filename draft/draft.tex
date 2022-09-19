@@ -258,7 +258,7 @@ A popular implementation of $K$-means clustering is Lloyd's algorithm \citep{105
 If instead of vectors in $\mathbb{R}^p$ we have a graph, it is not obvious how to translate $K$-means clustering to these data. 
 In particular, there is no inherent notion of centroid or sample mean for graph data. 
 However, there are inherent notions of distances among vertices, such as shortest path distance, expected commute time, or resistance distance. 
-One way to adapt $K$-means to graph data is to use an equivalent objective function as Eq.~\eqref{eq:kmeans} that doesn't use centroids (which are just nuisance parameters) and is stated only in terms of distances:  
+One way to adapt $K$-means to graph data is to use an equivalent objective function as equation~\eqref{eq:kmeans} that doesn't use centroids (which are just nuisance parameters) and is stated only in terms of distances:  
 $$
 \tilde{W}(x_1, ..., x_n) = \sum_{k=1}^K \sum_{x_i, x_j : z_i = z_j = k} \big( d(x_i, x_j) \big)^2.
 $$
@@ -587,6 +587,8 @@ If the edge probability matrix $P$ for this graph is such that $P_{ij} = \rho_n 
 We use the notation $A \sim \DCBM(z, \{\theta_{k \ell}\}_K, \omega; \rho_n)$ to denote a random adjacency matrix drawn from the DCBM with labels $z$, base edge probabilities $\{\theta_{k \ell}\}_K$, and degree correction factors $\omega$. 
 Under the sampling scheme in which the labels are drawn from a multivariate distribution with class probabilities $\alpha$, we use the notation $A \sim \DCBM(\alpha, \{\theta_{k \ell}\}_K, \omega; \rho_n)$.
 \end{definition}
+
+Showing explicitly that the SBM is a special case of the DCBM only requires us to set \(\omega\) as a constant vector, e.g., \(\omega = \begin{bmatrix} 1 & \cdots & 1 \end{bmatrix}^\top\).
 
 \begin{example}[Dating network as a disassortative DCBM]
 \label{ex:dcbm-dating}
@@ -1036,7 +1038,7 @@ vertices $i$ and $j$ are in different communities.
 \begin{proof}
 We first show that $V V^\top =
 \tilde{\Pi} X (X^\top X)^{-1} X^\top \tilde{\Pi}^{\top} $ where $X$ is 
-defined as in Eq.~\eqref{eq:xy}. Indeed, by Theorem 2, 
+defined as in equation~\eqref{eq:xy}. Indeed, by Theorem 2, 
 \(P = \tilde{\Pi} X U I_{p, q} U^\top X^\top \tilde{\Pi}\) for $p = K(K+1)/2$ and $q = K(K-1)/2$. 
 The eigendecomposition \(P = V D V^\top\) also yields $P = V
 |D|^{1/2} I_{p, q} |D|^{1/2} V^\top$ where \(|\cdot|^{1/2}\) is
@@ -1280,12 +1282,33 @@ for example theorem 2 in \citet{307cbeb9b1be48299388437423d94bf1} only guarantee
 As established in section \ref{sec:grdpg}, all Bernoulli random graphs are generalized random dot product graphs.
 Whether this is useful for community detection in block models depends entirely on the configuration of the latent vectors.
 In the case of the \(\ER\) model, SBM, DCBM, and PABM, each community forms a linear structure, i.e., a subspace, and this rigid structure can be exploited for community detection.
-In this section, we explore community-wise nonlinear latent structures.
+In this section, we explore GRDPGs with community-wise parameterized nonlinear latent structures.
+
+To motivate this model, consider a generalization of the \(\ER\) model in which each edge probability isn't constant but comes from a simple distribution.
+As with all Bernoulli random graphs, this is also a GRDPG, but by using a specific type of distribution, it is possible to construct specific latent structures on which the latent vectors lie.
+Or, in reverse, by constructing specific latent structures, the edge probabilities of the Bernoulli random graph follow specific distributions.
+
+\begin{example}
+In the $\ER$ model, the edge probability matrix has a fixed value $P_{ij} \equiv p \in [0, 1]$. 
+This corresponds to a one-dimensional RDPG with a latent structure $X = \begin{bmatrix} \sqrt{p} & \cdots & \sqrt{p} \end{bmatrix}^\top$. 
+In another view, the RDPG with latent structure $X = \begin{bmatrix} \sqrt{p} & \cdots & \sqrt{p} \end{bmatrix}^\top$ induces an $\ER$ model in which the edge probabilities have a fixed value. 
+
+Suppose that we have RDPG in which the latent space is in $\mathbb{R}^2$ and the latent vectors are drawn uniformly from the quarter unit circle defined by $g(t) = \begin{bmatrix} \cos \frac{\pi}{2} t & \sin \frac{\pi}{2} t \end{bmatrix}^\top$ for $t \in [0, 1]$. 
+For simplicity, we set $\rho_n \equiv 1$. 
+Then it can be shown that instead of a fixed $P_{ij} = p$, this RDPG induces a model in which the edge probabilities follow a distribution with density $f(p) = \frac{2}{\pi - 2} \Big( \frac{1}{1 - p^2} - 1 \Big)$. 
+\end{example}
+
+By changing the latent structure from a point mass to a curve, we are able to come up with more flexible Bernoulli random graph models in which the edge probabilities follow more general probability distributions.
+Community structure can then be added by sampling latent vectors from multiple curves.
+The goal of this section is to explore GRDPGs with such structures and develop algorithms for community detection and parameter estimation.
 
 \hypertarget{the-manifold-block-model}{%
 \subsection{The Manifold Block Model}\label{the-manifold-block-model}}
 
+We begin by defining the model:
+
 \begin{definition}[Manifold block model]
+\label{def:mbm}
 Let $p, q \geq 0$, $d = p + q \geq 1$, $1 \leq r < d$, $K \geq 2$, and $n > K$ be integers. 
 Define manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \in \mathcal{X}$ for $\mathcal{X} = \{x, y \in \mathbb{R}^d : x^\top I_{p,q} y \in [0, 1]\}$ each by continuous function $g_k : [0, 1]^r \to \mathcal{X}$. 
 Define probability distributions $F_1, ..., F_K$ each with support $[0, 1]^r$. 
@@ -1298,8 +1321,28 @@ Then the following mixture model is a {\em manifold block model}.
 \end{enumerate}
 \end{definition}
 
+Definition \ref{def:mbm}
+
 \begin{example}
+Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = \begin{bmatrix} \cos(\frac{\pi}{3} t) & \sin(\frac{\pi}{3} t) \end{bmatrix}^\top$ and $f_2(t) = \begin{bmatrix} 1 - \cos(\frac{\pi}{3} t) & 1 - \sin(\frac{\pi}{3} t) \end{bmatrix}^\top$.
+Draw $t_1, ..., t_n \iid \Uniform(0, 1)$ and $z_1, ..., z_n \iid \Multinomial(\frac{1}{2}, \frac{1}{2})$, and compute latent vectors $x_i = f_{z_i}(t_i)$, which are collected in data matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$. 
+Finally, let $A \sim \RDPG(X)$. Figure~\ref{fig:two-curves} shows the latent configuration drawn from this latent distribution, a random dot product graph drawn from the latent configuration, and the adjacency spectral embedding of the graph. 
+Although the community structure is not obvious from the graph, the embedding shows a clear separation between the two communities. 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/two-curves-1} 
+
+}
+
+\caption{Manifold block model described in Example 1. The latent configuration is on the left, a random dot product graph drawn from the latent configuration is on the middle, and the ASE is on the right.}\label{fig:two-curves}
+\end{figure}
 \end{example}
+
+In the case of the SBM, a GRDPG-motivated community detection algorithm is to construct the ASE of the graph and then apply a point cloud based clustering algorithm such as \(K\)-means or GMM on the embedding.
+We saw that in the case of the DCBM and PABM, because the latent structures are not based on point masses, while the ASE does reveal the communities, the final clustering step requires other clustering algorithms that are tailored to the latent community structure.
+Likewise, in the following sections, we develop algorithms specific to the structure of the manifold block model (MBM), one in the case of disjoint manifolds and one in the general case in which the latent manifolds can intersect.
+Both algorithms have theoretical consistency properties.
 
 \hypertarget{algorithms-for-nonintersecting-manifolds}{%
 \subsection{Algorithms for Nonintersecting Manifolds}\label{algorithms-for-nonintersecting-manifolds}}
@@ -1429,7 +1472,7 @@ such that $\sqrt{n} \hat{V}$ satisfies the subspace detection property in defini
   \max_{i} \|W \hat{v}_{i} - v_{i}\| \leq \min_{k} \frac{r_*(r^{(k)} -
     \mu^{(k)})}{2 + 7 r^{(k)}}.
 \end{gather}
-We now verify that for sufficiently large n, equation \eqref{eq:cond1} and Eq.~\eqref{eq:cond2}
+We now verify that for sufficiently large n, equation \eqref{eq:cond1} and equation~\eqref{eq:cond2}
 holds with high probability.
 
 {\bf Verifying equation \eqref{eq:cond1}}. If $n$ is sufficiently large then
