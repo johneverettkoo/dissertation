@@ -1273,8 +1273,8 @@ for example theorem 2 in \citet{307cbeb9b1be48299388437423d94bf1} only guarantee
 
 \newpage
 
-\hypertarget{generalized-random-dot-product-graphs-with-nonlinear-community-structure}{%
-\section{Generalized Random Dot Product Graphs with Nonlinear Community Structure}\label{generalized-random-dot-product-graphs-with-nonlinear-community-structure}}
+\hypertarget{sec:mbm}{%
+\section{Generalized Random Dot Product Graphs with Nonlinear Community Structure}\label{sec:mbm}}
 
 \hypertarget{community-detection-as-clustering-in-the-latent-space}{%
 \subsection{Community Detection as Clustering in the Latent Space}\label{community-detection-as-clustering-in-the-latent-space}}
@@ -1321,7 +1321,9 @@ Then the following mixture model is a {\em manifold block model}.
 \end{enumerate}
 \end{definition}
 
-Definition \ref{def:mbm}
+Definition \ref{def:mbm} describes the most general version of the manifold block model (MBM).
+Some plausible constraints may be to fix one distribution for each underlying distribution \(F_{z_i} \equiv F\) or to restrict the manifolds to be one-dimensional, i.e., \(r \equiv 1\).
+We use these constraints to construct the following example:
 
 \begin{example}
 Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = \begin{bmatrix} \cos(\frac{\pi}{3} t) & \sin(\frac{\pi}{3} t) \end{bmatrix}^\top$ and $f_2(t) = \begin{bmatrix} 1 - \cos(\frac{\pi}{3} t) & 1 - \sin(\frac{\pi}{3} t) \end{bmatrix}^\top$.
@@ -1341,14 +1343,20 @@ Although the community structure is not obvious from the graph, the embedding sh
 
 In the case of the SBM, a GRDPG-motivated community detection algorithm is to construct the ASE of the graph and then apply a point cloud based clustering algorithm such as \(K\)-means or GMM on the embedding.
 We saw that in the case of the DCBM and PABM, because the latent structures are not based on point masses, while the ASE does reveal the communities, the final clustering step requires other clustering algorithms that are tailored to the latent community structure.
-Likewise, in the following sections, we develop algorithms specific to the structure of the manifold block model (MBM), one in the case of disjoint manifolds and one in the general case in which the latent manifolds can intersect.
-Both algorithms have theoretical consistency properties.
+Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds (section \ref{sec:nonintersect}) and one in the general case in which the latent manifolds can intersect (section \ref{sec:intersect}).
+We also derive theoretical consistency properties for both settings.
 
-\hypertarget{algorithms-for-nonintersecting-manifolds}{%
-\subsection{Algorithms for Nonintersecting Manifolds}\label{algorithms-for-nonintersecting-manifolds}}
+\hypertarget{sec:nonintersect}{%
+\subsection{Algorithms for Nonintersecting Manifolds}\label{sec:nonintersect}}
 
-\hypertarget{algorithms-for-intersecting-manifolds}{%
-\subsection{Algorithms for Intersecting Manifolds}\label{algorithms-for-intersecting-manifolds}}
+In this section, we consider the following setting: Suppose that each community \(C_k\) is represented by a closed manifold \(\mathcal{M}_k\) in the latent space of a RDPG or GRDPG.
+Define \(\delta = \min\limits_{k \neq \ell} \min\limits_{x \in \mathcal{M}_k, y \in \mathcal{M}_\ell} \|x - y\|\), the minimum distance between two manifolds.
+Furthermore, assume that \(\delta > 0\), i.e., the manifolds do not intersect.
+
+In the original latent space, if the vectors on each manifold is sufficiently dense, it is possible to construct for each manifold \(\mathcal{M}_k\) an \(\eta_k\)-neighborhood graph for some \(\eta_k > 0\).
+
+\hypertarget{sec:intersect}{%
+\subsection{Algorithms for Intersecting Manifolds}\label{sec:intersect}}
 
 \hypertarget{examples-and-simulations}{%
 \subsection{Examples and Simulations}\label{examples-and-simulations}}
