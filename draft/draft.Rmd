@@ -523,7 +523,7 @@ Applying an EM algorithm to example \ref{ex:dcbm-dating} results in 84\% accurac
 \label{ex:pabm-dating}
 \end{example}
 
-## The Hierarchy of Block Models
+## A Hierarchy of Block Models
 
 \newpage
 
@@ -1565,7 +1565,7 @@ which tends to $0$ as $n \to \infty$.
 \end{proof}
 
 \begin{proof}[Proof of theorem \ref{theorem:nonintersect-grdpg}]
-Define $E_n(\eta)$ as in lemma \ref{lemma:no-noise} for manifolds $Q_n(\mathcal{M}_1), ..., Q_n(\mathcal{M}_K)$ and each $e_i = \hat{x}_i - Q_n x_i$ where $\hat{x}_i$ is the $i^{th}$ embedding vector and $Q_n$ is some indefinite orthogonal transformation as in \citet{https://doi.org/10.1111/rssb.12509}. 
+Define $E_n(\eta)$ as in lemma \ref{lemma:no-noise} for manifolds $Q_n(\mathcal{M}_1), ..., Q_n(\mathcal{M}_K)$ and each $e_i = \hat{x}_i - Q_n x_i$ where $\hat{x}_i$ is the $i^{th}$ embedding vector and $Q_n$ is some indefinite orthogonal transformation as in \citet{rubindelanchy2017statistical}. 
 Since $Q_n$ is a linear map, for any $\eta \in (0, \|Q_n\| \delta)$, $P(E_n(\eta)) \to 1$ as $n \to \infty$. 
 Let $\epsilon_i = \|e_i\|$, $\epsilon = \max_i \epsilon_i$, and $C_n = \|Q_n\|$. 
 
@@ -1591,6 +1591,14 @@ P(A_n) & = P(\hat{E}_n(\eta) \cap D_n) \\
 $$
 which tends toward $1$ as $n \to \infty$ since both $P(E_n(\eta))$ and $P(D_n)$ tend toward $1$ as $n \to \infty$. 
 \end{proof}
+
+\newpage
+
+\section*{Appendix B: Details on Fitting Bezier Curves to Noisy Data}
+
+\newpage
+
+\section*{Appendix C: Supplementary Materials}
 
 \newpage
 
