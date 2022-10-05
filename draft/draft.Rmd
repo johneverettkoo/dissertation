@@ -529,6 +529,11 @@ Applying an EM algorithm to example \ref{ex:dcbm-dating} results in 84\% accurac
 
 ## Random Dot Product Graphs and Generalized Random Dot Product Graphs {#sec:grdpg}
 
+In the Bernoulli random graph, the edge probability matrix $P$ is of size $n \times n$, but when $K \ll n$, the structure of $P$ is much simpler than its dimensions imply. 
+In particular, $P$ is rank $K$ in the SBM and DCBM and rank $K^2$ in the PABM. 
+This property lends these block models to be analyzed as another family of Bernoulli random graphs with low rank called the random dot product graph (RDPG) and generalized random dot product graph (GRDPG). 
+In this model, $P$ is decomposed into an outer product of two low-rank data matrices. 
+
 \begin{definition}[Generalized random dot product graph]
 \label{def:grdpg}
 Let $p \geq 1$ and $q \geq 0$ be integers. 
@@ -1177,7 +1182,6 @@ This corresponds to a one-dimensional RDPG with a latent structure $X = \begin{b
 In another view, the RDPG with latent structure $X = \begin{bmatrix} \sqrt{p} & \cdots & \sqrt{p} \end{bmatrix}^\top$ induces an $\ER$ model in which the edge probabilities have a fixed value. 
 
 Suppose that we have RDPG in which the latent space is in $\mathbb{R}^2$ and the latent vectors are drawn uniformly from the quarter unit circle defined by $g(t) = \begin{bmatrix} \cos \frac{\pi}{2} t & \sin \frac{\pi}{2} t \end{bmatrix}^\top$ for $t \in [0, 1]$. 
-For simplicity, we set $\rho_n \equiv 1$. 
 Then it can be shown that instead of a fixed $P_{ij} = p$, this RDPG induces a model in which the edge probabilities follow a distribution with density $f(p) = \frac{2}{\pi - 2} \Big( \frac{1}{1 - p^2} - 1 \Big)$. 
 \end{example}
 
@@ -1260,7 +1264,37 @@ In this section, we consider the following setting: Suppose that each community 
 Define $\delta = \min\limits_{k \neq \ell} \min\limits_{x \in \mathcal{M}_k, y \in \mathcal{M}_\ell} \|x - y\|$, the minimum distance between two manifolds. 
 Furthermore, assume that $\delta > 0$, i.e., the manifolds do not intersect. 
 
-In the original latent space, if the vectors on each manifold is sufficiently dense, it is possible to construct for each manifold $\mathcal{M}_k$ an $\eta_k$-neighborhood graph for some $\eta_k > 0$. 
+In the original latent space, it is possible to construct for each manifold $\mathcal{M}_k$ a connected $\eta_k$-neighborhood graph for some $\eta_k > 0$. 
+If the subsample of vectors on each manifold is sufficiently dense such that $\max_k \eta_k = \eta < \delta$, then an $\eta$-neighborhood graph on the entire sample results in a graph with $K$ disconnected subgraphs that map onto each manifold exactly. 
+This is equivalent to applying single linkage clustering on the ASE and cutting the dendrogram at $K$ clusters (see algorithm \ref{alg:ase-singlelink}).
+The remainder of this section explores under which conditions these criteria are met for the latent configuration, in which the latent vectors lie exactly on manifolds, as well as for the ASE of the GRDPG sampled from these latent configurations, in which the vectors lie approximately on manifolds with some noise that approaches zero asymptotically. 
+
+\begin{algorithm}[h]
+  \label{alg:ase-singlelink}
+  \DontPrintSemicolon
+  \SetAlgoLined
+  \setstretch{1.5}
+  \KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $(p, q)$.}
+  \KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$.}
+  Compute $\hat{X}$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
+  Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
+  \caption{ASE clustering for nonintersecting communities.}
+\end{algorithm}
+
+\begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting manifolds]
+\label{theorem:nonintersect-grdpg}
+Let $x_1, ..., x_n$ be points sampled on $K$ compact, connected manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \subset \mathbb{R}^d$ each with probability measures $F_1, ..., F_K$, and the manifolds are separated by distance at least $\delta = \min\limits_{k \neq \ell} \min\limits_{x_i \in \mathcal{M}_k, x_j \in \mathcal{M}_\ell} \| x_i - x_j \| > 0$. 
+Let $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$ and $A \sim \GRDPG_{p,q}(X; \rho_n)$ for some $p, q \in \mathbb{N}_0$ such that $p + q = d$ and sparsity parameter $\rho_n$ that satisfies $n \rho_n = \omega(\log^c n)$ for some $c > 1$. 
+Define $A_n(\eta)$ as the event that an $\eta$-neighborhood graph constructed from the ASE of $A$ consists of exactly $K$ disconnected subgraphs that map exactly to each manifold. 
+Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \infty} P(A_n(\eta)) = 1$. 
+\end{theorem}
+
+If the manifolds are one-dimensional, then a more precise rate of convergence can be derived. 
+
+\begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting curves]
+\label{theorem:nonintersect-curves}
+\end{theorem}
+
 
 
 ## Algorithms for Intersecting Manifolds {#sec:intersect}
@@ -1499,6 +1533,63 @@ O\Bigl(\frac{\log(n_k + n_{\ell})}{\sqrt{n_k + n_{\ell}}}\Bigr)$$
 with high probability. Combining this bound with the bound for
 $\|\hat{\lambda}^{(kk)} - \lambda^{(kk)}\|_{\infty}$ given above
 yields equation~\eqref{eq:param-est} in theorem~\ref{thm:param-est}. 
+\end{proof}
+
+\begin{lemma}
+\label{lemma:no-noise}
+Let $x_1, ..., x_n$ be drawn from $K$ compact, connected manifolds $\mathcal{M}_1$, ..., $\mathcal{M}_K$ each with probability measures $F_1$, ..., $F_K$, and the manifolds are separated by distance at least $\delta > 0$. 
+Suppose that for any $\epsilon > 0$ and $x$ drawn from each $F_k$, on $\mathcal{M}_k$, $F(B(x, \epsilon)) > 0$ where $B(x, \epsilon)$ is the open ball of radius $\epsilon$ centered at $x$. 
+Let $E_n(\eta)$ denote the event that an $\eta$-neighborhood graph constructed from $x_1, ..., x_n$ is comprised of exactly $K$ disjoint subgraphs that map to each of the $K$ manifolds. 
+Then if each $n_k \to \infty$ as $n \to \infty$, $\lim\limits_{n \to \infty} P(E_n(\eta)) = 1$ for each $\eta \in (0, \delta)$. 
+\end{lemma}
+
+\begin{proof}
+It is clear that if $\eta \in (0, \delta)$, an $\eta$-neighborhood graph constructed from the sample will always consist of at least $K$ disjoint subgraphs for which no subgraph contains vertices belonging to points from two different manifolds. 
+Then it is sufficient to show that for a sufficiently large $n$, any $\eta$-neighborhood graph (where $\eta \in (0, \delta)$) will achieve $E_n$. 
+
+Define each $E_{n_k}^{(k)}(\eta)$ as the event that if a sub-sample of size $n_k$ drawn from manifold $\mathcal{M}_k$, every $x \in \mathcal{M}_k$ is within distance $\eta$ of some $x_j$ of the sub-sample. 
+Then if $E_{n_k}^{(k)}(\eta)$ is true, the $\eta$-neighborhood graph results in a connected subgraph for points within the $k^{th}$ manifold. 
+By lemma 2 of \citet{trosset2020rehabilitating}, $P((E_{n_k}^{(k)}(\eta))^c) \leq \ell_k (1 - b_k)^{n_k}$ for some $\ell_k \in \mathbb{N}$ and $b_k \in (0, 1]$. 
+If each $E_{n_k}^{(k)}(\eta)$ is true, then $E_n$ is achieved, so $E_n(\eta) = \bigcap_k E_{n_k}^{(k)}(\eta))$. 
+$\bigcap_k E_{n_k}^{(k)}(\eta) = \Big( \bigcup_k (E_{n_k}^{(k)}(\eta))^c \Big)^c$, so it is sufficient to show $\lim\limits_{n \to \infty} P \big( \bigcup_k (E_{n_k}^{(k)}(\eta))^c \big) \to 0$. 
+
+$$
+\begin{aligned}
+P \big( \bigcup_k(E_{n_k}^{(k)})^c \big) & \leq \sum_k P \big((E_{n_k}^{(k)})^c \big) \\
+& \leq \sum_k \ell_k (1 - b_k)^{n_k} \\
+& \leq K \ell_{\max} (1 - b_{\min})^{n_{\min}},
+\end{aligned}
+$$
+
+which tends to $0$ as $n \to \infty$. 
+\end{proof}
+
+\begin{proof}[Proof of theorem \ref{theorem:nonintersect-grdpg}]
+Define $E_n(\eta)$ as in lemma \ref{lemma:no-noise} for manifolds $Q_n(\mathcal{M}_1), ..., Q_n(\mathcal{M}_K)$ and each $e_i = \hat{x}_i - Q_n x_i$ where $\hat{x}_i$ is the $i^{th}$ embedding vector and $Q_n$ is some indefinite orthogonal transformation as in \citet{https://doi.org/10.1111/rssb.12509}. 
+Since $Q_n$ is a linear map, for any $\eta \in (0, \|Q_n\| \delta)$, $P(E_n(\eta)) \to 1$ as $n \to \infty$. 
+Let $\epsilon_i = \|e_i\|$, $\epsilon = \max_i \epsilon_i$, and $C_n = \|Q_n\|$. 
+
+$A_n(\eta)$ is true if $\eta < \min\limits_{k, \ell} \min\limits_{x_i \in \mathcal{M}_k, x_j \in \mathcal{M}_\ell} \|\hat{x}_i - \hat{x}_j\|$, which is defined as event $D_n(\eta)$, and $\eta \geq \max\limits_k \max\limits_{x_i, x_j \in \mathcal{M}_k} \|\hat{x}_i - \hat{x}_j\|$, which is defined as event $\hat{E}_n(\eta)$.
+
+For any $x_i, x_j$ from different manifolds, $\|\hat{x}_i - \hat{x}_j\| \geq C_n \delta - 2 \epsilon$ if $2 \epsilon \leq C_n \delta$. 
+By theorem 3 of \citet{rubindelanchy2017statistical}, for some finite $M > 0$, $P \big(\epsilon < M \frac{\log^c n}{\sqrt{n}} \big) \to 1$ as $n \to \infty$, so $P(C_n \delta < 2 \epsilon) \leq P(C_n \delta < 2 M n^{1/2} \log^c n) \to 0$ since $C_n \delta > 0$. 
+Then since $P(C_n \delta - 2 \epsilon > 0) \to 1$, there is an $\epsilon \in (0, C_n \delta - 2 \epsilon)$ with probability 1. 
+Thus, $P(D_n(\eta)) \to 1$. 
+
+
+
+Then to show that $P(A_n) \to 1$: 
+
+$$
+\begin{aligned}
+P(A_n) & = P(\hat{E}_n(\eta) \cap D_n) \\
+& = P((\hat{E}_n^c(\eta) \cup D_n^c)^c) \\
+& = 1 - P(\hat{E}_n^c(\eta) \cup D_n^c) \\
+& \geq 1 - P(\hat{E}_n^c(\eta)) - P(D_n^c) \\ 
+& = P(\hat{E}_n(\eta)) + P(D_n) - 1,
+\end{aligned}
+$$
+which tends toward $1$ as $n \to \infty$ since both $P(E_n(\eta))$ and $P(D_n)$ tend toward $1$ as $n \to \infty$. 
 \end{proof}
 
 \newpage
