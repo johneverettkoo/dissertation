@@ -2724,7 +2724,6 @@ Since $\epsilon_i$ describes the error between each embedding point and its corr
 $$L < \frac{1}{n} \sum_i \epsilon_i + \delta_{z_i}(t_i) < \frac{1}{n} n (\epsilon + \delta) = \epsilon + \delta.$$ 
 Then as $n \to \infty$, 
 $$P(L < 2 M n^{-1/2} \log^c n) > P(\epsilon + \delta < 2 M n^{-1/2} \log^c n) \to 1.$$
-
 \end{proof}
 
 \newpage
