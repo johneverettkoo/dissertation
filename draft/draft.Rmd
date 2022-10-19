@@ -2714,8 +2714,6 @@ Let $\hat{X}$ with rows $\hat{x}_i^\top$ be the ASE of $A$ drawn from an MBM in 
 Define the ASE error as $\epsilon_i = \|Q \hat{x}_i - x_i\|$ and $\epsilon = \max_i \epsilon_i$ where $Q$ is the appropriate indefinite orthogonal transformation for the ASE. 
 By \citet{rubindelanchy2017statistical}, $\epsilon = O_P \bigg(\frac{\log^c n}{\sqrt{n}} \bigg)$. 
 
-Since $x_i = g(t_i; p_{z_i})$, $\|Q \hat{x}_i - g(t_i; p_{z_i})\| < \epsilon$. 
-
 The statement of the theorem assumes that for each community $k$, there at least $R + 1$ points with known label $k$. 
 For simplicity, suppose we have exactly $R + 1$ (if there are more, then discard the rest). 
 Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly (see appendix C), yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
