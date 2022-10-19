@@ -227,6 +227,8 @@ Graph and network data, in which samples are represented not as a collection of 
 \newcommand{\ER}{\text{Erd\"{o}s-R\'{e}nyi}}
 \newcommand{\SBM}{\mathrm{SBM}}
 \newcommand{\DCBM}{\mathrm{DCBM}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\MBM}{\mathrm{MBM}}
 
 \newpage
 
@@ -612,7 +614,7 @@ The following is a visualization of the network from example \ref{ex:sbm-dating}
 
 The DCBM allows for each vertex to have its own expected degree while still maintaining community structure.
 However, it still assumes that each vertex within a community has the same relative propensity to connect to each community.
-For example, going back to the dating network in examples \ref{ex:sbm-dating} and \ref{ex:dcbm-dating}, the models assume that everyone is ten times more likely to connect with a member of the opposite sex than to a member of the same sex.
+For example, going back to the dating network in examples \ref{ex:sbm-dating} and \ref{ex:dcbm-dating}, the models assume that each individual is ten times more likely to connect with a member of the opposite sex than with a member of the same sex.
 The popularity adjusted block model \citep{307cbeb9b1be48299388437423d94bf1} allows each vertex to have its own affinity toward each community.
 In the dating network example, the PABM allows us to model each individual's preferences instead of using population level averages.
 
@@ -634,7 +636,7 @@ In these models, it is assumed that all individuals have the same sexual orienta
 Using the parameters specified in these examples, we assume that each individual is 10 times more likely to match with a member of the opposite sex compared to a member of the same sex. 
 The PABM allows us to model each individual's sexual orientation. 
 Figure \ref{fig:dating-pabm} is a visualization of the online dating network modeled as a PABM in which the popularity parameters are drawn as $\lambda_{ik} \sim \Betadist(1, 6)$ if $z_i = k$ and $\lambda_{ik} \sim \Betadist(2, 2)$ if $z_i \neq k$. 
-Like in the SBM and DCBM examples, the average edge probability between communities is approximately ten times greater than the average edge probability within communities. 
+Like in the SBM and DCBM examples, the average edge probability between genders is approximately ten times that of the average edge probability within genders, but unlike in the SBM and DCBM examples, each individual has its own affinity toward each gender. 
 
 \begin{figure}[H]
 
@@ -649,18 +651,76 @@ Like in the SBM and DCBM examples, the average edge probability between communit
 \begin{remark}
 Unlike the SBM (when excluding the sparsity factor), each DCBM and PABM is not unique and therefore non-identifiable. 
 For example, in the case of the DCBM, doubling each $\theta_{k \ell}$ and dividing each $\omega_i$ by $\sqrt{2}$ results in the same edge probability matrix. 
-Nevertheless, a naive EM type algorithm similar to the one in section \ref{sec:sbm} results in high community detection accuracy for most networks, although it is not clear what its asymptotic properties are or whether there are any theoretical guarantees. 
+\citet{Karrer_2011} suggest imposing the constraint $\sum_{i : z_i = k} \omega_i = 1$ for each $k \in \{1, ..., K\}$, but other similar constraints can be used to enforce uniqueness, such as $\max_i \omega_i = 1$ and $\min_i \omega_i = 0$. 
+Despite the lack of uniqueness without constraints, a naive EM type algorithm similar to the one in section \ref{sec:sbm} results in high community detection accuracy for most realizations of the DCBM and PABM, although it is not clear what its asymptotic properties are or whether there are any theoretical guarantees. 
 Likewise, it is not immediately obvious how to approach the estimation of the $\theta_{k \ell}$'s, $\omega_i$'s, or $\lambda_{ik}$'s due to their non-uniqueness. 
-Applying an EM algorithm to example \ref{ex:dcbm-dating} results in 84\% accuracy, and applying a similar EM algorithm to example \ref{ex:pabm-dating} results in 97\% accuracy, but they fail to capture the original (which are not necessarily ``true'') parameters. 
+\citet{noroozi2019estimation} suggest focusing estimation on the edge probability matrix $P$ instead of the individual parameters to avoid this ambiguity. 
+Applying an EM algorithm similar to algorithm \ref{algo:sbm-em} adapted for the DCBM to example \ref{ex:dcbm-dating} results in 84\% accuracy, and applying a similar EM algorithm adapted for the PABM to example \ref{ex:pabm-dating} results in 97\% accuracy, but they fail to capture the original (which are not necessarily ``true'') parameters. 
 \end{remark}
 
 \hypertarget{a-hierarchy-of-block-models}{%
 \subsection{A Hierarchy of Block Models}\label{a-hierarchy-of-block-models}}
 
+The PABM, DCBM, and SBM are nested models, that is, the SBM is a special case of the DCBM which in turn is a special case of the SBM.
+In this section, these connections are made explicit, and we explore the implications for modeling.
+For ease of notation, throughout this section the rows and columns of \(P\) are assumed to be organized by community in increasing order, i.e., the first \(n_1\) rows and columns of \(P\) correspond to community \(1\), the next \(n_2\) rows and columns correspond to community \(2\), etc.
+We use the notation \(P^{(k \ell)} = (P^{(\ell k)})^\top\) to denote the block of \(P\) that corresponds to the edges between communities \(k\) and \(\ell\).
+In section \ref{sec:pabm-grdpg}, we will deal with this notation and convention more carefully.
+For additional details on the connections among the SBM, DCBM, and PABM, refer to \citet{Noroozi2022}.
+
+To see that the SBM is a special case of the DCBM, we can simply restrict the degree parameters \(\omega_i\) to all be a constant value, e.g., \(\omega_i \equiv 1\).
+But in order to better understand the relationship between these two models, we will break down the models further.
+
+Define \(B\) as the \(K \times K\) matrix of edge probabilities between pairs of communities in the SBM.
+Then \(B_{k \ell} = \theta_{k \ell}\) and \(P_{ij} = \theta_{z_i, z_j} = B_{z_i, z_j}\).
+We can further show that block \(P^{(k \ell)}\) can be written as \(P^{(k \ell)} = e^{(k)} B_{k \ell} (e^{(\ell)})^\top\) where \(e^{(k)}\) is the \(1\)-vector of dimension \(k\).
+Since \(B_{k \ell}\) is a scalar, \(P^{(k \ell)} = e^{(k)} B_{k \ell} (e^{(\ell)})^\top\) is a singular value decomposition of a rank 1 matrix and thus each block \(P^{(k \ell)}\) is rank 1.
+Then we can see that the entire edge probability matrix can be written as
+\[P = Z B Z^\top\]
+and \(Z\) is an \(n \times K\) matrix in which \(Z_{ik} = I(z_i = k) = z_{ik}\). Thus, if \(B\) is full rank, i.e., \(\rank(B) = K\), then \(P\) is also rank \(K\).
+
+To extend the SBM to the DCBM, we replace \(e^{(k)}\) with the vector \(\omega^{(k)}\) which contains the degree parameters of vertices in community \(k\).
+Then for the DCBM, \(P^{(k \ell)} = \omega^{(k)} B_{k \ell} (\omega^{(\ell)})^\top\).
+Similar to the SBM, this is a singular value decomposition of a rank 1 matrix.
+The full edge probability matrix can be written as
+\[P = (\Omega Z) B (\Omega Z)^\top\]
+for \(\Omega = \diag(\omega)\).
+Since \(\Omega\) is diagonal, we again have that \(\rank(P) = K\) (again, assuming that \(B\) is full rank).
+Thus, the dimensionality of the DCBM is the same as the SBM, and to restrict the DCBM to the PABM, let \(\Omega = I\).
+
+To extend the DCBM to the PABM, we note that the \(k \ell\)\textsuperscript{th} block of the edge probability matrix can be written as \(P^{(k \ell)} = \lambda^{(k \ell)} (\lambda^{(\ell k)})^\top\) where \(\lambda^{(k \ell)} \in \mathbb{R}^{n_k}\) is the vector of popularity parameters belonging to vertices in community \(k\) that point to community \(\ell\), i.e., \(\lambda^{(k \ell)}_i = \lambda_{i + \sum_{s=1}^{k-1} n_s, \ell}\).
+Similar to how \(\omega^{(k)}\) is a sub-vector of \(\omega\)
+To match this decomposition with the one for the DCBM, we can fix each \(B_{k \ell} \equiv 1\) and write \(P^{(k \ell)} = \lambda^{(k \ell)} B_{k \ell} (\lambda^{(\ell k)})^\top\).
+Restricting each \(\lambda^{(k \ell)} = \omega^{(k)}\) reduces the PABM to the DCBM.
+To write out the full edge probability matrix of the PABM, let \(\Lambda^{(k)} =\begin{bmatrix} \lambda^{(k1)} & \cdots & \lambda^{(kK)} \end{bmatrix}\) and \(X = \blockdiag(\Lambda^{(1)}, ..., \Lambda^{(K)})\).
+Then for some \(K^2 \times K^2\) permutation matrix \(\Pi\),
+\[P = X \Pi X^\top.\]
+From this decomposition, we can see that unlike the SBM and DCBM, \(\rank(P) = \rank(X) = K^2\).
+We will explore this decomposition of the edge probability matrix of the PABM in more detail in section \ref{sec:pabm-grdpg}.
+
+The full hierarchy of nested block models is summarized in table \ref{tab:hierarchy}.
+
+\begin{table}
+
+\caption{\label{tab:hierarchy}Summary of an hierarchical or nested view of block momdels.}
+\centering
+\begin{tabular}[t]{l|l|l|l|l}
+\hline
+Model & Parameters & Dimensions & Matrix Decomposition & Reduction to simpler model\\
+\hline
+SBM & $K (K-1) / 2$ & $K$ & $P = Z B Z^\top$ & \\
+\hline
+DCBM & $K (K-1) / 2 + n$ & $K$ & $P = (\Omega Z) B (\Omega Z)^\top$ & $\omega = e$\\
+\hline
+PABM & $n K$ & $K^2$ & $P = X \Pi X^\top$ & $\lambda_{ik} = \omega_i \sqrt{\theta_{z_i, k}}$\\
+\hline
+\end{tabular}
+\end{table}
+
 \newpage
 
 \hypertarget{sec:grdpg}{%
-\subsection{Random Dot Product Graphs and Generalized Random Dot Product Graphs}\label{sec:grdpg}}
+\subsection{The Generalized Random Dot Product Graph}\label{sec:grdpg}}
 
 In the Bernoulli random graph, the edge probability matrix \(P\) is of size \(n \times n\), but when \(K \ll n\), the structure of \(P\) is much simpler than its dimensions imply.
 In particular, \(P\) is rank \(K\) in the SBM and DCBM and rank \(K^2\) in the PABM.
@@ -681,12 +741,11 @@ If $q = 0$ and so $d = p$, (i.e., $P$ is positive semidefinite), then we call th
 In this case, we use the notation $A \sim \RDPG(X; \rho_n)$ and $A \sim \RDPG(F; \rho_n)$. 
 \end{definition}
 
-\begin{definition}[Adjacency spectral embedding]
-\label{def:ase}
-\end{definition}
-
 \begin{definition}[Indefinite orthogonal group]
-\label{def:indef-ortho-group}
+\label{def:indefinite}
+The indefinite orthogonal group with signature $(p, q)$ is
+the set $\{Q \in \mathbb{R}^{d \times d} \colon Q I_{p, q} Q^{\top} = I_{p, q}\}$,
+denoted as $\mathbb{O}(p, q)$. Here $d = p + q$. 
 \end{definition}
 
 \begin{remark}
@@ -697,6 +756,57 @@ More specifically, if $P_{ij} = x_i^\top I_{p, q} x_j$, then for any $Q \in \mat
 $(Q x_i)^\top I_{p, q} (Q x_j) = x_i^\top (Q^\top I_{p, q} Q) x_j = x_i^\top I_{p, q} x_j = P_{ij}$. 
 Unlike in the RDPG case, transforming the latent positions via multiplication by $Q \in \mathbb{O}(p, q)$ does not necessarily maintain interpoint angles or distances.
 \end{remark}
+
+Now that we defined the GRDPG as a generative model for Bernoulli random graphs,
+we need a method for estimation.
+We can use Adjacency Spectral Embedding (ASE) \citep{doi:10.1080/01621459.2012.699795} to recover the latent vectors of a GRDPG.
+This procedure consists of taking the spectral decomposition of \(A\) and keeping the \(p + q\) largest eigenvalues (in modulus) and corresponding eigenvectors of \(A\).
+
+\begin{definition}[Adjacency spectral embedding]
+\label{def:ase}
+Let $A$ be an $n
+\times n$ adjacency matrix and denote the
+eigendecomposition of $A$ as
+$$A = \sum_{i} \hat{\lambda}_i \hat{v}_i \hat{v}_i^{\top}, \quad
+\text{where} \,\,
+|\hat{\lambda}|_1 \geq |\hat{\lambda}_2| \geq \dots \geq
+|\hat{\lambda}_n|.$$
+Let $\hat{D}$ be a diagonal matrix whose diagonal entries are
+the eigenvalues $\{\hat{\lambda}_i\}_{i=1}^{d}$ arranged in decreasing values (not in
+decreasing modulus) and let $\hat{V}$ be the $n \times d$ matrix whose
+columns are the corresponding eigenvectors $\{\hat{v}_i\}_{i=1}^{d}$
+arranged in the same order as the diagonal entries of $\hat{D}$. Now
+define $\hat{X} = \hat{V} |\hat{D}|^{1/2}$ where the $|\cdot|$
+operation is applied elementwise to the entries of $\hat{D}$. Then
+$\hat{X}$ serves as an estimate of $X$, up to some non-identifiable
+orthogonal transformation $Q$ as described in
+remark~\ref{rem:non_identifiable} and definition~\ref{def:indefinite};
+see \citet{rubindelanchy2017statistical} for further details.
+\end{definition}
+
+\citet{doi:10.1080/01621459.2012.699795} and \citet{rubindelanchy2017statistical} showed that the ASE is consistent in estimating the latent vectors, up to an indefinite orthogonal transformation.
+More specifically, for sparsity parameters such that \(n \rho_n = \omega (\log^{4 c} n)\) for some constant \(c > 1\) and indefinite orthogonal transformation \(Q \in \mathbb{O}(p, q)\),
+\[\max_i \|Q \hat{x}_i - x_i \| = O_P \bigg( \frac{\log^c n}{n^{1/2}} \bigg)\]
+where \(x^\top\) and \(\hat{x}^\top\) are the rows of \(\hat{X}\) (from the ASE) and \(X\), respectively.
+
+\begin{example}
+Suppose that latent vectors for an RDPG are drawn from the curve 
+$x(t) = \begin{bmatrix} t^2 & 2 t (t-1) \end{bmatrix}^\top$, $t \in [0, 1]$. 
+Let $x_i = x(t_i)$. 
+Then for each $i < j$, the edges are drawn as $A_{ij} \indep \Bernoulli(x_i^\top x_j)$. 
+If after observing $A$, we wish to estimate the curve, the ASE provides an estimator in which the estimated latent vectors converge to the curve, up to an orthogonal transformation (figure \ref{fig:ase-example}). 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/ase-example-1} 
+
+}
+
+\caption{200 points drawn from a curve (left), and the ASE of an adjacency matrix drawn from this curve as an RDPG (right). The red line is the original curve rotated to match the ASE.}\label{fig:ase-example}
+\end{figure}
+
+
+\end{example}
 
 \hypertarget{sec:sbm-dcbm-grdpg}{%
 \subsection{Connecting the SBM and DCBM to the GRDPG}\label{sec:sbm-dcbm-grdpg}}
@@ -1296,8 +1406,337 @@ for example theorem 2 in \citet{307cbeb9b1be48299388437423d94bf1} only guarantee
 \hypertarget{simulation-study}{%
 \subsection{Simulation Study}\label{simulation-study}}
 
+For each simulation, community labels are drawn from a multinomial
+distribution, the popularity vectors \(\{\lambda^{(k \ell)}\}_K\) are drawn
+from two types of joint distributions depending on whether \(k = \ell\) or \(k \not = \ell\). The edge probability matrix \(P\) is constructed using the popularity
+vectors and finally the adjacency matrix \(A\)
+is drawn \(A \sim \mathrm{Bernoulli}(P)\). OSC (algorithm \ref{alg:osc}) is then used for community detection, and this
+method is compared against (1) SSC using the spectral embedding \(\hat{V}\)
+(algorithm \ref{alg:ssc}), (2) SSC using the rows of the
+observed adjacency matrix \(A\) as is done in \citet{noroozi2019estimation}
+and (3) modularity maximization (MM) as is done in
+\citet{307cbeb9b1be48299388437423d94bf1}. We denote the two SSC
+implementations using the rows of \(A\) and using the spectral embedding
+of \(A\) as SSC-A and SSC-ASE, respectively.
+The parameters \(\vartheta\)
+that controls the sparsity for SSC-A and SSC-ASE were chosen via a preliminary cross-validation experiment.
+In practice, \(\vartheta\) that guarantee SDP (if it is possible for the particular simulated data) often result in more than \(K\) disconnected subgraphs, so a smaller \(\vartheta\) that does not guarantee SDP was chosen,
+and the final clustering step of SSC-A and SSC-ASE was done
+by fitting a Gaussian mixture model to the normalized Laplacian
+eigenmap embeddings \citep{belkin03:_laplac} of the affinity matrix \(B\).
+We also estimate the latent popularity vectors \(\{\lambda^{(k \ell)}\}\)
+by assuming that the true community labels are known and then apply
+algorithm \ref{alg:param_est}, and we compare this estimation method against an
+MLE-based estimator as described in \citet{noroozi2019estimation} and
+\citet{307cbeb9b1be48299388437423d94bf1}.
+
+Modularity maximization is NP-hard, so
+\citet{307cbeb9b1be48299388437423d94bf1} used the extreme points
+(EP) algorithm (\cite{le2016}) as a greedy
+relaxation of the optimization problem; the EP algorithm has a running
+time of \(O(n^{K-1})\) where \(n\) is the number of vertices in the graph
+and \(K\) is the number of communities.
+For these simulations we instead replace the EP algorithm with the
+Louvain algorithm for modularity maximization,
+as the implementation of the EP algorithm in
+\citet{307cbeb9b1be48299388437423d94bf1} is too computationally expensive for \(K > 2\). For \(K = 2\), it
+was verified that the Louvain algorithm produces comparable results
+to EP-MM.
+
+For comparing methods, we define the community detection error as:
+\[L_c(\hat{\sigma}, \sigma; V) = \min_\pi \sum_i I(\pi \circ \hat{\sigma}(v_i) = \sigma(v_i))\]
+where \(\sigma(v_i)\) is the true community label of vertex \(v_i\), \(\hat{\sigma}(v_i)\) is the predicted label of \(v_i\), and \(\pi\) is a permutation operator.
+This is effectively the ``misclustering count'' of clustering function \(\hat{\sigma}\).
+
+For parameter estimation, because the popularity parameters \(\{\lambda_{ik}\}\) are unidentifiable, we instead estimate the edge probabilities \(P_{ij} = \lambda_{i z_j} \lambda_{j z_i}\) via the quantities \(\hat{P}_{ij} = \hat{\lambda}_{iz_j} \hat{\lambda}_{jz_i}\).
+The parameter estimation error is then given by the normalized Frobenius norm of \(P\) divided by the number of vertices, i.e.,
+\[\mathrm{RMSE}(\hat{P}, P) = \frac{1}{n} \|\hat{P} - P\|_F.\]
+
+We also note that unlike the MLE-based method \citep{307cbeb9b1be48299388437423d94bf1}, the ASE method in algorithm \ref{alg:param_est} can be trivially modified so as to not require the community labels if we are only interested in estimating \(P\).
+More specifically we first compute the ASE \(\hat{Z}\) of \(A\) (see definition \ref{def:ase}) and then compute \(\hat{P} = \hat{Z} I_{p,q} \hat{Z}^{\top}\).
+The resulting estimate \(\hat{P}\) will have the same convergence rate as that given in equation (\ref{eq:conv_prob}).
+
+\hypertarget{sec:balanced-communities}{%
+\subsubsection{Balanced Communities}\label{sec:balanced-communities}}
+
+In each simulation, community labels \(z_1, ..., z_n\) were drawn from a
+multinomial distribution with mixture parameters
+\(\{\alpha_1, ..., \alpha_K\}\), then \(\{\lambda^{(k \ell)}\}_K\) according
+to the drawn community labels, \(P\) was constructed using the drawn
+\(\{\lambda^{(k \ell)}\}_K\), and \(A\) was drawn from \(P\).
+
+For these examples, we set the following parameters:
+
+\begin{itemize}
+\tightlist
+\item
+  Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
+\item
+  Number of underlying communities \(K = 2, 3, 4\)
+\item
+  Mixture parameters \(\alpha_k = 1 / K\) for \(k = 1, ..., K\), (i.e.,
+  each community label has an equal probability of being drawn)
+\item
+  Community labels
+  \(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
+\item
+  Within-group popularities
+  \(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\)
+\item
+  Between-group popularities
+  \(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\) for
+  \(k \neq \ell\)
+\end{itemize}
+
+Fifty simulations were performed for each combination of \(n\) and \(K\).
+The results for community recovery and parameter estimations are presented in figures \ref{fig:clust_err_ct_sim} and \ref{fig:p_block_est}, respectively.
+
+Figure \ref{fig:clust_err_ct_sim} shows that OSC recovers the community
+perfectly as \(n\) increases, i.e., the number of mislabeled vertices
+goes to \(0\).
+The performance of SSC-ASE is comparable to OSC for \(K \geq 3\) but is noticeably worse when \(K = 2\).
+Similarly, SSC on both the embedding and on the adjacency matrix produces similar trends for \(K > 2\).
+The difference in performance between SSC-A and SSC-ASE for \(K = 2\) can be attributed to the final spectral clustering step of the affinity matrix. While the subspace detection property is guaranteed for large \(n\), in our simulations, setting the
+sparsity parameter \(\vartheta\) to the required value usually resulted
+in more than \(K\) disconnected subgraphs in the affinity matrix
+\(\hat{B}\).
+We instead chose a smaller sparsity parameter,
+necessitating a final clustering step.
+A GMM was fit to the normalized Laplacian eigenmap of \(\hat{B}\),
+but visual inspection suggests that the communities are not
+distributed as a mixture of Gaussians in the eigenmap.
+A different choice of mixture distribution may result in better performance.
+
+\begin{figure}[tp]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim-1}
+}
+\caption{Median and IQR of community detection error. Communities are approximately balanced. Simulations were repeated 50 times for each sample size.}
+\label{fig:clust_err_ct_sim}
+\end{figure}
+
+Given ground truth community labels, figure \ref{fig:p_block_est} shows
+that algorithm \ref{alg:param_est} and the MLE-based
+plug-in estimators perform comparably, with root mean square
+error decaying at rate approximately \(n^{-1/2}\) as \(n\) increases.
+
+\begin{figure}[tp]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p-1}}
+\caption{Median and IQR RMSE for edge probability matrices
+  reconstructed from the outputs of algorithm~\ref{alg:param_est}
+  (red) compared against outputs of an MLE-based method (blue) proposed in \citet{307cbeb9b1be48299388437423d94bf1}.
+  Simulations were repeated 50 times for each sample size. Communities were drawn to be approximately balanced.}
+\label{fig:p_block_est}
+\end{figure}
+
+\hypertarget{sec:imbalanced-communities}{%
+\subsubsection{Imbalanced Communities}\label{sec:imbalanced-communities}}
+
+Simulations performed in this section are the same as those in the
+previous section with the exception of the mixture parameters
+\(\{\alpha_1, ..., \alpha_K\}\) used to draw community labels from the
+multinomial distribution. For these examples, we set the following
+parameters:
+
+\begin{itemize}
+\tightlist
+\item
+  Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
+\item
+  Number of underlying communities \(K = 2, 3, 4\)
+\item
+  Mixture parameters \(\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}\)
+  for \(k = 1, ..., K\)
+\item
+  Community labels
+  \(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
+\item
+  Within-group popularities
+  \(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\)
+\item
+  Between-group popularities
+  \(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\) for
+  \(k \neq \ell\)
+\end{itemize}
+
+Fifty simulations were performed for each combination of \(n\) and \(K\).
+The results for community recovery and parameter estimations are presented in figures \ref{fig:clust_err_ct_sim_imba} and \ref{fig:lambda_est_p_imba}, respectively.
+
+From figure \ref{fig:clust_err_ct_sim_imba} we once again see that the
+number of mislabeled vertices trending to \(0\) for OSC.
+The performance of SSC-ASE is comparable to that of OSC for \(K > 2\) but is worse when \(K = 2\).
+Figure \ref{fig:lambda_est_p_imba} indicates that the parameter estimation error also decays at rate \(n^{-1/2}\) similar to that in the balanced communities setting.
+
+\begin{figure}[H]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim_imba-1}
+}
+\caption{Median and IQR of community detection error. Communities are imbalanced. 
+Simulations were repeated 50 times for each sample size.}\label{fig:clust_err_ct_sim_imba}
+\end{figure}
+
+\begin{figure}[H]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p_imba-1}
+}
+\caption{Median and IQR RMSE of edge probabilities derived from the
+  outputs of Algorithm \ref{alg:param_est} (red) compared against an
+  MLE-based method (blue) described in
+  \cite{307cbeb9b1be48299388437423d94bf1}.
+  Simulations were repeated 50 times for each sample size. Communities were drawn to be imbalanced.}
+\label{fig:lambda_est_p_imba}
+\end{figure}
+
+\hypertarget{sec:disassortative-models}{%
+\subsubsection{Disassortative Models}\label{sec:disassortative-models}}
+
+\citet{rubindelanchy2017statistical} demonstrated the power of applying GRDPG-based approaches to disassortative block models.
+Likewise, demonstrate that GRDPG-based algorithms OSC and SSC-ASE perform well on disassortative PABMs.
+Simulations performed in this section are the same as those in section \ref{sec:balanced-communities} with the exception of the distributions from which within and between-group popularity parameters are drawn.
+Here, we draw these parameters such that the expected value is \(1/3\) for the within-group popularity parameters and \(2/3\) for the between-group popularity parameters:
+
+\begin{itemize}
+\tightlist
+\item
+  Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
+\item
+  Number of underlying communities \(K = 2, 3, 4\)
+\item
+  Mixture parameters \(\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}\)
+  for \(k = 1, ..., K\)
+\item
+  Community labels
+  \(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
+\item
+  Within-group popularities
+  \(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\)
+\item
+  Between-group popularities
+  \(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\) for
+  \(k \neq \ell\)
+\end{itemize}
+
+OSC, SSC-ASE, and SSC-A perform similarly on disassortative PABMs compared to the simulations in sections \ref{sec:balanced-communities} and \ref{sec:imbalanced-communities}
+(figures \ref{fig:clust_k_disassortative} and \ref{fig:lambda_est_disassortative}).
+
+\begin{figure}[H]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_k_disassortative}
+}
+\caption{Median and IQR of community detection error. 
+Communities are approximately balanced. 
+Edge probabilities were drawn to be disassortative. 
+Simulations were repeated 50 times for each sample size.}
+\label{fig:clust_k_disassortative}
+\end{figure}
+
+\begin{figure}[H]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_disassortative}
+}
+\caption{Median and IQR RMSE of edge probabilities derived from the
+  outputs of algorithm \ref{alg:param_est} (red) compared against an
+  MLE-based method (blue) described in
+  \cite{307cbeb9b1be48299388437423d94bf1}.
+  Simulations were repeated 50 times for each sample size. 
+  Communities were drawn to be approximately balanced.
+  Edge probabilities were drawn to be disassortative.}
+\label{fig:lambda_est_disassortative}
+\end{figure}
+
+\begin{remark}
+While we call the models in this section ``disassortative'', it is our view that the assortative/disassortative distinction is not applicable to PABMs due to its flexibility. 
+Unlike the SBM and DCBM, in the PABM, each vertex is free to have a higher affinity to its own community or to other communities, independent of each other. 
+In other words, within the same community, $v_i$ may have a larger popularity parameter to its own community whereas $v_j$ may have a larger popularity parameter to a different community. 
+Furthermore, when viewed as GRDPGs, the assortativity or disassortativity of SBMs and DCBMs affects whether $P$ is positive semidefinite, which affects ASE-based approaches to analyzing the graph \citep{rubindelanchy2017statistical}, 
+but in the full rank PABM, $P$ is never positive semidefinite and will always have $K (K + 1) / 2$ positive eigenvalues and $K (K - 1) / 2$ negative eigenvalues. 
+\end{remark}
+
 \hypertarget{applications}{%
 \subsection{Applications}\label{applications}}
+
+In the first example, we applied OSC (algorithm \ref{alg:osc}) to the Leeds Butterfly
+dataset \citep{Wang_2018} consisting of visual similarity measurements
+among 832 butterflies across 10 species. The graph was modified to match
+the example from \citet{noroozi2019estimation}: Only the \(K=4\) most
+frequent species were considered, and the similarities were discretized
+to \(\{0, 1\}\) via thresholding.
+Figure \ref{fig:butterfly} shows a sorted adjacency matrix sorted by the resultant clustering.
+
+Comparing against the ground truth species labels, \citet{noroozi2019estimation}
+report that SSC on the adjacency matrix achieves an adjusted Rand index of 73\% in their implementation, whereas OSC achieves 92\% and SSC on the ASE achieves 96\%.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/butterfly-1}
+
+}
+
+\caption{Adjacency matrix of the Leeds Butterfly dataset 
+after sorting by the clustering outputted by OSC.}\label{fig:butterfly}
+\end{figure}
+
+In the second example (figure \ref{fig:mp} and table \ref{tab:unnamed-chunk-6}), we applied OSC to the British MPs Twitter network
+\citep{greene2013producing}, the Political Blogs network
+\citep{10.1145/1134271.1134277}, and the DBLP network
+\citep{NIPS2009_3855, 10.1007/978-3-642-15880-3_42}.
+For this data analysis, we subsetted the data as described in
+\citet{307cbeb9b1be48299388437423d94bf1} for their analysis of the
+same networks. Our methods slightly underperformed compared to modularity
+maximization, although performance is comparable.
+The run time of OSC is however much smaller than that of modularity maximization.
+
+\begin{figure}[H]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1}
+}
+\caption{Adjacency matrices of (from left to right) the British MPs, Political Blogs, and DBLP networks after sorting by the clustering outputted by OSC.}\label{fig:mp}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+Network & MM & SSC-ASE & OSC\\
+\hline
+British MPs & 0.003 & 0.012 & 0.006\\
+\hline
+Political Blogs & 0.050 & 0.187 & 0.062\\
+\hline
+DBLP & 0.028 & 0.072 & 0.059\\
+\hline
+\end{tabular}
+\caption{\label{tab:unnamed-chunk-6}Community detection error rates on the British MPs Twitter, Political Blogs, and DBLP networks using modularity maximization, sparse subspace clustering, and OSC.}
+\end{table}
+
+In the third example (figure \ref{fig:households-figure} and
+table \ref{tab:households-table}),
+we analyzed the Karantaka villages data studied by
+\citet{DVN/U3BIHX_2013}. We chose the \texttt{visitgo}
+networks from villages 12, 31, and 46 at the household level.
+In these networks, each node is a household and each edge is
+an interaction between members of pairs of households.
+The label of interest is the religious affiliation.
+The networks were truncated to religions ``1'' and ``2'',
+and vertices of degree 0 were removed.
+The villages were chosen based on there being an adequate number of nodes
+between households within each religion.
+
+\begin{figure}[H]
+{\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1}
+}
+\caption{Adjacency matrix of the Karnataka villages data, arranged by the clustering produced by OSC (left). The villages studied here are, from left to right, 12, 31, and 46.}\label{fig:households-figure}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+Network & MM & SSC-ASE & OSC\\
+\hline
+Village 12 & 0.270 & 0.291 & 0.227\\
+\hline
+Village 31 & 0.125 & 0.059 & 0.051\\
+\hline
+Village 46 & 0.052 & 0.069 & 0.056\\
+\hline
+\end{tabular}
+\caption{\label{tab:households-table}Community detection error rates for identifying household religion.}
+\end{table}
 
 \newpage
 
@@ -1353,9 +1792,10 @@ Some plausible constraints may be to fix one distribution for each underlying di
 We use these constraints to construct the following example:
 
 \begin{example}
+\label{ex:separated-curves}
 Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = \begin{bmatrix} \cos(\frac{\pi}{3} t) & \sin(\frac{\pi}{3} t) \end{bmatrix}^\top$ and $f_2(t) = \begin{bmatrix} 1 - \cos(\frac{\pi}{3} t) & 1 - \sin(\frac{\pi}{3} t) \end{bmatrix}^\top$.
 Draw $t_1, ..., t_n \iid \Uniform(0, 1)$ and $z_1, ..., z_n \iid \Multinomial(\frac{1}{2}, \frac{1}{2})$, and compute latent vectors $x_i = f_{z_i}(t_i)$, which are collected in data matrix $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$. 
-Finally, let $A \sim \RDPG(X)$. Figure~\ref{fig:two-curves} shows the latent configuration drawn from this latent distribution, a random dot product graph drawn from the latent configuration, and the adjacency spectral embedding of the graph. 
+Finally, let $A \sim \RDPG(X)$. Figure~\ref{fig:two-curves} shows the latent configuration drawn from this latent distribution, a random dot product graph drawn from the latent configuration, and the ASE of the graph. 
 Although the community structure is not obvious from the graph, the embedding shows a clear separation between the two communities. 
 
 \begin{figure}[H]
@@ -1364,7 +1804,7 @@ Although the community structure is not obvious from the graph, the embedding sh
 
 }
 
-\caption{Manifold block model described in Example 1. The latent configuration is on the left, a random dot product graph drawn from the latent configuration is on the middle, and the ASE is on the right.}\label{fig:two-curves}
+\caption{Manifold block model from two disjoint curves. The latent configuration is on the left, a random dot product graph drawn from the latent configuration is on the middle, and the ASE is on the right.}\label{fig:two-curves}
 \end{figure}
 \end{example}
 
@@ -1374,7 +1814,7 @@ Likewise, in the following sections, we develop algorithms specific to the struc
 We also derive theoretical consistency properties for both settings.
 
 \hypertarget{sec:nonintersect}{%
-\subsection{Algorithms for Nonintersecting Manifolds}\label{sec:nonintersect}}
+\subsection{Algorithm for Nonintersecting Manifolds}\label{sec:nonintersect}}
 
 In this section, we consider the following setting: Suppose that each community \(C_k\) is represented by a closed manifold \(\mathcal{M}_k\) in the latent space of a RDPG or GRDPG.
 Define \(\delta = \min\limits_{k \neq \ell} \min\limits_{x \in \mathcal{M}_k, y \in \mathcal{M}_\ell} \|x - y\|\), the minimum distance between two manifolds.
@@ -1407,18 +1847,244 @@ Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \inf
 
 If the manifolds are one-dimensional, then a more precise rate of convergence can be derived.
 
-\begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting curves]
-\label{theorem:nonintersect-curves}
-\end{theorem}
+\begin{example}
+\label{ex:separated-curves-2}
+Refer back to the RDPG in example \ref{ex:separated-curves} in which the latent vectors are drawn uniformly from two nonintersecting curves. 
+Figure \ref{fig:two-curves} shows that while the ASE introduces noise to the original latent vectors, there is still sufficient separation between the two communities. 
+Applying single-linkage clustering on the ASE results in recovering the original community labels, up to permutation (figure \ref{fig:two-curves-2}). 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/two-curves-2-1} 
+
+}
+
+\caption{Single-linkage clustering applied to the ASE of an MBM with two nonintersecting curves. The ASE is on the left and the dendrogram from single-linkage clustering, colored by the original community labels, is on the right.}\label{fig:two-curves-2}
+\end{figure}
+\end{example}
 
 \hypertarget{sec:intersect}{%
-\subsection{Algorithms for Intersecting Manifolds}\label{sec:intersect}}
+\subsection{Algorithm for Intersecting Manifolds}\label{sec:intersect}}
 
-\hypertarget{examples-and-simulations}{%
-\subsection{Examples and Simulations}\label{examples-and-simulations}}
+The consistency of the ASE provides asymptotic guarantees for perfect community label recovery for the nonintersecting MBM.
+This relies on the fact that single-linkage clustering and \(\eta\)-neighborhood clustering graphs result in disconnected components if clusters of points are far away from each other.
+However, many graphs do not behave so nicely.
+For example, the DCBM and PABM can both be viewed as MBMs in which the latent vectors come from (linear) manifolds that intersect at the origin (see section \ref{sec:sbm-dcbm-grdpg}).
+Nonlinear intersecting manifolds have also been observed in ASEs of real graphs \citep{SannaPassino2022, https://doi.org/10.48550/arxiv.1709.05454}.
+While the DCBM and PABM cases can be handled by algorithms specific to linear structures such as SSC and OSC, nonlinear intersecting manifolds require a more flexible approach.
+For the intersecting case, we restrict the MBM to the case in which each \(F_{z_i}\) is identical and univariate on the unit interval \([0, 1]\).
+The full mixture model is described as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Draw \(t_1, ..., t_n \iid F\) for probability distribution \(F\) with support \([0, 1]\).
+\item
+  Draw \(z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)\), the community labels.
+\item
+  Let each \(x_i = g_{z_i}(t_i)\) be the latent vector for vertex \(v_i\), and collect the latent vectors into matrix \(X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top\).
+\item
+  Draw \(A \sim \GRDPG_{p,q}(X; \rho_n)\).
+\end{enumerate}
+
+\begin{example}
+\label{ex:intersect-curves}
+Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two curves defined by the parameterizations $g_1(t) = \begin{bmatrix} t^2 & 2 t (1-t) \end{bmatrix}^\top$ and $g_2(t) = \begin{bmatrix} 2 t (1-t) & (1-t)^2 \end{bmatrix}^\top$. 
+This can be described as a two-community MBM in which the manifolds are both one-dimensional. 
+For simplicity, we restrict $F_1 = F_2 = \Uniform(0, 1)$. 
+$g_1$ and $g_2$ intersect at two points, $t = 0$ and $t = 2/3$, which in the latent space correspond to $(0, 0)$ and $(4/9, 4/9)$. 
+Clearly, single-linkage or $\eta$-neighborhood clustering does not work for this setting, both in the original latent space and in the ASE. 
+The community structure is also not clear from the adjacency matrix. 
+However, there still is a clear pattern in the ASE that reveals the community structure (figure \ref{fig:intersect-curves-example}). 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/intersect-curves-example-1} 
+
+}
+
+\caption{Latent vectors on intersecting curves (left), along with an RDPG drawn from this configuration (center) and its ASE (right).}\label{fig:intersect-curves-example}
+\end{figure}
+\end{example}
+
+In this setting, if we know the labels \(z_1, ..., z_n\), then for each \(k\)\textsuperscript{th} subsample for which \(z_i = k\), we can fit the curve \(\hat{g}_k\) (up to an indefinite orthogonal transformation).
+On the other hand, if we know the curves \(g_1, ..., g_K\), then we can assign each embedding vector \(\hat{x}_i\) the predicted label \(\hat{z}_i\) based on which curve it is closest to.
+This lends itself to an alternating coordinate descent algorithm in which we alternate between fitting curves and assigning labels at each iteration (algorithm \ref{alg:kcurves}).
+We call this algorithm \(K\)-curves clustering.
+In this algorithm, the loss function that we wish to minimize is
+\begin{equation}
+\label{eq:kcurves-loss}
+\sum_{k=1}^K \sum_{i \in C_k} \|x_i - g_k(t_i)\|^2
+\end{equation}
+
+\begin{algorithm}[h]
+\label{alg:kcurves}
+\DontPrintSemicolon
+\SetAlgoLined
+\setstretch{1.5}
+\KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $p$, $q$, stopping criterion $\epsilon$}
+\KwResult{Community assignments $1, ..., K$, curves $g_1, ..., g_K$}
+Compute $X$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
+Initialize community labels $z_1, ..., z_n$.\;
+\Repeat {the change in $\sum_k \sum_{i \in C_k} \|x_i - g_k(t_i)\|^2$ is less than $\epsilon$} {
+\For {$k = 1, ..., K$} {
+Define $X_k$ as the rows of $X$ for which $z_i = k$.\;
+Fit curve $g_k$ and positions $t_{k_i}$ to $X_k$ by minimizing $\sum_{k_i} \|x_{k_i} - g_k(t_{k_i})\|^2$.\;
+}
+\For {$k = 1, ..., K$} {
+Assign $z_i \leftarrow \arg\min_\ell \|x_i - g_\ell(t_i)\|^2$.\;
+}
+}
+\caption{$K$-curves clustering.}
+\end{algorithm}
+
+\(K\)-curves clustering either requires knowledge of the functional form of each \(g_k\) or a function that is flexible enough to approximate it.
+The choice of \(g_k\) affects the difficulty of the algorithm.
+As a balance between flexibility and ease of estimation, we consider the case where each \(g_k\) is a Bezier polynomial of degree \(R\) with coefficients \(p_k\).
+Then we have \(g_k(t) = g(t; p_k) = \sum_{r=0}^R p_k^{(r)} \binom{R}{r} (1-t)^{R-r} t^r\).
+
+\begin{example}
+\label{ex:intersect-curves-fit}
+Figure \ref{fig:intersect-curves-2} shows one result of applying algorithm \ref{alg:kcurves} on example \ref{ex:intersect-curves}. 
+In this implementation, $g_1$ and $g_2$ are assumed to be Bezier curves in which $p_1^{(0)} = p_2^{(0)} = \begin{bmatrix} 0 & 0 \end{bmatrix}^\top$, i.e., the curves meet at the origin. 
+Here, an accuracy of 87.5\% is achieved. 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/intersect-curves-2-1} 
+
+}
+
+\caption{$K$-curves clustering applied to example \ref{ex:intersect-curves}. The embedding vectors are labeled by predicted community.}\label{fig:intersect-curves-2}
+\end{figure}
+\end{example}
+
+While example \ref{ex:intersect-curves-fit} achieved high accuracy, algorithm \ref{alg:kcurves} often results in poor performance when it is paired with poor initialization.
+In example \ref{ex:intersect-curves-fit}, it just so happened that we randomly chose initial curves that iterated to good fits, but this is not guaranteed.
+We also restricted the curves to meet at the origin, which appears to have helped guide the curves to good fits.
+In figures \ref{fig:loss} and \ref{fig:init-strategies}, we show the results of various initializations on fitting curves to example \ref{ex:intersect-curves}, such as random initialization and spectral clustering.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{/home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed-chunk-7-1} 
+
+}
+
+\caption{ASE labeled by estimated community labels for each initialization strategy. Upper right: random initialization assuming intersection at the origin. Upper middle: random initialization without assuming intersection at the origin. Upper right: initialization via spectral clustering assuming intersection at the origin. Lower left: initialization via spectral clustering without assuming intersection at the origin. Lower middle: initialization with ground truth labels, assuming intersection at the origin. Lower right: initialization with ground truth labels, without assuming intersection at the origin.}\label{fig:init-strategies}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics{/home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed-chunk-6-1} 
+
+}
+
+\caption{Clustering loss vs. iteration for each run of $K$-curve clustering.}\label{fig:loss}
+\end{figure}
+
+Alternatively, if we turn this problem into a semi-supervised problem in which we know a few of the community labels, then the convergence of the ASE guarantees high accuracy.
+
+\begin{theorem}
+\label{thm:kcurves-semisupervised}
+Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$ and its density function is such that $f(t) > a > 0$ for every $t \in [0, 1]$, and each $g_k$ is is a Bezier curve of order $R$. 
+Suppose that for each community $k$, we have labels for $R + 1$ vertices. 
+Define the community detection error rate as $\frac{1}{n} \min_\pi \sum_i I(z_i = \pi(\hat{z}_i))$, where $\pi$ is a permutation function and $\hat{z}_i$ are the predicted labels from $K$-curves clustering. 
+Then as $n \to \infty$, $K$-curves clustering produces zero community detection error rate, with high probability. 
+\end{theorem}
+
+\hypertarget{simulation-study-1}{%
+\subsection{Simulation Study}\label{simulation-study-1}}
+
+For a simulation study, we again turn to examples. \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit}.
+The exact simulation setup is as follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Draw \(z_1, ..., z_n \iid \Multinomial(1/2, 1/2)\).
+\item
+  Draw \(t_1, ..., t_n \iid \Uniform(0, 1)\).
+\item
+  Let each \(x_i = g_{z_i}(t_i)\) where \(g_1(t) = \begin{bmatrix} t^2 & 2 t (1-t) \end{bmatrix}^\top\) and \(g_2(t) = \begin{bmatrix} 2 t (1-t) & (1-t)^2 \end{bmatrix}^\top\).
+  Collect the latent vectors into matrix \(X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top\).
+\item
+  Draw \(A \sim \RDPG(X; \rho_n)\) (for these simulations we fix \(\rho_n \equiv 1\)).
+\end{enumerate}
+
+For this simulation study, we set \(n = 128, 256, 512, 1024, 2048\), and we start with completely random initialization as well as initializations in which we know 4 or 8 labels from each community.
+For each setting, we simulate 50 replicates.
+Since the curves meet at the origin, we force the fitted Bezier curves to meet at the origin as well by fixing \(p_1^{(0)} = p_2^{(0)} = (0, 0)\).
+Figure \ref{fig:sim-curves} shows the median and interquartile ranges for the error rates in each simulation setting.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/sim-curves-1} 
+
+}
+
+\caption{Median and IQR error rates over 50 replicates.}\label{fig:sim-curves}
+\end{figure}
+
+We also explored the behavior of random initialization by setting \(n = 512\) and compiling the loss values outputted by \(K\)-curves clustering for each replicate.
+Here, we repeated the simulations \(256\) times.
+Figure \ref{fig:repeat-losses} suggests that in this particular setting, about half the time, random initialization of \(K\)-curves clustering results in the desired curves, while the rest of the time, \(K\)-curves clustering settled on a local minimum.
+Plotting each of the \(256 \times 2\) fitted curves confirms this conclusion (figure \ref{fig:repeat-curves}).
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/repeat-losses-1} 
+
+}
+
+\caption{Histogram of loss values outputted by $K$-curves clustering over 256 replicates.}\label{fig:repeat-losses}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/repeat-curves-1} 
+
+}
+
+\caption{Fitted curves over 256 replicates. The curves are colored by the loss values.}\label{fig:repeat-curves}
+\end{figure}
 
 \hypertarget{applications-1}{%
 \subsection{Applications}\label{applications-1}}
+
+In the first example, we applied \(K\)-curves clustering (algorithm \ref{alg:kcurves}) to the Macaque visuotactile brain areas and connections network \citep{https://doi.org/10.1111/j.1460-9568.2006.04678.x}, which is visualized in figure \ref{fig:macaque-graph}.
+In this graph, there are 45 vertices which each correspond to a brain area, and the communities represent each area's tactile function.
+Applying an ASE with \(p = 2\) and \(q = 0\) to this graph results in an embedding that appears to fall approximately on two curves (figure \ref{fig:macaque-ase}) which intersect at the origin.
+Figure \ref{fig:macaque-fitted} shows the result of \(K\)-curves clustering on this graph,
+which yields a 4.4\% error rate.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-graph-1} 
+
+}
+
+\caption{Macaque visuotactile brain areas and connections network. The vertices represent brain areas.}\label{fig:macaque-graph}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-ase-1} 
+
+}
+
+\caption{ASE on the Macaque brain areas network. The embedding suggests a community-wise manifold structure.}\label{fig:macaque-ase}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-fitted-1} 
+
+}
+
+\caption{$K$-means clustering on the ASE of the Macaque brain areas network. The embedding vectors are colored by predicted label.}\label{fig:macaque-fitted}
+\end{figure}
 
 \hypertarget{conclusions}{%
 \subsection{Conclusions}\label{conclusions}}
