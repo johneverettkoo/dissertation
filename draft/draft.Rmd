@@ -2388,20 +2388,21 @@ ggraph(A, layout = 'stress') +
   scale_colour_brewer(palette = 'Set1')
 ```
 
-```{r mbconnectome-ase, fig.cap = 'ASE of the Drosophila connectome graph. The embedding vectors are labeled by neuron type.', fig.height = 2, figh.width = 4}
+```{r mbconnectome-ase, fig.cap = 'ASE of the Drosophila connectome graph. The embedding vectors are labeled by neuron type.', fig.height = 2, fig.width = 8}
 Xhat <- embedding(A, 2, 0)
 
 ggplot() + 
   geom_point(aes(x = Xhat[, 1], y = Xhat[, 2],
                  colour = factor(z))) + 
-  coord_fixed() +
+  coord_fixed(.5) +
   theme_bw() + 
+  theme(legend.position = 'none') +
   scale_colour_brewer(palette = 'Set1') + 
   labs(x = expression(x[1]), y = expression(x[2]),
        colour = NULL)
 ```
 
-```{r mbconnectome-kcurves, fig.cap = 'ASE of the Drosophila connectome graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 4, cache = TRUE}
+```{r mbconnectome-kcurves, fig.cap = 'ASE of the Drosophila connectome graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 8, cache = TRUE}
 set.seed(314159)
 z.init <- sample.points(z, 3)
 
@@ -2415,7 +2416,7 @@ mbconnectome.out <- manifold.clustering(Xhat, 2,
 
 plot.estimated.curves(Xhat, mbconnectome.out) + 
   scale_colour_brewer(palette = 'Set1') + 
-  # coord_fixed(.5) + 
+  coord_fixed(.5) +
   labs(x = expression(x[1]), y = expression(x[2]))
 ```
 
@@ -2706,6 +2707,9 @@ P(A_n) & = P(\hat{E}_n(\eta) \cap D_n) \\
 \end{aligned}
 $$
 which tends toward $1$ as $n \to \infty$ since both $P(E_n(\eta))$ and $P(D_n)$ tend toward $1$ as $n \to \infty$. 
+\end{proof}
+
+\begin{proof}[Proof of theorem \ref{thm:kcurves-semisupervised}]
 \end{proof}
 
 \newpage
