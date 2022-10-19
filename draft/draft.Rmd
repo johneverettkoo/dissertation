@@ -2348,7 +2348,7 @@ plot.estimated.curves(Xhat[, c(2, 1)], hp.out) +
   labs(x = expression(x[2]), y = expression(x[1]))
 ```
 
-In the final example, 
+In the final example, we examined the *Drosophila* connectome graph \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}. 
 
 ## Conclusions
 
