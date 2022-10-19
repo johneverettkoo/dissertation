@@ -488,6 +488,7 @@ a plausible set of edge probabilities is $\theta_{11} = \theta_{22} = 0.02$ and 
 \end{example}
 
 \begin{example}[Assortativity and disassortativity of the two-community SBM]
+\label{ex:sbm-assortativity}
 Let $P$ be the $n \times n$ probability matrix of a two-community SBM. 
 Then $rank(P) = 2$, and its two nonzero eigenvalues are:
 
@@ -658,8 +659,8 @@ Likewise, it is not immediately obvious how to approach the estimation of the $\
 Applying an EM algorithm similar to algorithm \ref{algo:sbm-em} adapted for the DCBM to example \ref{ex:dcbm-dating} results in 84\% accuracy, and applying a similar EM algorithm adapted for the PABM to example \ref{ex:pabm-dating} results in 97\% accuracy, but they fail to capture the original (which are not necessarily ``true'') parameters. 
 \end{remark}
 
-\hypertarget{a-hierarchy-of-block-models}{%
-\subsection{A Hierarchy of Block Models}\label{a-hierarchy-of-block-models}}
+\hypertarget{sec:hierarchy}{%
+\subsection{A Hierarchy of Block Models}\label{sec:hierarchy}}
 
 The PABM, DCBM, and SBM are nested models, that is, the SBM is a special case of the DCBM which in turn is a special case of the SBM.
 In this section, these connections are made explicit, and we explore the implications for modeling.
@@ -706,7 +707,7 @@ The full hierarchy of nested block models is summarized in table \ref{tab:hierar
 \centering
 \begin{tabular}[t]{l|l|l|l|l}
 \hline
-Model & Parameters & Dimensions & Matrix Decomposition & Reduction to simpler model\\
+Model & Parameters & Dimension & Matrix Decomposition & Reduction to simpler model\\
 \hline
 SBM & $K (K-1) / 2$ & $K$ & $P = Z B Z^\top$ & \\
 \hline
@@ -810,6 +811,89 @@ If after observing $A$, we wish to estimate the curve, the ASE provides an estim
 
 \hypertarget{sec:sbm-dcbm-grdpg}{%
 \subsection{Connecting the SBM and DCBM to the GRDPG}\label{sec:sbm-dcbm-grdpg}}
+
+In this section, we connect the SBM and DCBM to the GRDPG and show how this connection is useful for community detection and parameter estimation.
+We begin by showing that \emph{all} Bernoulli random graphs are GRDPGs.
+
+\begin{proposition}
+Let $A \sim \BG(P; \rho_n)$. 
+Then there exists a $d \leq n$ and $p + q = d$ such that for some $X \in \mathbb{R}^d$, $A \sim \GRDPG_{p, q}(X; \rho_n)$. 
+If $P$ is positive semidefinite, then $A \sim \RDPG(X; \rho_n)$. 
+\end{proposition}
+
+\begin{proof}
+$P$ is the edge probability matrix of a GRDPG if and only if there exists an $X \in \mathbb{R}^{n \times d}$ such that $P = X I_{p,q} X^\top$. 
+$P$ is a square and symmetric matrix, so it has an eigendecomposition $P = V \Lambda V^\top$ where $V \in \mathbb{R}^{n \times d}$, $\Lambda$ is a $d \times d$ diagonal matrix, and $d = \rank(P)$. 
+Let $p$ and $q$ respectively be the number of positive and negative eigenvalues of $P$. 
+Then we can equivalently write $P = V |\Lambda|^{1/2} I_{p,q} |\Lambda|^{1/2} V^\top$ where $|\cdot|$ is applied element-wise. 
+This is exactly the form of the GRDPG with latent vectors $V |\Lambda|^{1/2}$,
+i.e., if $A \sim \BG(P; \rho_n)$, then $A \sim \GRDPG_{p,q}(V |\Lambda|^{1/2}; \rho_n)$. 
+If $P$ is positive semidefinite, then $q = 0$ and we have $P = V \Lambda^{1/2} (V \Lambda^{1/2})^\top$, so $A \sim \RDPG(V \Lambda^{1/2}; \rho_n)$. 
+\end{proof}
+
+The SBM and DCBM are both Bernoulli random graphs, so they are also GRDPG.
+Recall that the SBM and DCBM are rank \(K\).
+Therefore, we can find \(X \in \mathbb{R}^{n \times K}\) that are the latent vectors of the SBM and DCBM.
+If we analyze the SBM and DCBM as GRDPGs, then we observe community-wise structures in the latent space that are useful for estimation.
+The latent vectors that generate the SBM consist of \(K\) point masses in \(\mathbb{R}^K\), each of which correspond to a community, and similarly, the latent vectors that generate the DCBM consist of \(K\) line segments emitting from the origin in \(\mathbb{R}^K\), each of which correspond to a community, and this property is observed in both assortative and disassortative models \citep{rubindelanchy2017statistical}.
+The ASE recovers these structures with noise, so clustering applied to the ASE can recover the original community labels.
+\citet{rubindelanchy2017statistical} showed that this approach to community detection for the SBM and DCBM is asymptotically consistent.
+Note that for a given \(P\), \(X\) is not unique, i.e., for any \(Q \in \mathbb{O}(p, q)\), \(X Q\) results in the same \(P\) (see remark \ref{rem:non_identifiable}).
+However, this does not change the general structure of the SBM and DCBM in the latent space.
+Multiplication by \(Q \in \mathbb{O}(p,q)\) does not change the fact that the latent vectors of an SBM are point masses or that the latent vectors of a DCBM are line segments, because \(Q\) is a linear transformation.
+
+\begin{example}
+Consider a two-community assortative SBM. 
+Recall that assortativity in SBMs is characterized by positive definite edge probability matrices. 
+Therefore, this model is also an RDPG. 
+To show this explicitly, suppose that $P$ is organized by community such that the $P^{(k \ell)}$ block corresponds to edges from community $k$ to $\ell$, and consider 
+$$X = \begin{bmatrix}
+\sqrt{\theta_{11}} & 0 \\ 
+\vdots & \vdots \\ 
+\sqrt{\theta_{11}} & 0 \\ 
+\sqrt{\theta_{12}^2 / \theta_{11}} & \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\vdots & \vdots \\
+\sqrt{\theta_{12}^2 / \theta_{11}} & \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\end{bmatrix}.$$
+This describes two point masses in $\mathbb{R}^2$, one at $(\sqrt{\theta_{11}}, 0)$ and another at $(\sqrt{\theta_{12}^2 / \theta_{11}}, \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}})$. 
+Taking the dot product of two vectors in the first point mass results in $\theta_{11}$, taking the dot product of two vectors in the second point mass results in $\theta_{22}$, and taking the dot product of a vector from the first point mass with a vector from the second point mass results in $\theta_{12}$, which correspond exactly to the edge probabilities between communities of the SBM. 
+Therefore, $(X X^\top)_{ij} = \theta_{z_i, z_j}$. 
+Note that this latent configuration implicitly assumes that $\theta_{11} \theta_{22} > \theta_{12}^2$, which is the condition we saw for the assortative two-community SBM in example \ref{ex:sbm-assortativity}.
+
+If instead, we have a DCBM, consider the latent configuration $\Omega X$ where $\Omega = \diag(\omega_1, ..., \omega_n)$ is the diagonal matrix of degree parameters. 
+Then $P = \Omega X (\Omega X)^\top$ is the edge probability of a DCBM. 
+Writing out $\Omega X$ explicitly yields:
+$$X = \begin{bmatrix}
+\omega_1 \sqrt{\theta_{11}} & 0 \\ 
+\vdots & \vdots \\ 
+\omega_{n_1} \sqrt{\theta_{11}} & 0 \\ 
+\omega_{n_1 + 1} \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_{n_1 + 1} \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\vdots & \vdots \\
+\omega_n \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_n \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\end{bmatrix}.$$
+The resulting rows of $X$ are point masses that have been stretched out, turning into rays. 
+\end{example}
+
+\begin{example}
+Recall the UK faculty network in \ref{ex:uk-faculty}. 
+If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can take the ASE of the adjacency matrix and see whether the embedding vectors lie around point masses or rays. 
+We will assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
+Because the fourth community only contains two members, we omit it from this analysis. 
+Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM. 
+Fitting three line segments to these data and clustering the embedding vectors by which line segment is closest results in a community detection accuracy of 83.5\%. 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/ukfaculty-ase-1} 
+
+}
+
+\caption{The ASE of the UK faculty network. The vertices are labeled by the school to which each faculty member belongs.}\label{fig:ukfaculty-ase}
+\end{figure}
+\end{example}
+
+The PABM is also a Bernoulli random graph, so it is also a GRDPG.
+We explore this in the next section (see section \ref{sec:pabm-grdpg}).
 
 \newpage
 
@@ -1813,6 +1897,9 @@ We saw that in the case of the DCBM and PABM, because the latent structures are 
 Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds (section \ref{sec:nonintersect}) and one in the general case in which the latent manifolds can intersect (section \ref{sec:intersect}).
 We also derive theoretical consistency properties for both settings.
 
+\hypertarget{previous-work-1}{%
+\subsubsection{Previous Work}\label{previous-work-1}}
+
 \hypertarget{sec:nonintersect}{%
 \subsection{Algorithm for Nonintersecting Manifolds}\label{sec:nonintersect}}
 
@@ -2017,6 +2104,7 @@ For this simulation study, we set \(n = 128, 256, 512, 1024, 2048\), and we star
 For each setting, we simulate 50 replicates.
 Since the curves meet at the origin, we force the fitted Bezier curves to meet at the origin as well by fixing \(p_1^{(0)} = p_2^{(0)} = (0, 0)\).
 Figure \ref{fig:sim-curves} shows the median and interquartile ranges for the error rates in each simulation setting.
+The simulation results suggest that for large \(n\), we do not benefit from having more known labels, but having a few results in greatly improved performance.
 
 \begin{figure}[H]
 
@@ -2085,6 +2173,44 @@ which yields a 4.4\% error rate.
 
 \caption{$K$-means clustering on the ASE of the Macaque brain areas network. The embedding vectors are colored by predicted label.}\label{fig:macaque-fitted}
 \end{figure}
+
+In the second example, we considered the Harry Potter enmity graph \citep{harrypotter}, visualized in figure \ref{fig:hp}.
+This graph does not come with ground truth labels.
+\citet{rubindelanchy2017statistical} and \citet{SannaPassino2022} analyzed this graph as a GRDPG, and the ASE suggests that an appropriate model for this graph is a disassortative DCBM with \(K = 2\) communities.
+Indeed, if we construct an ASE with \(p = 1\) and \(q = 1\) and label the points by character name, we see embedding vectors lie neatly along two rays emitting from the origin, with one ray populated by protagonists and another ray populated by antagonists (figure \ref{fig:hp-ase}).
+Nevertheless, we tried fitting an MBM on this graph via \(K\)-curves clustering.
+Since the DCBM is a special case of the MBM, it should result in at least as good of a fit as the DCBM.
+We initialized \(K\)-curves clustering by specifying that Lord Voldemort is in one community and Harry Potter is in another, with the other vertices not known \emph{a priori}.
+The fitted quadratic curves are illustrated in figure \ref{fig:hp-kcurves}, which indeed appear to be very close to linear.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/hp-1} 
+
+}
+
+\caption{Harry Potter enmity graph. The vertices represent characters and the edges represent whether pairs of characters are enemies.}\label{fig:hp}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/hp-ase-1} 
+
+}
+
+\caption{ASE of the Harry Potter emnity graph. The way in which the embedding vectors are organized suggest that a DCBM is an appropriate model for this graph.}\label{fig:hp-ase}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/hp-kcurves-1} 
+
+}
+
+\caption{ASE of the Harry Potter emnity graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.}\label{fig:hp-kcurves}
+\end{figure}
+
+In the final example,
 
 \hypertarget{conclusions}{%
 \subsection{Conclusions}\label{conclusions}}

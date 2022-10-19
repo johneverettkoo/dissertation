@@ -58,6 +58,7 @@ import::from(magrittr, `%>%`, `%<>%`)
 import::from(foreach, foreach, `%dopar%`)
 library(ggplot2)
 library(ggraph)
+library(mclust)
 source('~/dev/pabm-grdpg/functions.R')
 source('~/dev/manifold-block-models/functions.R')
 
@@ -368,6 +369,7 @@ ggraph(A, layout = 'auto') +
 \end{example}
 
 \begin{example}[Assortativity and disassortativity of the two-community SBM]
+\label{ex:sbm-assortativity}
 Let $P$ be the $n \times n$ probability matrix of a two-community SBM. 
 Then $rank(P) = 2$, and its two nonzero eigenvalues are:
 
@@ -565,7 +567,7 @@ Likewise, it is not immediately obvious how to approach the estimation of the $\
 Applying an EM algorithm similar to algorithm \ref{algo:sbm-em} adapted for the DCBM to example \ref{ex:dcbm-dating} results in 84\% accuracy, and applying a similar EM algorithm adapted for the PABM to example \ref{ex:pabm-dating} results in 97\% accuracy, but they fail to capture the original (which are not necessarily ``true'') parameters. 
 \end{remark}
 
-## A Hierarchy of Block Models
+## A Hierarchy of Block Models {#sec:hierarchy}
 
 The PABM, DCBM, and SBM are nested models, that is, the SBM is a special case of the DCBM which in turn is a special case of the SBM. 
 In this section, these connections are made explicit, and we explore the implications for modeling. 
@@ -610,7 +612,7 @@ The full hierarchy of nested block models is summarized in table \@ref(tab:hiera
 blockmodel.df <- dplyr::tibble(
   Model = c('SBM', 'DCBM', 'PABM'),
   Parameters = c('$K (K-1) / 2$', '$K (K-1) / 2 + n$', '$n K$'),
-  Dimensions = c('$K$', '$K$', '$K^2$'),
+  Dimension = c('$K$', '$K$', '$K^2$'),
   `Matrix Decomposition` = c('$P = Z B Z^\\top$', '$P = (\\Omega Z) B (\\Omega Z)^\\top$', '$P = X \\Pi X^\\top$'),
   `Reduction to simpler model` = c('', '$\\omega = e$', '$\\lambda_{ik} = \\omega_i \\sqrt{\\theta_{z_i, k}}$')
 )
@@ -728,7 +730,90 @@ gridExtra::grid.arrange(latent.vec.plot, ase.plot, nrow = 1)
 
 ## Connecting the SBM and DCBM to the GRDPG {#sec:sbm-dcbm-grdpg}
 
+In this section, we connect the SBM and DCBM to the GRDPG and show how this connection is useful for community detection and parameter estimation. 
+We begin by showing that *all* Bernoulli random graphs are GRDPGs.
 
+\begin{proposition}
+Let $A \sim \BG(P; \rho_n)$. 
+Then there exists a $d \leq n$ and $p + q = d$ such that for some $X \in \mathbb{R}^d$, $A \sim \GRDPG_{p, q}(X; \rho_n)$. 
+If $P$ is positive semidefinite, then $A \sim \RDPG(X; \rho_n)$. 
+\end{proposition}
+
+\begin{proof}
+$P$ is the edge probability matrix of a GRDPG if and only if there exists an $X \in \mathbb{R}^{n \times d}$ such that $P = X I_{p,q} X^\top$. 
+$P$ is a square and symmetric matrix, so it has an eigendecomposition $P = V \Lambda V^\top$ where $V \in \mathbb{R}^{n \times d}$, $\Lambda$ is a $d \times d$ diagonal matrix, and $d = \rank(P)$. 
+Let $p$ and $q$ respectively be the number of positive and negative eigenvalues of $P$. 
+Then we can equivalently write $P = V |\Lambda|^{1/2} I_{p,q} |\Lambda|^{1/2} V^\top$ where $|\cdot|$ is applied element-wise. 
+This is exactly the form of the GRDPG with latent vectors $V |\Lambda|^{1/2}$,
+i.e., if $A \sim \BG(P; \rho_n)$, then $A \sim \GRDPG_{p,q}(V |\Lambda|^{1/2}; \rho_n)$. 
+If $P$ is positive semidefinite, then $q = 0$ and we have $P = V \Lambda^{1/2} (V \Lambda^{1/2})^\top$, so $A \sim \RDPG(V \Lambda^{1/2}; \rho_n)$. 
+\end{proof}
+
+The SBM and DCBM are both Bernoulli random graphs, so they are also GRDPG. 
+Recall that the SBM and DCBM are rank $K$. 
+Therefore, we can find $X \in \mathbb{R}^{n \times K}$ that are the latent vectors of the SBM and DCBM. 
+If we analyze the SBM and DCBM as GRDPGs, then we observe community-wise structures in the latent space that are useful for estimation. 
+The latent vectors that generate the SBM consist of $K$ point masses in $\mathbb{R}^K$, each of which correspond to a community, and similarly, the latent vectors that generate the DCBM consist of $K$ line segments emitting from the origin in $\mathbb{R}^K$, each of which correspond to a community, and this property is observed in both assortative and disassortative models \citep{rubindelanchy2017statistical}. 
+The ASE recovers these structures with noise, so clustering applied to the ASE can recover the original community labels. 
+\citet{rubindelanchy2017statistical} showed that this approach to community detection for the SBM and DCBM is asymptotically consistent. 
+Note that for a given $P$, $X$ is not unique, i.e., for any $Q \in \mathbb{O}(p, q)$, $X Q$ results in the same $P$ (see remark \ref{rem:non_identifiable}). 
+However, this does not change the general structure of the SBM and DCBM in the latent space. 
+Multiplication by $Q \in \mathbb{O}(p,q)$ does not change the fact that the latent vectors of an SBM are point masses or that the latent vectors of a DCBM are line segments, because $Q$ is a linear transformation. 
+
+\begin{example}
+Consider a two-community assortative SBM. 
+Recall that assortativity in SBMs is characterized by positive definite edge probability matrices. 
+Therefore, this model is also an RDPG. 
+To show this explicitly, suppose that $P$ is organized by community such that the $P^{(k \ell)}$ block corresponds to edges from community $k$ to $\ell$, and consider 
+$$X = \begin{bmatrix}
+\sqrt{\theta_{11}} & 0 \\ 
+\vdots & \vdots \\ 
+\sqrt{\theta_{11}} & 0 \\ 
+\sqrt{\theta_{12}^2 / \theta_{11}} & \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\vdots & \vdots \\
+\sqrt{\theta_{12}^2 / \theta_{11}} & \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\end{bmatrix}.$$
+This describes two point masses in $\mathbb{R}^2$, one at $(\sqrt{\theta_{11}}, 0)$ and another at $(\sqrt{\theta_{12}^2 / \theta_{11}}, \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}})$. 
+Taking the dot product of two vectors in the first point mass results in $\theta_{11}$, taking the dot product of two vectors in the second point mass results in $\theta_{22}$, and taking the dot product of a vector from the first point mass with a vector from the second point mass results in $\theta_{12}$, which correspond exactly to the edge probabilities between communities of the SBM. 
+Therefore, $(X X^\top)_{ij} = \theta_{z_i, z_j}$. 
+Note that this latent configuration implicitly assumes that $\theta_{11} \theta_{22} > \theta_{12}^2$, which is the condition we saw for the assortative two-community SBM in example \ref{ex:sbm-assortativity}.
+
+If instead, we have a DCBM, consider the latent configuration $\Omega X$ where $\Omega = \diag(\omega_1, ..., \omega_n)$ is the diagonal matrix of degree parameters. 
+Then $P = \Omega X (\Omega X)^\top$ is the edge probability of a DCBM. 
+Writing out $\Omega X$ explicitly yields:
+$$X = \begin{bmatrix}
+\omega_1 \sqrt{\theta_{11}} & 0 \\ 
+\vdots & \vdots \\ 
+\omega_{n_1} \sqrt{\theta_{11}} & 0 \\ 
+\omega_{n_1 + 1} \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_{n_1 + 1} \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\vdots & \vdots \\
+\omega_n \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_n \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\end{bmatrix}.$$
+The resulting rows of $X$ are point masses that have been stretched out, turning into rays. 
+\end{example}
+
+\begin{example}
+Recall the UK faculty network in \ref{ex:uk-faculty}. 
+If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can take the ASE of the adjacency matrix and see whether the embedding vectors lie around point masses or rays. 
+We will assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
+Because the fourth community only contains two members, we omit it from this analysis. 
+Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM. 
+Fitting three line segments to these data and clustering the embedding vectors by which line segment is closest results in a community detection accuracy of 83.5\%. 
+
+```{r ukfaculty-ase, fig.cap = 'The ASE of the UK faculty network. The vertices are labeled by the school to which each faculty member belongs.', fig.height = 3, fig.width = 4, cache = TRUE }
+data(UKfaculty)
+A <- as.matrix(igraph::as_adjacency_matrix(UKfaculty, type = 'both'))
+A <- sign(A + t(A))
+z <- factor(igraph::vertex_attr(UKfaculty)$Group)
+A <- A[z != 4, z != 4]
+z <- z[z != 4]
+Xhat <- embedding(A, 3, 0)
+pairs(Xhat, col = z, asp = 1)
+```
+\end{example}
+
+The PABM is also a Bernoulli random graph, so it is also a GRDPG. 
+We explore this in the next section (see section \@ref(sec:pabm-grdpg)). 
 
 \newpage
 
@@ -1659,7 +1744,7 @@ Village 46 & 0.052 & 0.069 & 0.056\\
 As established in section \@ref(sec:grdpg), all Bernoulli random graphs are generalized random dot product graphs. 
 Whether this is useful for community detection in block models depends entirely on the configuration of the latent vectors. 
 In the case of the $\ER$ model, SBM, DCBM, and PABM, each community forms a linear structure, i.e., a subspace, and this rigid structure can be exploited for community detection. 
-In this section, we explore GRDPGs with community-wise parameterized nonlinear latent structures. 
+In this section, we explore GRDPGs with community-wise parameterized nonlinear latent structures.
 
 To motivate this model, consider a generalization of the $\ER$ model in which each edge probability isn't constant but comes from a simple distribution. 
 As with all Bernoulli random graphs, this is also a GRDPG, but by using a specific type of distribution, it is possible to construct specific latent structures on which the latent vectors lie. 
@@ -1747,6 +1832,8 @@ In the case of the SBM, a GRDPG-motivated community detection algorithm is to co
 We saw that in the case of the DCBM and PABM, because the latent structures are not based on point masses, while the ASE does reveal the communities, the final clustering step requires other clustering algorithms that are tailored to the latent community structure. 
 Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds (section \@ref(sec:nonintersect)) and one in the general case in which the latent manifolds can intersect (section \@ref(sec:intersect)). 
 We also derive theoretical consistency properties for both settings.
+
+### Previous Work
 
 ## Algorithm for Nonintersecting Manifolds {#sec:nonintersect}
 
@@ -2033,8 +2120,9 @@ For this simulation study, we set $n = 128, 256, 512, 1024, 2048$, and we start 
 For each setting, we simulate 50 replicates. 
 Since the curves meet at the origin, we force the fitted Bezier curves to meet at the origin as well by fixing $p_1^{(0)} = p_2^{(0)} = (0, 0)$. 
 Figure \ref{fig:sim-curves} shows the median and interquartile ranges for the error rates in each simulation setting. 
+The simulation results suggest that for large $n$, we do not benefit from having more known labels, but having a few results in greatly improved performance. 
 
-```{r sim-curves, fig.height = 3, fig.width = 8, fig.cap = 'Median and IQR error rates over 50 replicates.'}
+```{r sim-curves, fig.height = 3, fig.width = 8, fig.cap = 'Median and IQR error rates over 50 replicates.', cache = TRUE}
 n.vec <- 2 ^ c(7, 8, 9, 10, 11)
 nsamp.vec <- c(0, 4, 8)
 
@@ -2075,7 +2163,7 @@ Here, we repeated the simulations $256$ times.
 Figure \ref{fig:repeat-losses} suggests that in this particular setting, about half the time, random initialization of $K$-curves clustering results in the desired curves, while the rest of the time, $K$-curves clustering settled on a local minimum. 
 Plotting each of the $256 \times 2$ fitted curves confirms this conclusion (figure \ref{fig:repeat-curves}). 
 
-```{r repeat-losses, fig.height = 3, fig.width = 8, fig.cap = 'Histogram of loss values outputted by $K$-curves clustering over 256 replicates.'}
+```{r repeat-losses, fig.height = 3, fig.width = 8, fig.cap = 'Histogram of loss values outputted by $K$-curves clustering over 256 replicates.', cache = TRUE}
 repeat.df <- readr::read_csv('~/dev/manifold-block-models/simulations/repeat-study/repeat-study.csv')
 ggplot(repeat.df) + 
   geom_histogram(aes(x = loss),
@@ -2084,7 +2172,7 @@ ggplot(repeat.df) +
   theme_bw()
 ```
 
-```{r repeat-curves, fig.height = 3, fig.width = 3, fig.cap = 'Fitted curves over 256 replicates. The curves are colored by the loss values.'}
+```{r repeat-curves, fig.height = 3, fig.width = 3, fig.cap = 'Fitted curves over 256 replicates. The curves are colored by the loss values.', cache = TRUE}
 plot.repeat.study <- function(repeat.df) {
   repeat.df <- na.omit(repeat.df)
   min.t <- 0
@@ -2188,9 +2276,16 @@ plot.estimated.curves(Xhat, macaque.out) +
   scale_colour_brewer(palette = 'Set1')
 ```
 
-In the second example, we consider the Harry Potter enmity graph (figure \ref{fig:hp}).
+In the second example, we considered the Harry Potter enmity graph \citep{harrypotter}, visualized in figure \ref{fig:hp}. 
+This graph does not come with ground truth labels. 
+\citet{rubindelanchy2017statistical} and \citet{SannaPassino2022} analyzed this graph as a GRDPG, and the ASE suggests that an appropriate model for this graph is a disassortative DCBM with $K = 2$ communities. 
+Indeed, if we construct an ASE with $p = 1$ and $q = 1$ and label the points by character name, we see embedding vectors lie neatly along two rays emitting from the origin, with one ray populated by protagonists and another ray populated by antagonists (figure \ref{fig:hp-ase}). 
+Nevertheless, we tried fitting an MBM on this graph via $K$-curves clustering. 
+Since the DCBM is a special case of the MBM, it should result in at least as good of a fit as the DCBM. 
+We initialized $K$-curves clustering by specifying that Lord Voldemort is in one community and Harry Potter is in another, with the other vertices not known *a priori*. 
+The fitted quadratic curves are illustrated in figure \ref{fig:hp-kcurves}, which indeed appear to be very close to linear.
 
-```{r hp, fig.cap = 'Harry Potter enmity graph. The vertices represent characters, the edges represent whether pairs of characters are enemies, and the communities represent whether the characters are on the side of the protagonist or the antagonist.', fig.width = 4, fig.height = 2}
+```{r hp, fig.cap = 'Harry Potter enmity graph. The vertices represent characters and the edges represent whether pairs of characters are enemies.', fig.width = 4, fig.height = 2}
 relations.df <- readr::read_csv('~/dev/potter-network/data/relations.csv') %>% 
   dplyr::mutate(source = source + 1, target = target + 1)
 characters.df <- readr::read_csv('~/dev/potter-network/data/characters.csv') %>% 
@@ -2214,14 +2309,46 @@ deg.A <- colSums(A)
 
 A <- A[deg.A > 0, deg.A > 0]
 
-ggraph(A, layout = 'stress') + 
-  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
-  geom_node_point(aes(colour = factor(z)), 
-                  show.legend = FALSE) + 
-  labs(colour = NULL) + 
-  theme_void() + 
-  scale_colour_brewer(palette = 'Set1')
+qgraph::qgraph(A, layout = 'spring')
 ```
+
+```{r hp-ase, fig.cap = 'ASE of the Harry Potter emnity graph. The way in which the embedding vectors are organized suggest that a DCBM is an appropriate model for this graph.', fig.height = 3, fig.width = 10}
+Xhat <- embedding(A, p = 1, q = 1)
+
+ggplot() + 
+  geom_point(aes(x = Xhat[, 2], y = Xhat[, 1])) + 
+  ggrepel::geom_text_repel(aes(x = Xhat[, 2], y = Xhat[, 1], 
+                               label = characters.df$name[deg.A > 0])) + 
+  # coord_fixed() + 
+  theme_bw() + 
+  labs(x = expression(x[2]), y = expression(x[1]))
+```
+
+```{r hp-kcurves, fig.cap = 'ASE of the Harry Potter emnity graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 3, fig.width = 10, cache = TRUE}
+z.init <- rep(NA, nrow(A))
+z.init[rownames(A) == 'Harry Potter'] <- 1
+z.init[rownames(A) == 'Hermione Granger'] <- 1
+z.init[rownames(A) == 'Lord Voldemort'] <- 2
+z.init[rownames(A) == 'Peter Pettigrew'] <- 2
+
+hp.out <- manifold.clustering(Xhat[, c(2, 1)], 2, 
+                              initialization = z.init,
+                              intercept = FALSE, 
+                              parallel = TRUE, 
+                              verbose = FALSE, 
+                              animate = FALSE, 
+                              curve.init = 'x')
+
+plot.estimated.curves(Xhat[, c(2, 1)], hp.out) + 
+  ggrepel::geom_text_repel(aes(x = Xhat[, 2], y = Xhat[, 1], 
+                               label = characters.df$name[deg.A > 0],
+                               colour = factor(hp.out$z))) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  coord_fixed(.5) + 
+  labs(x = expression(x[2]), y = expression(x[1]))
+```
+
+In the final example, 
 
 ## Conclusions
 
