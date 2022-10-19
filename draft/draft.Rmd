@@ -375,8 +375,8 @@ Then $rank(P) = 2$, and its two nonzero eigenvalues are:
 
 $$
 \lambda = \frac{n}{2} \bigg( 
-  \theta_{11} + \theta_{22} \pm 
-  \sqrt{(\theta_{11} - \theta_{22})^2 + 4 \theta_{12}^2} 
+\theta_{11} + \theta_{22} \pm 
+\sqrt{(\theta_{11} - \theta_{22})^2 + 4 \theta_{12}^2} 
 \bigg).
 $$
 The first eigenvalue is always positive. 
@@ -410,21 +410,21 @@ As an example, we write the EM algorithm for the likelihood function in equation
 
 \begin{algorithm}
 \label{algo:sbm-em}
-  \setstretch{1.5}
-  \DontPrintSemicolon
-  \SetAlgoLined
-  \KwData{Adjacency matrix $A$, number of communities $K$}
-  \KwResult{Estimated community label probabilities $\{\pi_{ik}\}$ for which each $\pi_{ik} = P(z_i = k \mid A)$, estimated community edge probabilities $\{\hat{\theta}_{k \ell}\}_K$}
-  \caption{Approximate EM algorithm for the SBM}
-  Initialize $\{\pi_{ik}\}$, $\{\theta_{k \ell}\}$.\;
-  \While{$\|\nabla \ell\| > \epsilon$} {
-    \For {$i = 1, ..., n$} {
-      \For {$k = 1, ..., K$} {
-        E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log \hat{\theta}_{k \ell} + (1 - A_{ij}) \log (1 - \hat{\theta}_{k \ell})) \bigg)$.\;
-        M-step: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
-      }
-    }
-  }
+\setstretch{1.5}
+\DontPrintSemicolon
+\SetAlgoLined
+\KwData{Adjacency matrix $A$, number of communities $K$}
+\KwResult{Estimated community label probabilities $\{\pi_{ik}\}$ for which each $\pi_{ik} = P(z_i = k \mid A)$, estimated community edge probabilities $\{\hat{\theta}_{k \ell}\}_K$}
+\caption{Approximate EM algorithm for the SBM}
+Initialize $\{\pi_{ik}\}$, $\{\theta_{k \ell}\}$.\;
+\While{$\|\nabla \ell\| > \epsilon$} {
+\For {$i = 1, ..., n$} {
+\For {$k = 1, ..., K$} {
+E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log \hat{\theta}_{k \ell} + (1 - A_{ij}) \log (1 - \hat{\theta}_{k \ell})) \bigg)$.\;
+M-step: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
+}
+}
+}
 \end{algorithm}
 
 Applying algorithm \ref{algo:sbm-em} to example \ref{ex:assort-sbm} with initial guesses of $\pi_{ik} = 0.5$ for each $i, k$, $\hat{\theta}_{11} = \hat{\theta}_{22} = 0.9$, and $\hat{\theta}_{12} = 0.1$ results in a community detection error rate of 4.7\% and parameter estimates $\hat{\theta}_{11} = 0.503$, $\hat{\theta}_{22} = 0.241$, and $\hat{\theta}_{12} = 0.109$, compared to the true parameters $\theta_{11} = 0.5$, $\theta_{22} = 0.25$, and $\theta_{12} = 0.125$. 
@@ -833,7 +833,7 @@ Next let $\lambda^{(k \ell)} = \{\lambda_{i \ell} \colon z_i = k\} \in \mathbb{R
 Define $\lambda^{(\ell k)}$ analogously. 
 Then each block $\tilde{P}^{(k \ell)}$ can be written as the outer product of two vectors:
 \begin{equation} \label{eq:pabm}
-  \tilde{P}^{(k \ell)} = \rho_n \lambda^{(k \ell)} (\lambda^{(\ell k)})^{\top}.
+\tilde{P}^{(k \ell)} = \rho_n \lambda^{(k \ell)} (\lambda^{(\ell k)})^{\top}.
 \end{equation} 
 
 We will henceforth use the notation \(A \sim \PABM(\{\lambda^{(k \ell)}\}_K, \rho_n)\) to denote a random adjacency matrix \(A\) drawn from a PABM with $K$ communities, popularity parameters \(\{\lambda^{(k \ell)}\}\) and sparsity parameter $\rho_n$.
@@ -855,7 +855,7 @@ Then there exists a block diagonal matrix
 $X \in \mathbb{R}^{n \times K^2}$ defined by $\{\lambda^{(k \ell)}\}$ and a 
 $K^2 \times K^2$ {\em fixed} orthonormal matrix $U$ such 
 that $A \sim \mathrm{GRDPG}_{K (K+1) / 2, K (K-1) /
-  2}(\tilde{\Pi}XU)$. Here $\tilde{\Pi}$ is the permutation matrix
+2}(\tilde{\Pi}XU)$. Here $\tilde{\Pi}$ is the permutation matrix
 such that $P = \tilde{\Pi} \tilde{P} \tilde{\Pi}^{\top}$ where the
 rows and columns of $\tilde{P}$ are arranged according to increasing values of the
 community labels (see remark~\ref{rem:pabm_view2}). 
@@ -870,10 +870,10 @@ For the $K = 2$ case, the proof is straightforward. We will first work with
 the matrix $\tilde{P}$. Note that $\tilde{P}$ has the form
 
 $$\tilde{P} = \begin{bmatrix} P^{(11)} & P^{(12)} \\ P^{(21)} &
-  P^{(22)} \end{bmatrix} = \begin{bmatrix} \lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
-  \lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)}
-  (\lambda^{(22)})^\top \end{bmatrix}.$$
-  Now let
+P^{(22)} \end{bmatrix} = \begin{bmatrix} \lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
+\lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)}
+(\lambda^{(22)})^\top \end{bmatrix}.$$
+Now let
 $$X = \begin{bmatrix}
 \lambda^{(11)} & \lambda^{(12)} & 0 & 0 \\
 0 & 0 & \lambda^{(21)} & \lambda^{(22)}
@@ -885,8 +885,8 @@ U = \begin{bmatrix} 1 & 0 & 0 & 0 \\
 Then by straightforward matrix multiplication, we obtain 
 $$X U I_{3, 1} U^\top X^\top =
 \begin{bmatrix}
-  \lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
-  \lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)} (\lambda^{(22)})^\top
+\lambda^{(11)} (\lambda^{(11)})^\top & \lambda^{(12)} (\lambda^{(21)})^\top \\
+\lambda^{(21)} (\lambda^{(12)})^\top & \lambda^{(22)} (\lambda^{(22)})^\top
 \end{bmatrix} = \tilde{P}$$
 and hence $\tilde{P}$ also corresponds to the edge probability matrix of GRDPG
 with latent vectors described by $X U$. As $P = \tilde{\Pi} \tilde{P}
@@ -898,9 +898,9 @@ More specifically, the product $U I_{3, 1} U^\top$
 yields a permutation matrix $\Pi$ with fixed points at positions $1$ and $4$ 
 and a cycle of order 2 swapping positions $2$ and $3$, i.e., 
 $$\Pi = U I_{3, 1} U^\top = \begin{bmatrix} 1 & 0 & 0 & 0 \\
-  0 & 0 & 1 & 0 \\
-  0 & 1 & 0 & 0 \\
-  0 & 0 & 0 & 1
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1
 \end{bmatrix}.$$
 Furthermore, as $U$ is orthonormal and $I_{3, 1}$ is diagonal, 
 $U I_{3, 1} U^\top$ is also an eigendecomposition of $\Pi$ where the fixed
@@ -933,15 +933,15 @@ Y = \begin{bmatrix} L^{(1)} \mid \cdots \mid L^{(K)} \end{bmatrix} \in
 It is then straightforward to verify that
 
 \begin{gather*}
-  XY^{\top} = \mathrm{blockdiag}(\Lambda^{(1)}, \dots,
+XY^{\top} = \mathrm{blockdiag}(\Lambda^{(1)}, \dots,
 \Lambda^{(K)}) \begin{bmatrix} L_1^{\top} \\ \vdots \\
-  L_{K}^{\top} \end{bmatrix} = \begin{bmatrix} \Lambda^{(1)}
-  (L^{(1)})^{\top} \\ \vdots \\
-  \Lambda^{(K)} (L^{(K)})^{\top} \end{bmatrix}, \\
+L_{K}^{\top} \end{bmatrix} = \begin{bmatrix} \Lambda^{(1)}
+(L^{(1)})^{\top} \\ \vdots \\
+\Lambda^{(K)} (L^{(K)})^{\top} \end{bmatrix}, \\
 \Lambda^{(k)} (L^{(k)})^{\top} = \begin{bmatrix} \lambda^{(k1)}
-  (\lambda^{(1k)})^{\top} \mid \dots \mid \lambda^{(kK)}
-  (\lambda^{(Kk)})^{\top} \end{bmatrix} = \begin{bmatrix} P^{(k1)}
-  \mid P^{(k2)} \mid \dots \mid P^{(kK)} \end{bmatrix}.
+(\lambda^{(1k)})^{\top} \mid \dots \mid \lambda^{(kK)}
+(\lambda^{(Kk)})^{\top} \end{bmatrix} = \begin{bmatrix} P^{(k1)}
+\mid P^{(k2)} \mid \dots \mid P^{(kK)} \end{bmatrix}.
 \end{gather*}
 We therefore have $\tilde{P} = X Y^\top$. 
 Similar to the $K = 2$ case, we also have $Y = X \Pi$ for some permutation matrix
@@ -998,15 +998,15 @@ The matrix $\tilde{P}$ is then the edge probabilities matrix for a
 Generalized Random Dot Product Graph whose latent positions 
 are the rows of the matrix
 $$XU = \begin{bmatrix}
-  \lambda^{(11)} & 0 & 0 &
-  \frac{\lambda^{(12)}}{\sqrt{2}} & \frac{\lambda^{(13)}}{\sqrt{2}} & 0 &
-  \frac{\lambda^{(12)}}{\sqrt{2}} & \frac{\lambda^{(13)}}{\sqrt{2}} & 0 \\
-  0 & \lambda^{(22)} & 0 &
-  \frac{\lambda^{(21)}}{\sqrt{2}} & 0 & \frac{\lambda^{(23)}}{\sqrt{2}} &
-  -\frac{\lambda^{(21)}}{\sqrt{2}} & 0 & \frac{\lambda^{(23)}}{\sqrt{2}} \\
-  0 & 0 & \lambda^{(33)} &
-  0 & \frac{\lambda^{(31)}}{\sqrt{2}} & \frac{\lambda^{(32)}}{\sqrt{2}} &
-  0 & -\frac{\lambda^{(31)}}{\sqrt{2}} & -\frac{\lambda^{(32)}}{\sqrt{2}}
+\lambda^{(11)} & 0 & 0 &
+\frac{\lambda^{(12)}}{\sqrt{2}} & \frac{\lambda^{(13)}}{\sqrt{2}} & 0 &
+\frac{\lambda^{(12)}}{\sqrt{2}} & \frac{\lambda^{(13)}}{\sqrt{2}} & 0 \\
+0 & \lambda^{(22)} & 0 &
+\frac{\lambda^{(21)}}{\sqrt{2}} & 0 & \frac{\lambda^{(23)}}{\sqrt{2}} &
+-\frac{\lambda^{(21)}}{\sqrt{2}} & 0 & \frac{\lambda^{(23)}}{\sqrt{2}} \\
+0 & 0 & \lambda^{(33)} &
+0 & \frac{\lambda^{(31)}}{\sqrt{2}} & \frac{\lambda^{(32)}}{\sqrt{2}} &
+0 & -\frac{\lambda^{(31)}}{\sqrt{2}} & -\frac{\lambda^{(32)}}{\sqrt{2}}
 \end{bmatrix}$$
 and the latent positions for $P$ is a permutation of the rows of
 $XU$. 
@@ -1020,9 +1020,9 @@ Two inference objectives arise from the PABM:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Community membership identification (up to permutation).
+Community membership identification (up to permutation).
 \item
-  Parameter estimation (estimating $\lambda_{ik}$'s).
+Parameter estimation (estimating $\lambda_{ik}$'s).
 \end{enumerate}
 
 In our methods, the data that are observed for estimation is the adjacency matrix, $A \sim \PABM(\{\lambda^{(k \ell)}\}_K, \rho_n)$, along with an assumed number of communities, $K$. 
@@ -1235,25 +1235,25 @@ algorithm \ref{alg:osc}.
 The following result leverages existing theoretical properties
 of ASE for estimating of latent positions in a GRDPG \citep{rubindelanchy2017statistical} to show that
 $\hat{B}$ converges almost surely to $B$; in particular 
- $\hat{B}_{ij} \stackrel{a.s.}{\to} 0$ 
+$\hat{B}_{ij} \stackrel{a.s.}{\to} 0$ 
 for each pair $(i, j)$ in different communities. 
 
 \begin{algorithm}[tp]
-  \label{alg:osc}
-  \setstretch{1.5}
-  \DontPrintSemicolon
-  \SetAlgoLined
-  \KwData{Adjacency matrix $A$, number of communities $K$}
-  \KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$}
-    Compute the eigenvectors of $A$ that correspond to the $K (K+1) / 2$ most
-    positive eigenvalues and $K (K-1) / 2$ most negative eigenvalues. Construct
-    $V$ using these eigenvectors as its columns.\;
-    Compute $B = |n V V^\top|$, applying $|\cdot|$ entry-wise.\;
-    Construct graph $G$ using $B$ as its similarity matrix.\;
-    Partition $G$ into $K$ disconnected subgraphs
-    (e.g., using edge thresholding or spectral clustering).\;
-    Map each partition to the community labels $1, ..., K$.\;
-  \caption{Orthogonal Spectral Clustering.}
+\label{alg:osc}
+\setstretch{1.5}
+\DontPrintSemicolon
+\SetAlgoLined
+\KwData{Adjacency matrix $A$, number of communities $K$}
+\KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$}
+Compute the eigenvectors of $A$ that correspond to the $K (K+1) / 2$ most
+positive eigenvalues and $K (K-1) / 2$ most negative eigenvalues. Construct
+$V$ using these eigenvectors as its columns.\;
+Compute $B = |n V V^\top|$, applying $|\cdot|$ entry-wise.\;
+Construct graph $G$ using $B$ as its similarity matrix.\;
+Partition $G$ into $K$ disconnected subgraphs
+(e.g., using edge thresholding or spectral clustering).\;
+Map each partition to the community labels $1, ..., K$.\;
+\caption{Orthogonal Spectral Clustering.}
 \end{algorithm}
 
 \begin{theorem}
@@ -1300,35 +1300,35 @@ shows that the subspace detection property also holds for the rows of
 $\sqrt{n} \hat{V}$. 
 
 \begin{algorithm}[t]
-  \label{alg:ssc}
-  \setstretch{1.5}
-  \DontPrintSemicolon
-  \SetAlgoLined
-  \caption{Sparse Subspace Clustering using LASSO.}
-  \KwData{Adjacency matrix $A$, number of communities $K$,
-  hyperparameter $\lambda$}
-  \KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$}
-    Find $V$, the matrix of eigenvectors of $A$
-    corresponding to the $K (K + 1) / 2$ most positive
-    and the $K (K - 1) / 2$ most negative eigenvalues.\;
-    Normalize $V \leftarrow \sqrt{n} V$.\;
-    \For {$i = 1, ..., n$} {
-      Assign $v_i^\top$ as the $i^{th}$ row of $V$.
-      Assign $V_{-i} = \bigl[
-      v_1 \mid \cdots \mid v_{i-1} \mid v_{i+1} \mid \cdots \mid v_n \bigr]^\top$.\;
-      Solve the LASSO problem
-      $c_i = \arg\min_{\beta}
-      \frac{1}{2} \|v_i - V_{-i} \beta\|_2^2 + \lambda \|\beta\|_1$.\;
-      Assign $\tilde{c}_i = (c_i^{(1)}, \dots, c_i^{(i-1)}, 0, c_i^{(i)}, \dots, c_i^{(n-1)})^\top$ such that the superscript is the index of
-      $\tilde{c}_i$.\;
-    }
-    Assign
-    $C = \bigr[ \tilde{c}_1 \mid \cdots \mid \tilde{c}_n \bigr]$.\;
-    Compute the affinity matrix $B = |C| + |C^\top|$.\;
-    Construct graph $G$ using $B$ as its similarity matrix.\;
-    Partition $G$ into $K$ disconnected subgraphs (e.g., using edge
-    thresholding or spectral clustering).\;
-    Map each partition to the community labels $1, ..., K$.
+\label{alg:ssc}
+\setstretch{1.5}
+\DontPrintSemicolon
+\SetAlgoLined
+\caption{Sparse Subspace Clustering using LASSO.}
+\KwData{Adjacency matrix $A$, number of communities $K$,
+hyperparameter $\lambda$}
+\KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$}
+Find $V$, the matrix of eigenvectors of $A$
+corresponding to the $K (K + 1) / 2$ most positive
+and the $K (K - 1) / 2$ most negative eigenvalues.\;
+Normalize $V \leftarrow \sqrt{n} V$.\;
+\For {$i = 1, ..., n$} {
+Assign $v_i^\top$ as the $i^{th}$ row of $V$.
+Assign $V_{-i} = \bigl[
+v_1 \mid \cdots \mid v_{i-1} \mid v_{i+1} \mid \cdots \mid v_n \bigr]^\top$.\;
+Solve the LASSO problem
+$c_i = \arg\min_{\beta}
+\frac{1}{2} \|v_i - V_{-i} \beta\|_2^2 + \lambda \|\beta\|_1$.\;
+Assign $\tilde{c}_i = (c_i^{(1)}, \dots, c_i^{(i-1)}, 0, c_i^{(i)}, \dots, c_i^{(n-1)})^\top$ such that the superscript is the index of
+$\tilde{c}_i$.\;
+}
+Assign
+$C = \bigr[ \tilde{c}_1 \mid \cdots \mid \tilde{c}_n \bigr]$.\;
+Compute the affinity matrix $B = |C| + |C^\top|$.\;
+Construct graph $G$ using $B$ as its similarity matrix.\;
+Partition $G$ into $K$ disconnected subgraphs (e.g., using edge
+thresholding or spectral clustering).\;
+Map each partition to the community labels $1, ..., K$.
 \end{algorithm}
 
 \begin{theorem}
@@ -1349,22 +1349,22 @@ Because each $\lambda^{(k \ell)}$ is not strictly identifiable, we instead estim
 Given the adjacency matrix \(A\) instead of edge probability matrix \(P\), we can simply use plug-in estimators by taking the SVD of each $A^{(k \ell)}$ to obtain $\hat{\lambda}^{(k \ell)} = \hat{\sigma}^{(k \ell)} \hat{u}^{(k \ell)}$ using the largest singular value of $A$ and its corresponding singular vectors. 
 
 \begin{algorithm}[tp]
-  \label{alg:param_est}
-  \DontPrintSemicolon
-  \SetAlgoLined
-  \setstretch{1.5}
-  \caption{PABM parameter estimation.}
-  \KwData{Adjacency matrix $A$, community assignments $1, ..., K$}
-  \KwResult{PABM parameter estimates $\{\hat{\lambda}^{(k \ell)}\}_K$.}
-  Arrange the rows and columns of $A$ by community such that each 
-  $A^{(k \ell)}$ block consists of estimated edge probabilities between 
-  communities $k$ and $l$.\;
-  \For {$k, \ell = 1, ..., K$, $k \leq \ell$} {
-    Compute $A^{(k \ell)} = U \Sigma V^\top$, the SVD of the $k\ell^{th}$ block.\;
-    Assign $u^{(k \ell)}$ and $v^{(k \ell)}$ as the first columns of $U$ and $V$. 
-    Assign $(\sigma^{(k \ell)})^2 \leftarrow \Sigma_{11}$.\;
-    Assign $\hat{\lambda}^{(k \ell)} \leftarrow \pm \sigma^{(k \ell)} u^{(k \ell)}$ and $\hat{\lambda}^{(\ell k)} \leftarrow \pm \sigma^{(k \ell)} v^{(k \ell)}$.
-  }
+\label{alg:param_est}
+\DontPrintSemicolon
+\SetAlgoLined
+\setstretch{1.5}
+\caption{PABM parameter estimation.}
+\KwData{Adjacency matrix $A$, community assignments $1, ..., K$}
+\KwResult{PABM parameter estimates $\{\hat{\lambda}^{(k \ell)}\}_K$.}
+Arrange the rows and columns of $A$ by community such that each 
+$A^{(k \ell)}$ block consists of estimated edge probabilities between 
+communities $k$ and $l$.\;
+\For {$k, \ell = 1, ..., K$, $k \leq \ell$} {
+Compute $A^{(k \ell)} = U \Sigma V^\top$, the SVD of the $k\ell^{th}$ block.\;
+Assign $u^{(k \ell)}$ and $v^{(k \ell)}$ as the first columns of $U$ and $V$. 
+Assign $(\sigma^{(k \ell)})^2 \leftarrow \Sigma_{11}$.\;
+Assign $\hat{\lambda}^{(k \ell)} \leftarrow \pm \sigma^{(k \ell)} u^{(k \ell)}$ and $\hat{\lambda}^{(\ell k)} \leftarrow \pm \sigma^{(k \ell)} v^{(k \ell)}$.
+}
 \end{algorithm}
 
 \begin{theorem}
@@ -1380,12 +1380,12 @@ O\bigg(\frac{\log n_k}{\sqrt{n_k}} \bigg)
 with high probability. 
 Here $\|\cdot\|_{\infty}$ denotes the $\ell_\infty$ norm of a vector. Let $\hat{\Lambda}$ be the matrix
 $$\hat{\Lambda} = \begin{bmatrix} \hat{\lambda}^{(11)} &
-  \hat{\lambda}^{(12)} & \cdots & \hat{\lambda}^{(1 K)} \\
-  \hat{\lambda}^{(21)} &
-  \hat{\lambda}^{(22)} & \cdots & \hat{\lambda}^{(2 K)} \\
-  \vdots & \vdots & \cdots & \vdots \\
-   \hat{\lambda}^{(K1)} &
-  \hat{\lambda}^{(K2)} & \cdots & \hat{\lambda}^{(K K)} 
+\hat{\lambda}^{(12)} & \cdots & \hat{\lambda}^{(1 K)} \\
+\hat{\lambda}^{(21)} &
+\hat{\lambda}^{(22)} & \cdots & \hat{\lambda}^{(2 K)} \\
+\vdots & \vdots & \cdots & \vdots \\
+\hat{\lambda}^{(K1)} &
+\hat{\lambda}^{(K2)} & \cdots & \hat{\lambda}^{(K K)} 
 \end{bmatrix}$$
 and let $\hat{P} = \hat{X} U I_{p,q} U^\top \hat{X}^{\top}$, where $\hat{X}$ is defined from $\hat{\Lambda}$ and $U$ is defined from $K$ as in theorem~\ref{thm:pabm-grdpg}. 
 Equation~\eqref{eq:param-est} then implies
@@ -1471,22 +1471,22 @@ For these examples, we set the following parameters:
 \begin{itemize}
 \tightlist
 \item
-  Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
+Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
 \item
-  Number of underlying communities \(K = 2, 3, 4\)
+Number of underlying communities \(K = 2, 3, 4\)
 \item
-  Mixture parameters \(\alpha_k = 1 / K\) for \(k = 1, ..., K\), (i.e.,
-  each community label has an equal probability of being drawn)
+Mixture parameters \(\alpha_k = 1 / K\) for \(k = 1, ..., K\), (i.e.,
+each community label has an equal probability of being drawn)
 \item
-  Community labels
-  \(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
+Community labels
+\(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
 \item
-  Within-group popularities
-  \(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\)
+Within-group popularities
+\(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\)
 \item
-  Between-group popularities
-  \(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\) for
-  \(k \neq \ell\)
+Between-group popularities
+\(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\) for
+\(k \neq \ell\)
 \end{itemize}
 Fifty simulations were performed for each combination of $n$ and $K$. 
 The results for community recovery and parameter estimations are presented in figures \ref{fig:clust_err_ct_sim} and \ref{fig:p_block_est}, respectively.
@@ -1522,9 +1522,9 @@ error decaying at rate approximately \(n^{-1/2}\) as $n$ increases.
 \begin{figure}[tp]
 {\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p-1}}
 \caption{Median and IQR RMSE for edge probability matrices
-  reconstructed from the outputs of algorithm~\ref{alg:param_est}
-  (red) compared against outputs of an MLE-based method (blue) proposed in \citet{307cbeb9b1be48299388437423d94bf1}.
-  Simulations were repeated 50 times for each sample size. Communities were drawn to be approximately balanced.}
+reconstructed from the outputs of algorithm~\ref{alg:param_est}
+(red) compared against outputs of an MLE-based method (blue) proposed in \citet{307cbeb9b1be48299388437423d94bf1}.
+Simulations were repeated 50 times for each sample size. Communities were drawn to be approximately balanced.}
 \label{fig:p_block_est}
 \end{figure}
 
@@ -1539,22 +1539,22 @@ parameters:
 \begin{itemize}
 \tightlist
 \item
-  Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
+Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
 \item
-  Number of underlying communities \(K = 2, 3, 4\)
+Number of underlying communities \(K = 2, 3, 4\)
 \item
-  Mixture parameters \(\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}\)
-  for \(k = 1, ..., K\)
+Mixture parameters \(\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}\)
+for \(k = 1, ..., K\)
 \item
-  Community labels
-  \(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
+Community labels
+\(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
 \item
-  Within-group popularities
-  \(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\)
+Within-group popularities
+\(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\)
 \item
-  Between-group popularities
-  \(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\) for
-  \(k \neq \ell\)
+Between-group popularities
+\(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\) for
+\(k \neq \ell\)
 \end{itemize}
 
 Fifty simulations were performed for each combination of $n$ and $K$. 
@@ -1576,10 +1576,10 @@ Simulations were repeated 50 times for each sample size.}\label{fig:clust_err_ct
 {\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p_imba-1}
 }
 \caption{Median and IQR RMSE of edge probabilities derived from the
-  outputs of Algorithm \ref{alg:param_est} (red) compared against an
-  MLE-based method (blue) described in
-  \cite{307cbeb9b1be48299388437423d94bf1}.
-  Simulations were repeated 50 times for each sample size. Communities were drawn to be imbalanced.}
+outputs of Algorithm \ref{alg:param_est} (red) compared against an
+MLE-based method (blue) described in
+\cite{307cbeb9b1be48299388437423d94bf1}.
+Simulations were repeated 50 times for each sample size. Communities were drawn to be imbalanced.}
 \label{fig:lambda_est_p_imba}
 \end{figure}
 
@@ -1593,22 +1593,22 @@ Here, we draw these parameters such that the expected value is $1/3$ for the wit
 \begin{itemize}
 \tightlist
 \item
-  Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
+Number of vertices \(n = 128, 256, 512, 1024, 2048, 4096\)
 \item
-  Number of underlying communities \(K = 2, 3, 4\)
+Number of underlying communities \(K = 2, 3, 4\)
 \item
-  Mixture parameters \(\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}\)
-  for \(k = 1, ..., K\)
+Mixture parameters \(\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}\)
+for \(k = 1, ..., K\)
 \item
-  Community labels
-  \(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
+Community labels
+\(z_k \stackrel{\text{iid}}{\sim} \Multinomial(\alpha_1, ..., \alpha_K)\)
 \item
-  Within-group popularities
-  \(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\)
+Within-group popularities
+\(\lambda^{(kk)} \stackrel{\text{iid}}{\sim} \Betadist(1, 2)\)
 \item
-  Between-group popularities
-  \(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\) for
-  \(k \neq \ell\)
+Between-group popularities
+\(\lambda^{(k \ell)} \stackrel{\text{iid}}{\sim} \Betadist(2, 1)\) for
+\(k \neq \ell\)
 \end{itemize}
 
 OSC, SSC-ASE, and SSC-A perform similarly on disassortative PABMs compared to the simulations in sections \@ref(sec:balanced-communities) and \@ref(sec:imbalanced-communities) 
@@ -1628,12 +1628,12 @@ Simulations were repeated 50 times for each sample size.}
 {\centering \includegraphics{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_disassortative}
 }
 \caption{Median and IQR RMSE of edge probabilities derived from the
-  outputs of algorithm \ref{alg:param_est} (red) compared against an
-  MLE-based method (blue) described in
-  \cite{307cbeb9b1be48299388437423d94bf1}.
-  Simulations were repeated 50 times for each sample size. 
-  Communities were drawn to be approximately balanced.
-  Edge probabilities were drawn to be disassortative.}
+outputs of algorithm \ref{alg:param_est} (red) compared against an
+MLE-based method (blue) described in
+\cite{307cbeb9b1be48299388437423d94bf1}.
+Simulations were repeated 50 times for each sample size. 
+Communities were drawn to be approximately balanced.
+Edge probabilities were drawn to be disassortative.}
 \label{fig:lambda_est_disassortative}
 \end{figure}
 
@@ -1856,15 +1856,15 @@ This is equivalent to applying single linkage clustering on the ASE and cutting 
 The remainder of this section explores under which conditions these criteria are met for the latent configuration, in which the latent vectors lie exactly on manifolds, as well as for the ASE of the GRDPG sampled from these latent configurations, in which the vectors lie approximately on manifolds with some noise that approaches zero asymptotically. 
 
 \begin{algorithm}[h]
-  \label{alg:ase-singlelink}
-  \DontPrintSemicolon
-  \SetAlgoLined
-  \setstretch{1.5}
-  \KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $(p, q)$.}
-  \KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$.}
-  Compute $\hat{X}$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
-  Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
-  \caption{ASE clustering for nonintersecting communities.}
+\label{alg:ase-singlelink}
+\DontPrintSemicolon
+\SetAlgoLined
+\setstretch{1.5}
+\KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $(p, q)$.}
+\KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$.}
+Compute $\hat{X}$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
+Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
+\caption{ASE clustering for nonintersecting communities.}
 \end{algorithm}
 
 \begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting manifolds]
@@ -1995,7 +1995,7 @@ We call this algorithm $K$-curves clustering.
 In this algorithm, the loss function that we wish to minimize is
 \begin{equation}
 \label{eq:kcurves-loss}
-L(z_1, ..., z_n, g_1, ..., g_n; X) = \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
+L(z_1, ..., z_n, g_1, ..., g_n; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
 \end{equation}
 
 \begin{algorithm}[h]
@@ -2108,11 +2108,11 @@ Alternatively, if we turn this problem into a semi-supervised problem in which w
 
 \begin{theorem}
 \label{thm:kcurves-semisupervised}
-Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$ and its density function is such that $f(t) > a > 0$ for every $t \in [0, 1]$, and each $g_k$ is is a Bezier curve of order $R$. 
+Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a Bezier curve of order $R$. 
 Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
-Then as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
+Then if $n \rho_n = \omega(\log^{4c} n)$, as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
 $$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_n; X) \stackrel{p}{\to} 0,$$
-where $L$ is defined as in equation \ref{eq:kcurves-loss}. 
+where $L$ is the loss function defined in equation (\ref{eq:kcurves-loss}). 
 \end{theorem}
 
 ## Simulation Study
@@ -2359,7 +2359,7 @@ plot.estimated.curves(Xhat[, c(2, 1)], hp.out) +
 ```
 
 In the final example, we examined the *Drosophila* connectome graph \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}. 
-In this graph, each vertex is a neuron, and the labels correspond to one of four neuron types, Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons. 
+In this graph, each vertex is a neuron, and the labels correspond to one of four neuron types (Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons). 
 In our analysis, we only considered neurons labeled as Kenyon Cells and Projection Neurons in the right hemisphere. 
 The resulting graph is illustrated in figure \ref{fig:mbconnectome-graph}. 
 
@@ -2407,12 +2407,12 @@ set.seed(314159)
 z.init <- sample.points(z, 3)
 
 mbconnectome.out <- manifold.clustering(Xhat, 2, 
-                              initialization = z.init,
-                              intercept = FALSE, 
-                              parallel = TRUE, 
-                              verbose = FALSE, 
-                              animate = FALSE, 
-                              curve.init = 'x')
+                                        initialization = z.init,
+                                        intercept = FALSE, 
+                                        parallel = TRUE, 
+                                        verbose = FALSE, 
+                                        animate = FALSE, 
+                                        curve.init = 'x')
 
 plot.estimated.curves(Xhat, mbconnectome.out) + 
   scale_colour_brewer(palette = 'Set1') + 
@@ -2459,7 +2459,7 @@ Next recall theorem~\ref{thm:osc-p}; in particular $B_{ij} = nv_i^{\top}
 v_j$. 
 We therefore have
 \[\begin{split}
- \max_{ij} |\hat{B}_{ij} - B_{ij}| &= \max_{ij} n |\hat{v}_i^\top \hat{v}_j -
+\max_{ij} |\hat{B}_{ij} - B_{ij}| &= \max_{ij} n |\hat{v}_i^\top \hat{v}_j -
 v_i^\top v_j| \\
 & \leq n \max_{ij} |\hat{v}_i^\top W W^\top \hat{v}_j -
 v_i^\top v_j| \\
@@ -2510,8 +2510,8 @@ rows of $V^{(k)}$.
 Now define $\nu_{i}^{(k)}$ for $k = 1,2,\dots,K$ and $i =
 1,2,\dots,n_{k}$ as the solution of the following optimization problem
 $$\nu_{i}^{(k)} = \max_\eta (\hat{v}_i^{(k)})^\top \eta - \frac{1}{2
-  \lambda} \eta^\top \eta, \quad \text{subject to $\|V_{-i}^{(k)}
-  \eta\|_\infty \leq 1$.}$$
+\lambda} \eta^\top \eta, \quad \text{subject to $\|V_{-i}^{(k)}
+\eta\|_\infty \leq 1$.}$$
 Given $\nu_i^{(k)}$, let $\mathbb{P}_{\mathcal{S}^{(k)}}(\nu_i^{(k)})$
 be the vector in $\mathbb{R}^{K^2}$ corresponding to the orthogonal projection of $\nu_i^{(k)}$ onto the vector space
 $\mathcal{S}^{(k)}$ and define the projected dual direction $w_{i}^{(k)}$
@@ -2529,11 +2529,11 @@ the rows of $V_{-i}^{(k)}$ and let $r_* = \min_{k} r^{(k)}$. Then Theorem~6 in
 \citet{jmlr-v28-wang13} states that there exists a $\lambda > 0$
 such that $\sqrt{n} \hat{V}$ satisfies the subspace detection property in definition \ref{def:subspace_detection} whenever the following two conditions are satisfied: 
 \begin{gather}
-  \label{eq:cond1}
-  \mu^{(k)} < r^{(k)} \quad \text{for all $k = 1,2,\dots,K$}, \\
-  \label{eq:cond2}
-  \max_{i} \|W \hat{v}_{i} - v_{i}\| \leq \min_{k} \frac{r_*(r^{(k)} -
-    \mu^{(k)})}{2 + 7 r^{(k)}}.
+\label{eq:cond1}
+\mu^{(k)} < r^{(k)} \quad \text{for all $k = 1,2,\dots,K$}, \\
+\label{eq:cond2}
+\max_{i} \|W \hat{v}_{i} - v_{i}\| \leq \min_{k} \frac{r_*(r^{(k)} -
+\mu^{(k)})}{2 + 7 r^{(k)}}.
 \end{gather}
 We now verify that for sufficiently large n, equation \eqref{eq:cond1} and equation~\eqref{eq:cond2}
 holds with high probability.
@@ -2607,12 +2607,12 @@ The eigendecomposition of \(M^{(k \ell)}\) is then
 \begin{bmatrix} u^{(k \ell)} & -u^{(k \ell)} \\ v^{(k \ell)} & v^{(k \ell)} \end{bmatrix}^\top\]
 Thus treating \(M^{(k \ell)}\) as the edge probability matrix of a GRDPG, we have latent positions in \(\mathbb{R}^2\) given by the $(n_k + n_{\ell}) \times 2$ matrix
 \[\Lambda^{(k \ell)} = \begin{bmatrix} 
-  \sigma_{k \ell} u^{(k \ell)} & \sigma_{k \ell} u^{(k \ell)} \\ 
-  \sigma_{k \ell} v^{(k \ell)} & -\sigma_{k \ell} v^{(k \ell)} 
+\sigma_{k \ell} u^{(k \ell)} & \sigma_{k \ell} u^{(k \ell)} \\ 
+\sigma_{k \ell} v^{(k \ell)} & -\sigma_{k \ell} v^{(k \ell)} 
 \end{bmatrix} = 
 \begin{bmatrix} 
-  \lambda^{(k \ell)} & \lambda^{(k \ell)} \\ 
-  \lambda^{( \ell k)} & -\lambda^{( \ell k)} 
+\lambda^{(k \ell)} & \lambda^{(k \ell)} \\ 
+\lambda^{( \ell k)} & -\lambda^{( \ell k)} 
 \end{bmatrix}.\]
 Now consider
 \[\hat{M}^{(k \ell)} = \begin{bmatrix} 0 & A^{(k \ell)} \\ A^{(\ell k)} & 0 \end{bmatrix}\]
@@ -2622,8 +2622,8 @@ the edge probabilities matrix \(M^{(k \ell)}\). Now suppose that the adjacency s
 embedding of $\hat{M}^{(k \ell)}$ is represented as the $(n_k +
 n_{\ell}) \times 2$ matrix
 \[\hat{\Lambda}^{(k \ell)} = \begin{bmatrix} 
-  \hat{\lambda}^{(k \ell)} & \hat{\lambda}^{(k \ell)} \\ 
-  \hat{\lambda}^{(\ell k)} & -\hat{\lambda}^{(\ell k)} 
+\hat{\lambda}^{(k \ell)} & \hat{\lambda}^{(k \ell)} \\ 
+\hat{\lambda}^{(\ell k)} & -\hat{\lambda}^{(\ell k)} 
 \end{bmatrix}\]
 where each \(\hat{\lambda}^{(k \ell)}\) is defined as in Algorithm 3. Then
 by Theorem 5 of \citet{rubindelanchy2017statistical}, there
@@ -2633,7 +2633,7 @@ $$\max_{i} |W^{*} \hat{\Lambda}_{i}^{(k \ell)} - \Lambda_{i}^{(k \ell)} \| =
 O\Bigl(\frac{\log (n_k + n_{\ell})}{\sqrt{n_k + n_{\ell}}}\Bigr)$$
 with high probability. Here $\Lambda_{i}^{(k \ell)}$ and
 $\hat{\Lambda}_i^{(k \ell)}$ denote the $i$th rows of $\Lambda^{(k
-  \ell)}$ and $\hat{\Lambda}^{(k \ell)}$, respectively. 
+\ell)}$ and $\hat{\Lambda}^{(k \ell)}$, respectively. 
 
 Furthermore, by looking at the proof of Theorem~5 in
 \citep{rubindelanchy2017statistical}, we see that $W^{*}$ is also
@@ -2710,6 +2710,22 @@ which tends toward $1$ as $n \to \infty$ since both $P(E_n(\eta))$ and $P(D_n)$ 
 \end{proof}
 
 \begin{proof}[Proof of theorem \ref{thm:kcurves-semisupervised}]
+Let $\hat{X}$ with rows $\hat{x}_i^\top$ be the ASE of $A$ drawn from an MBM in which each $g_k(t) = g(t; p_k)$ is a Bezier curve of order $R$. 
+Define the ASE error as $\epsilon_i = \|Q \hat{x}_i - x_i\|$ and $\epsilon = \max_i \epsilon_i$ where $Q$ is the appropriate indefinite orthogonal transformation for the ASE. 
+By \citet{rubindelanchy2017statistical}, $\epsilon = O_P \bigg(\frac{\log^c n}{\sqrt{n}} \bigg)$. 
+
+Since $x_i = g(t_i; p_{z_i})$, $\|Q \hat{x}_i - g(t_i; p_{z_i})\| < \epsilon$. 
+
+The statement of the theorem assumes that for each community $k$, there at least $R + 1$ points with known label $k$. 
+For simplicity, suppose we have exactly $R + 1$ (if there are more, then discard the rest). 
+Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly (see appendix B), yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
+Use the fitted Bezier curves to define $\delta_k(t) = \|Q g(t; \hat{p}_k) - g(t; p_k)\|$, $\delta_k = \max_t \delta_k(t)$, and $\delta = \max_k \delta_k$. 
+Since $P(\epsilon < M n^{-1/2} \log^c n) \to 1$ for constants $M, c > 0$, 
+$P(\delta_k < M n^{-1/2} \log^c n) \to 1$ for each $k$. 
+Since $\epsilon_i$ describes the error between each embedding point and its corresponding latent vertex, and $\delta_k(t_i)$ describes the error between the fitted curve and its corresponding true curve in the latent space, 
+$L < \frac{1}{n} \sum_i \epsilon_i + \delta_{z_i}(t_i) < \frac{1}{n} n (\epsilon + \delta) = \epsilon + \delta$. 
+Then $P(L < 2 M n^{-1/2} \log^c n) > P(\epsilon + \delta < 2 M n^{-1/2} \log^c n) \to 1$ as $n \to \infty$. 
+
 \end{proof}
 
 \newpage
@@ -2719,7 +2735,5 @@ which tends toward $1$ as $n \to \infty$ since both $P(E_n(\eta))$ and $P(D_n)$ 
 \newpage
 
 \section*{Appendix C: Supplementary Materials}
-
-\newpage
 
 # References
