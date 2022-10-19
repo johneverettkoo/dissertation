@@ -1900,6 +1900,14 @@ We also derive theoretical consistency properties for both settings.
 \hypertarget{previous-work-1}{%
 \subsubsection{Previous Work}\label{previous-work-1}}
 
+Manifolds have been observed in the ASEs of real observed graphs when they are studied as GRDPGs.
+The \emph{Drosophila} connectome graph \citep{Eichler141762} displays community-wise linear and quadratic structures in the ASE.
+\citet{https://doi.org/10.48550/arxiv.1705.03297} used GMMs on the ASE for community detection and found that the curve-like structures in the ASE were incompatible with centroid-based clustering methods.
+\citet{SannaPassino2022} used Gaussian Processes to estimate curves, which resulted in better empirical fits.
+\citet{athreya2020estimation} considered GRDPGs in which the vertices lie on curves or manifolds, but their focus was largely on estimating distributions on the manifolds rather than the manifolds themselves.
+
+Outside of random graph inference, there is a larger body of work on fitting parametric curves to vectors in \(\mathbb{R}^d\) and identifying vectors belonging to different manifolds in \(\mathbb{R}^d\).
+
 \hypertarget{sec:nonintersect}{%
 \subsection{Algorithm for Nonintersecting Manifolds}\label{sec:nonintersect}}
 
@@ -2002,7 +2010,7 @@ We call this algorithm \(K\)-curves clustering.
 In this algorithm, the loss function that we wish to minimize is
 \begin{equation}
 \label{eq:kcurves-loss}
-\sum_{k=1}^K \sum_{i \in C_k} \|x_i - g_k(t_i)\|^2
+L(z_1, ..., z_n, g_1, ..., g_n; X) = \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
 \end{equation}
 
 \begin{algorithm}[h]
@@ -2075,9 +2083,10 @@ Alternatively, if we turn this problem into a semi-supervised problem in which w
 \begin{theorem}
 \label{thm:kcurves-semisupervised}
 Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$ and its density function is such that $f(t) > a > 0$ for every $t \in [0, 1]$, and each $g_k$ is is a Bezier curve of order $R$. 
-Suppose that for each community $k$, we have labels for $R + 1$ vertices. 
-Define the community detection error rate as $\frac{1}{n} \min_\pi \sum_i I(z_i = \pi(\hat{z}_i))$, where $\pi$ is a permutation function and $\hat{z}_i$ are the predicted labels from $K$-curves clustering. 
-Then as $n \to \infty$, $K$-curves clustering produces zero community detection error rate, with high probability. 
+Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
+Then as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
+$$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_n; X) \stackrel{p}{\to} 0,$$
+where $L$ is defined as in equation \ref{eq:kcurves-loss}. 
 \end{theorem}
 
 \hypertarget{simulation-study-1}{%
@@ -2211,6 +2220,39 @@ The fitted quadratic curves are illustrated in figure \ref{fig:hp-kcurves}, whic
 \end{figure}
 
 In the final example, we examined the \emph{Drosophila} connectome graph \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}.
+In this graph, each vertex is a neuron, and the labels correspond to one of four neuron types, Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons.
+In our analysis, we only considered neurons labeled as Kenyon Cells and Projection Neurons in the right hemisphere.
+The resulting graph is illustrated in figure \ref{fig:mbconnectome-graph}.
+
+The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for this graph (figure \ref{fig:mbconnectome-ase}).
+Fitting two quadratic Bezier curves to the ASE (figure \ref{fig:mbconnectome-kcurves}) results in 91.4\% accuracy.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/mbconnectome-graph-1} 
+
+}
+
+\caption{Drosophila connectome graph. Each vertex represents a neuron, which are labeled by neuron type.}\label{fig:mbconnectome-graph}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/mbconnectome-ase-1} 
+
+}
+
+\caption{ASE of the Drosophila connectome graph. The embedding vectors are labeled by neuron type.}\label{fig:mbconnectome-ase}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/mbconnectome-kcurves-1} 
+
+}
+
+\caption{ASE of the Drosophila connectome graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.}\label{fig:mbconnectome-kcurves}
+\end{figure}
 
 \hypertarget{conclusions}{%
 \subsection{Conclusions}\label{conclusions}}
