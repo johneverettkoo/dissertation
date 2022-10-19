@@ -2424,7 +2424,7 @@ plot.estimated.curves(Xhat, mbconnectome.out) +
 
 \newpage
 
-\section*{Appendix A: Proofs of Theorems}
+\section*{Appendix A: Proofs of Theorems from Section 3}
 
 Let \(V_n\) and \(\hat{V}_n\)
 be the $n \times K^2$ matrices whose columns are the eigenvectors of \(P\) and \(A\) corresponding to the
@@ -2652,6 +2652,8 @@ $\|\hat{\lambda}^{(kk)} - \lambda^{(kk)}\|_{\infty}$ given above
 yields equation~\eqref{eq:param-est} in theorem~\ref{thm:param-est}. 
 \end{proof}
 
+\section*{Appendix B: Proofs of Theorems from Section 4}
+
 \begin{lemma}
 \label{lemma:no-noise}
 Let $x_1, ..., x_n$ be drawn from $K$ compact, connected manifolds $\mathcal{M}_1$, ..., $\mathcal{M}_K$ each with probability measures $F_1$, ..., $F_K$, and the manifolds are separated by distance at least $\delta > 0$. 
@@ -2693,8 +2695,6 @@ By theorem 3 of \citet{rubindelanchy2017statistical}, for some finite $M > 0$, $
 Then since $P(C_n \delta - 2 \epsilon > 0) \to 1$, there is an $\epsilon \in (0, C_n \delta - 2 \epsilon)$ with probability 1. 
 Thus, $P(D_n(\eta)) \to 1$. 
 
-
-
 Then to show that $P(A_n) \to 1$: 
 
 $$
@@ -2718,22 +2718,21 @@ Since $x_i = g(t_i; p_{z_i})$, $\|Q \hat{x}_i - g(t_i; p_{z_i})\| < \epsilon$.
 
 The statement of the theorem assumes that for each community $k$, there at least $R + 1$ points with known label $k$. 
 For simplicity, suppose we have exactly $R + 1$ (if there are more, then discard the rest). 
-Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly (see appendix B), yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
+Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly (see appendix C), yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
 Use the fitted Bezier curves to define $\delta_k(t) = \|Q g(t; \hat{p}_k) - g(t; p_k)\|$, $\delta_k = \max_t \delta_k(t)$, and $\delta = \max_k \delta_k$. 
 Since $P(\epsilon < M n^{-1/2} \log^c n) \to 1$ for constants $M, c > 0$, 
 $P(\delta_k < M n^{-1/2} \log^c n) \to 1$ for each $k$. 
 Since $\epsilon_i$ describes the error between each embedding point and its corresponding latent vertex, and $\delta_k(t_i)$ describes the error between the fitted curve and its corresponding true curve in the latent space, 
-$L < \frac{1}{n} \sum_i \epsilon_i + \delta_{z_i}(t_i) < \frac{1}{n} n (\epsilon + \delta) = \epsilon + \delta$. 
-Then $P(L < 2 M n^{-1/2} \log^c n) > P(\epsilon + \delta < 2 M n^{-1/2} \log^c n) \to 1$ as $n \to \infty$. 
+$$L < \frac{1}{n} \sum_i \epsilon_i + \delta_{z_i}(t_i) < \frac{1}{n} n (\epsilon + \delta) = \epsilon + \delta.$$ 
+Then as $n \to \infty$, 
+$$P(L < 2 M n^{-1/2} \log^c n) > P(\epsilon + \delta < 2 M n^{-1/2} \log^c n) \to 1.$$
 
 \end{proof}
 
 \newpage
 
-\section*{Appendix B: Details on Fitting Bezier Curves to Noisy Data}
+\section*{Appendix C: Details on Fitting Bezier Curves to Noisy Data}
 
 \newpage
-
-\section*{Appendix C: Supplementary Materials}
 
 # References
