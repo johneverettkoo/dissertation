@@ -2614,7 +2614,7 @@ The curve fitting step in algorithm \ref{alg:kcurves} requires estimation of som
 One choice of curve is the Bezier polynomial.
 The Bezier polynomial of order \(R\) is defined by function \(g\) with parameters \(p\) such that
 \[g(t; p) = \sum_{r=0}^R p^{(r)} \binom{R}{r} t^r (1-t)^{R-r}\]
-where the Bezier coefficients \(p^{(r)}\) are vectors in \(\mathbb{R}^d\), and \(p = \big[ p^{(0)} \mid \cdots \mid p^{(R)} \big]\).
+where the Bezier coefficients \(p^{(r)}\) are vectors in \(\mathbb{R}^d\), and \(p = \big[ p^{(0)} \mid \cdots \mid p^{(R)} \big]^\top\).
 
 The general idea behind Bezier curve fitting to noisy data is as follows:
 We wish to minimize the squared loss function
@@ -2663,12 +2663,21 @@ Initialize timepoints $t_1, ..., t_n$ (e.g., by sampling from a random distribut
 
 Algorithm \ref{alg:bezier-fit} is sensitive to initialization.
 We propose two initialization strategies.
-One involves using a one-dimensional Isomap \citep{Tenenbaum2000-ff} embedding normalized to the unit interval.
-Since the vectors lie approximately on a one-dimensional manifold, a one-dimensional Isomap embedding should be able to approximate the manifold, and in particular the interpoint distances along the manifold, as long as the sample is dense along the manifold \citep{trosset2020rehabilitating}.
+The first involves using a one-dimensional Isomap \citep{Tenenbaum2000-ff} embedding normalized to the unit interval.
+Since the vectors lie approximately on a one-dimensional manifold, a one-dimensional Isomap embedding should be able to approximate the manifold, and in particular the interpoint distances along the manifold, as long as the sample is sufficiently dense along the entire curve \citep{trosset2020rehabilitating}.
+The second initialization strategy involves choosing \(R+1\) representative vectors.
+Then it is possible to fit a Bezier polynomial of order \(R\) exactly to these \(R+1\) vectors.
+If the representative vectors lie close to the true curve, then the fitted curve is also close to the true curve, providing a good initial guess.
+In this strategy, we use the consistency of the ASE \citep{rubindelanchy2017statistical} to ensure that this is true asymptotically of any embedding vector in the ASE (see theorem \ref{thm:kcurves-semisupervised}).
 
 \newpage
 
 \section*{Appendix D: Supplementary Materials}
+
+The RMarkdown and \LaTeX files to compile this dissertation can be found at \url{https://github.com/johneverettkoo/dissertation}.
+The code for simulations and data analyses in section \ref{sec:pabm-grdpg} can be found at \url{https://github.com/johneverettkoo/pabm-grdpg}.
+An R package implementing orthogonal spectral clustering (algorithm \ref(alg:osc)) is currently in progress and can be found at \url{https://github.com/johneverettkoo/osc}.
+The code for simulations and data analyses in section \ref{sec:mbm} can be found at \url{https://github.com/johneverettkoo/manifold-block-models}.
 
 \newpage
 
