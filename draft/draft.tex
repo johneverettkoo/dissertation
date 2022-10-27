@@ -2149,7 +2149,7 @@ Plotting each of the \(256 \times 2\) fitted curves confirms this conclusion (fi
 \end{figure}
 
 In the second simulation, we extended the first simulation setup based on examples \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit} into three dimensions and three curves.
-The setup is as follows:
+The mixture model is as follows (also see figure \ref{fig:three-curves}):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2169,7 +2169,7 @@ The setup is as follows:
   \item
     \(g_2(t) = \big[ 0, t^2, 2 t (t-1) \big]^\top\)
   \item
-    \(g_3(t) = \big[2 t (t-1), 0, t^2 \big]^\top\).
+    \(g_3(t) = \big[2 t (t-1), t^2, 2 t (t-1) \big]^\top\).
   \end{enumerate}
 \item
   Collect the latent vectors into matrix \(X = \big[ x_1 \mid \cdots \mid x_n \big]^\top\).
@@ -2177,11 +2177,20 @@ The setup is as follows:
   Draw \(A \sim \RDPG(X; \rho_n)\) (for these simulations we fix \(\rho_n \equiv 1\)).
 \end{enumerate}
 
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/three-curves-1} 
+
+}
+
+\caption{Latent vectors (left) and ASE (right) of one realization of the mixture model in the simulation setup with $K=3$ manifolds.}\label{fig:three-curves}
+\end{figure}
+
 As in the previous setup, we set \(n = 128, 256, 512, 1024, 2048\), and we start with completely random initializations as well as initializations in which we know \(4\) or \(8\) labels from each community.
 For each setting, we simulate 50 replicates.
 Since the curves meet at the origin, we force the fitted Bezier curves to meet at the origin as well by fixing \(p_1^{(k)} = (0, 0, 0)\) for each \(k\).
 Figure \ref{fig:sim-curves-3} shows the median and interquartile ranges for the error rates for each \(n\) and \emph{a priori} known labels per community.
-As in the previous \(K = 2\) setup, the results suggest that for sufficient \(n\), we do not benefit from having more known labels, but having a few results in greatly improved performance. Unlike in the previous setup, random initialization fails to improve with greater \(n\).
+As in the previous \(K = 2\) simulations, the results suggest that for sufficient \(n\), we do not benefit from having more known labels, but having a few results in greatly improved performance. Unlike in the previous setup, random initialization results in low community detection error rates, close to the semi-supervised setups.
 
 \begin{figure}[H]
 
@@ -2596,7 +2605,7 @@ By \citet{rubindelanchy2017statistical}, $\epsilon = O_P \bigg(\frac{\log^c n}{\
 
 The statement of the theorem assumes that for each community $k$, there at least $R + 1$ points with known label $k$. 
 For simplicity, suppose we have exactly $R + 1$ (if there are more, then discard the rest). 
-Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly (see appendix C), yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
+Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly, yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
 Use the fitted Bezier curves to define $\delta_k(t) = \|Q g(t; \hat{p}_k) - g(t; p_k)\|$, $\delta_k = \max_t \delta_k(t)$, and $\delta = \max_k \delta_k$. 
 Since $P(\epsilon < M n^{-1/2} \log^c n) \to 1$ for constants $M, c > 0$, 
 $P(\delta_k < M n^{-1/2} \log^c n) \to 1$ for each $k$. 

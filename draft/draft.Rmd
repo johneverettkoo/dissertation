@@ -2183,7 +2183,7 @@ ggplot(repeat.df) +
   theme_bw()
 ```
 
-```{r repeat-curves, fig.height = 3, fig.width = 3, fig.cap = 'Fitted curves over 256 replicates. The curves are colored by the loss values.', cache = TRUE}
+```{r repeat-curves, fig.height = 2.5, fig.width = 12, fig.cap = 'Fitted curves over 256 replicates. The curves are colored by the loss values.', cache = TRUE}
 plot.repeat.study <- function(repeat.df) {
   repeat.df <- na.omit(repeat.df)
   min.t <- 0
@@ -2221,14 +2221,14 @@ plot.repeat.study <- function(repeat.df) {
     })
   }
   ggplot(curves.df) + 
-    geom_path(aes(x = x, y = y, group = interaction(z, iter),
+    geom_path(aes(x = y, y = x, group = interaction(z, iter),
                   colour = loss),
               alpha = 1 / log(niter)) + 
     theme_bw() + 
     coord_fixed() + 
     labs(colour = 'loss',
-         x = expression(x[1]),
-         y = expression(x[2])) + 
+         x = NULL,
+         y = NULL) + 
     viridis::scale_color_viridis()
 }
 
@@ -2236,22 +2236,75 @@ plot.repeat.study(repeat.df)
 ```
 
 In the second simulation, we extended the first simulation setup based on examples \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit} into three dimensions and three curves. 
-The setup is as follows:
+The mixture model is as follows (also see figure \ref{fig:three-curves}):
 
 1. Draw $z_1, ..., z_n \iid \Multinomial(1/3, 1/3, 1/3)$.
 2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
 3. Let each $x_i = g_{z_i}(t_i)$ where
     i. $g_1(t) = \big[ 2 t (t-1), t^2, 0 \big]^\top$
     ii. $g_2(t) = \big[ 0, t^2, 2 t (t-1) \big]^\top$
-    iii. $g_3(t) = \big[2 t (t-1), 0, t^2 \big]^\top$.
+    iii. $g_3(t) = \big[2 t (t-1), t^2, 2 t (t-1) \big]^\top$.
 4. Collect the latent vectors into matrix $X = \big[ x_1 \mid \cdots \mid x_n \big]^\top$.
 5. Draw $A \sim \RDPG(X; \rho_n)$ (for these simulations we fix $\rho_n \equiv 1$). 
+
+```{r three-curves, cache = TRUE, fig.height = 3, fig.width = 12, fig.cap = 'Latent vectors (left) and ASE (right) of one realization of the mixture model in the simulation setup with $K=3$ manifolds.'}
+par(mfrow = c(1, 3))
+
+n <- 512
+
+p.list <- list(matrix(c(0, 1, 0, 
+                        0, 0, 1,
+                        0, 0, 0),
+                      nrow = 3, ncol = 3),
+               matrix(c(0, 0, 0, 
+                        0, 0, 1,
+                        0, 1, 0),
+                      nrow = 3, ncol = 3),
+               matrix(c(0, 1, 0, 
+                        0, 0, 1,
+                        0, 1, 0),
+                      nrow = 3, ncol = 3))
+
+K <- length(p.list)
+
+z <- sample(seq(K), n, replace = TRUE)
+z <- sort(z)
+
+t <- runif(n)
+
+X <- lapply(seq(K), function(k) {
+  bezier.curve(t[z == k], 
+               p.list[[k]], 
+               intercept = TRUE)
+}) %>% 
+  do.call('rbind', .)
+
+p <- ncol(X)
+q <- 0
+
+P <- grdpg.edge.prob.matrix(X, p, q)
+A <- draw.graph(P)
+Xhat <- embedding(A, p, q)
+
+scatterplot3d::scatterplot3d(X[, 1], X[, 2], X[, 3],
+                             color = z, 
+                             xlab = NA, ylab = NA, zlab = NA,
+                             pch = '.', asp = 1,
+                             tick.marks = FALSE)
+
+scatterplot3d::scatterplot3d(Xhat[, 1], Xhat[, 2], Xhat[, 3], 
+                             color = z, 
+                             xlab = NA, ylab = NA, zlab = NA, 
+                             pch = '.', asp = 1, 
+                             tick.marks = FALSE,
+                             angle = 40)
+```
 
 As in the previous setup, we set $n = 128, 256, 512, 1024, 2048$, and we start with completely random initializations as well as initializations in which we know $4$ or $8$ labels from each community. 
 For each setting, we simulate 50 replicates. 
 Since the curves meet at the origin, we force the fitted Bezier curves to meet at the origin as well by fixing $p_1^{(k)} = (0, 0, 0)$ for each $k$. 
 Figure \ref{fig:sim-curves-3} shows the median and interquartile ranges for the error rates for each $n$ and *a priori* known labels per community. 
-As in the previous $K = 2$ setup, the results suggest that for sufficient $n$, we do not benefit from having more known labels, but having a few results in greatly improved performance. Unlike in the previous setup, random initialization fails to improve with greater $n$. 
+As in the previous $K = 2$ simulations, the results suggest that for sufficient $n$, we do not benefit from having more known labels, but having a few results in greatly improved performance. Unlike in the previous setup, random initialization results in low community detection error rates, close to the semi-supervised setups. 
 
 ```{r sim-curves-3, fig.height = 3, fig.width = 8, fig.cap = 'Median and IQR error rates over 50 replicates in the simulation setup for $K = 3$ curves.', cache = TRUE}
 n.vec <- 2 ^ c(7, 8, 9, 10, 11)
@@ -2771,7 +2824,7 @@ By \citet{rubindelanchy2017statistical}, $\epsilon = O_P \bigg(\frac{\log^c n}{\
 
 The statement of the theorem assumes that for each community $k$, there at least $R + 1$ points with known label $k$. 
 For simplicity, suppose we have exactly $R + 1$ (if there are more, then discard the rest). 
-Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly (see appendix C), yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
+Then for each community $k$, it is possible to fit a polynomial of order $R$ that goes through each of the $R + 1$ known points exactly, yielding $g(t; \hat{p}_k)$, where $\hat{p}_k$ are the fitted coefficients of the Bezier polynomial. 
 Use the fitted Bezier curves to define $\delta_k(t) = \|Q g(t; \hat{p}_k) - g(t; p_k)\|$, $\delta_k = \max_t \delta_k(t)$, and $\delta = \max_k \delta_k$. 
 Since $P(\epsilon < M n^{-1/2} \log^c n) \to 1$ for constants $M, c > 0$, 
 $P(\delta_k < M n^{-1/2} \log^c n) \to 1$ for each $k$. 
