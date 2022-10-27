@@ -2111,7 +2111,7 @@ Alternatively, if we turn this problem into a semi-supervised problem in which w
 Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a Bezier curve of order $R$. 
 Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
 Then if $n \rho_n = \omega(\log^{4c} n)$, as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
-$$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_n; X) \stackrel{p}{\to} 0,$$
+$$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_K; X) \stackrel{p}{\to} 0,$$
 where $L$ is the loss function defined in equation (\ref{eq:kcurves-loss}). 
 \end{theorem}
 
@@ -2300,11 +2300,11 @@ scatterplot3d::scatterplot3d(Xhat[, 1], Xhat[, 2], Xhat[, 3],
                              angle = 40)
 ```
 
-As in the previous setup, we set $n = 128, 256, 512, 1024, 2048$, and we start with completely random initializations as well as initializations in which we know $4$ or $8$ labels from each community. 
-For each setting, we simulate 50 replicates. 
-Since the curves meet at the origin, we force the fitted Bezier curves to meet at the origin as well by fixing $p_1^{(k)} = (0, 0, 0)$ for each $k$. 
+As in the previous setup, we set $n = 128, 256, 512, 1024, 2048$, and we started with completely random initializations as well as initializations in which we know $4$ or $8$ labels from each community. 
+For each setting, we simulated 50 replicates. 
+Since the curves meet at the origin, we forced the fitted Bezier curves to meet at the origin as well by fixing $p_k^{(0)} = (0, 0, 0)$ for each $k$. 
 Figure \ref{fig:sim-curves-3} shows the median and interquartile ranges for the error rates for each $n$ and *a priori* known labels per community. 
-As in the previous $K = 2$ simulations, the results suggest that for sufficient $n$, we do not benefit from having more known labels, but having a few results in greatly improved performance. Unlike in the previous setup, random initialization results in low community detection error rates, close to the semi-supervised setups. 
+As in the previous $K = 2$ simulations, the results suggest that for sufficient $n$, we do not benefit from having more known labels, but having a few results in greatly improved performance. Unlike in the previous setup, random initialization results in low community detection error rates, close to the semi-supervised setups for larger $n$. 
 
 ```{r sim-curves-3, fig.height = 3, fig.width = 8, fig.cap = 'Median and IQR error rates over 50 replicates in the simulation setup for $K = 3$ curves.', cache = TRUE}
 n.vec <- 2 ^ c(7, 8, 9, 10, 11)
