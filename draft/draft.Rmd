@@ -2509,7 +2509,7 @@ graph.l <- ggraph(A.l, layout = 'stress') +
 gridExtra::grid.arrange(graph.l, graph.r, nrow = 1)
 ```
 
-```{r mbconnectome-ase, fig.cap = 'ASE of the Drosophila connectome graphs. The embedding vectors are labeled by neuron type.', fig.height = 2, fig.width = 12}
+```{r mbconnectome-ase, fig.cap = 'ASEs of the Drosophila connectome graphs. The embedding vectors are labeled by neuron type.', fig.height = 2, fig.width = 8}
 Xhat.l <- embedding(A.l, 2, 0)
 ase.l <- ggplot() + 
   geom_point(aes(x = Xhat.l[, 1], y = Xhat.l[, 2],
@@ -2533,7 +2533,7 @@ ase.r <- ggplot() +
 gridExtra::grid.arrange(ase.l, ase.r, nrow = 1)
 ```
 
-```{r mbconnectome-kcurves, fig.cap = 'ASEs of the Drosophila connectome graphs with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 12, cache = TRUE}
+```{r mbconnectome-kcurves, fig.cap = 'ASEs of the Drosophila connectome graphs with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 8, cache = TRUE}
 set.seed(314159265)
 
 z.init.r <- sample.points(z.r, 10)
@@ -2549,8 +2549,10 @@ mbconnectome.out.r <- manifold.clustering(Xhat.r,
                                           curve.init = 'x')
 fitted.r <- plot.estimated.curves(Xhat.r, mbconnectome.out.r) + 
   scale_colour_brewer(palette = 'Set1') + 
-  coord_fixed(.4) +
-  labs(x = NULL, y = NULL)
+  coord_fixed(.5) +
+  labs(x = NULL, y = NULL) + 
+  ylim(min(Xhat.r[, 2]), max(Xhat.r[, 2])) + 
+  xlim(min(Xhat.r[, 1]), max(Xhat.r[, 1]))
 
 mbconnectome.out.l <- manifold.clustering(Xhat.l, 
                                           length(unique(z.l)), 
@@ -2562,8 +2564,10 @@ mbconnectome.out.l <- manifold.clustering(Xhat.l,
                                           curve.init = 'x')
 fitted.l <- plot.estimated.curves(Xhat.l, mbconnectome.out.l) + 
   scale_colour_brewer(palette = 'Set1') + 
-  coord_fixed(.4) +
-  labs(x = NULL, y = NULL)
+  coord_fixed(.5) +
+  labs(x = NULL, y = NULL) + 
+  ylim(min(Xhat.l[, 2]), max(Xhat.l[, 2])) + 
+  xlim(min(Xhat.l[, 1]), max(Xhat.l[, 1]))
 
 gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 ```
