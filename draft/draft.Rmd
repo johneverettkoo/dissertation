@@ -2466,66 +2466,106 @@ plot.estimated.curves(Xhat[, c(2, 1)], hp.out) +
   labs(x = expression(x[2]), y = expression(x[1]))
 ```
 
-In the final example, we examined the *Drosophila* connectome graph \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}. 
-In this graph, each vertex is a neuron, and the labels correspond to one of four neuron types (Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons). 
-In our analysis, we only considered neurons labeled as Kenyon Cells and Projection Neurons in the right hemisphere. 
-The resulting graph is illustrated in figure \ref{fig:mbconnectome-graph}. 
+In the final example, we examined the *Drosophila* connectome graphs \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}. 
+This dataset consists of two graphs representing two networks of neurons, one for each hemisphere of the *Drosophila* brain. 
+In these graphs, each vertex is a neuron, and the labels correspond to one of four neuron types (Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons). 
+The resulting graphs are illustrated in figure \ref{fig:mbconnectome-graph}. 
 
-The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for this graph (figure \ref{fig:mbconnectome-ase}). 
-Fitting two quadratic Bezier curves to the ASE (figure \ref{fig:mbconnectome-kcurves}) results in 91.4\% accuracy. 
+The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for these graphs (figure \ref{fig:mbconnectome-ase}). 
+Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 69.9\% accuracy for the left hemisphere connectome and 76.5\% accuracy for the right hemisphere connectome. 
 
-```{r mbconnectome-graph, fig.cap = 'Drosophila connectome graph. Each vertex represents a neuron, which are labeled by neuron type.', fig.height = 2, figh.width = 4}
+```{r mbconnectome-graph, fig.cap = 'Graphs of the Drosophila connectomes. The left and right are of the left and right hemispheres, respectively. Each vertex represents a neuron, which are labeled by neuron type.', fig.height = 2, figh.width = 12}
 library(mbstructure)
 data(MBconnectome)
 
-graph <- generate.graph(newrdat, vdf.right)
-A <- as.matrix(igraph::as_adjacency_matrix(graph$g, type = 'both'))
-z <- graph$vdf$type
-ind.keep <- z %in% c('KC', 'PN')
-A <- A[ind.keep, ind.keep]
-z <- as.numeric(as.factor(as.numeric(z[ind.keep])))
-A <- sign(A + t(A))
-diag(A) <- 0
-
-ggraph(A, layout = 'stress') + 
-  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
-  geom_node_point(aes(colour = factor(z)), 
+graph.r <- generate.graph(newrdat, vdf.right)
+A.r <- as.matrix(igraph::as_adjacency_matrix(graph.r$g, type = 'both'))
+z.r <- as.numeric(graph.r$vdf$type)
+n.r <- length(z.r)
+A.r <- sign(A.r + t(A.r))
+diag(A.r) <- 0
+graph.r <- ggraph(A.r, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n.r) / 2) + 
+  geom_node_point(aes(colour = factor(z.r)), 
                   show.legend = FALSE) + 
   labs(colour = NULL) + 
   theme_void() + 
   scale_colour_brewer(palette = 'Set1')
+
+graph.l <- generate.graph(newldat, vdf.left)
+A.l <- as.matrix(igraph::as_adjacency_matrix(graph.l$g, type = 'both'))
+z.l <- as.numeric(graph.l$vdf$type)
+n.l <- length(z.l)
+Al <- sign(A.l + t(A.l))
+diag(A.l) <- 0
+graph.l <- ggraph(A.l, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n.l) / 2) + 
+  geom_node_point(aes(colour = factor(z.l)), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(graph.l, graph.r, nrow = 1)
 ```
 
-```{r mbconnectome-ase, fig.cap = 'ASE of the Drosophila connectome graph. The embedding vectors are labeled by neuron type.', fig.height = 2, fig.width = 8}
-Xhat <- embedding(A, 2, 0)
-
-ggplot() + 
-  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2],
-                 colour = factor(z))) + 
+```{r mbconnectome-ase, fig.cap = 'ASE of the Drosophila connectome graphs. The embedding vectors are labeled by neuron type.', fig.height = 2, fig.width = 12}
+Xhat.l <- embedding(A.l, 2, 0)
+ase.l <- ggplot() + 
+  geom_point(aes(x = Xhat.l[, 1], y = Xhat.l[, 2],
+                 colour = factor(z.l))) + 
   coord_fixed(.5) +
   theme_bw() + 
   theme(legend.position = 'none') +
   scale_colour_brewer(palette = 'Set1') + 
-  labs(x = expression(x[1]), y = expression(x[2]),
-       colour = NULL)
+  labs(x = NULL, y = NULL, colour = NULL)
+
+Xhat.r <- embedding(A.r, 2, 0)
+ase.r <- ggplot() + 
+  geom_point(aes(x = Xhat.r[, 1], y = Xhat.r[, 2],
+                 colour = factor(z.r))) + 
+  coord_fixed(.5) +
+  theme_bw() + 
+  theme(legend.position = 'none') +
+  scale_colour_brewer(palette = 'Set1') + 
+  labs(x = NULL, y = NULL, colour = NULL)
+
+gridExtra::grid.arrange(ase.l, ase.r, nrow = 1)
 ```
 
-```{r mbconnectome-kcurves, fig.cap = 'ASE of the Drosophila connectome graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 8, cache = TRUE}
-set.seed(314159)
-z.init <- sample.points(z, 3)
+```{r mbconnectome-kcurves, fig.cap = 'ASEs of the Drosophila connectome graphs with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 12, cache = TRUE}
+set.seed(314159265)
 
-mbconnectome.out <- manifold.clustering(Xhat, 2, 
-                                        initialization = z.init,
-                                        intercept = FALSE, 
-                                        parallel = TRUE, 
-                                        verbose = FALSE, 
-                                        animate = FALSE, 
-                                        curve.init = 'x')
+z.init.r <- sample.points(z.r, 10)
+z.init.l <- sample.points(z.l, 10)
 
-plot.estimated.curves(Xhat, mbconnectome.out) + 
+mbconnectome.out.r <- manifold.clustering(Xhat.r, 
+                                          length(unique(z.r)), 
+                                          initialization = z.init.r,
+                                          intercept = FALSE, 
+                                          parallel = TRUE, 
+                                          verbose = FALSE, 
+                                          animate = FALSE, 
+                                          curve.init = 'x')
+fitted.r <- plot.estimated.curves(Xhat.r, mbconnectome.out.r) + 
   scale_colour_brewer(palette = 'Set1') + 
   coord_fixed(.4) +
-  labs(x = expression(x[1]), y = expression(x[2]))
+  labs(x = NULL, y = NULL)
+
+mbconnectome.out.l <- manifold.clustering(Xhat.l, 
+                                          length(unique(z.l)), 
+                                          initialization = z.init.l,
+                                          intercept = FALSE, 
+                                          parallel = TRUE, 
+                                          verbose = FALSE, 
+                                          animate = FALSE, 
+                                          curve.init = 'x')
+fitted.l <- plot.estimated.curves(Xhat.l, mbconnectome.out.l) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  coord_fixed(.4) +
+  labs(x = NULL, y = NULL)
+
+gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 ```
 
 ## Conclusions

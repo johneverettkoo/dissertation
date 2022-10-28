@@ -2273,13 +2273,13 @@ The fitted quadratic curves are illustrated in figure \ref{fig:hp-kcurves}, whic
 \caption{ASE of the Harry Potter emnity graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.}\label{fig:hp-kcurves}
 \end{figure}
 
-In the final example, we examined the \emph{Drosophila} connectome graph \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}.
-In this graph, each vertex is a neuron, and the labels correspond to one of four neuron types (Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons).
-In our analysis, we only considered neurons labeled as Kenyon Cells and Projection Neurons in the right hemisphere.
-The resulting graph is illustrated in figure \ref{fig:mbconnectome-graph}.
+In the final example, we examined the \emph{Drosophila} connectome graphs \citep{Eichler141762}, which has been studied as a GRDPG by \citet{athreya2017statistical}, \citet{https://doi.org/10.48550/arxiv.1705.03297}, and \citet{SannaPassino2022}.
+This dataset consists of two graphs representing two networks of neurons, one for each hemisphere of the \emph{Drosophila} brain.
+In these graphs, each vertex is a neuron, and the labels correspond to one of four neuron types (Kenyon Cells, Input Neurons, Output Neurons, and Projection Neurons).
+The resulting graphs are illustrated in figure \ref{fig:mbconnectome-graph}.
 
-The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for this graph (figure \ref{fig:mbconnectome-ase}).
-Fitting two quadratic Bezier curves to the ASE (figure \ref{fig:mbconnectome-kcurves}) results in 91.4\% accuracy.
+The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for these graphs (figure \ref{fig:mbconnectome-ase}).
+Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 69.9\% accuracy for the left hemisphere connectome and 76.5\% accuracy for the right hemisphere connectome.
 
 \begin{figure}[H]
 
@@ -2287,7 +2287,7 @@ Fitting two quadratic Bezier curves to the ASE (figure \ref{fig:mbconnectome-kcu
 
 }
 
-\caption{Drosophila connectome graph. Each vertex represents a neuron, which are labeled by neuron type.}\label{fig:mbconnectome-graph}
+\caption{Graphs of the Drosophila connectomes. The left and right are of the left and right hemispheres, respectively. Each vertex represents a neuron, which are labeled by neuron type.}\label{fig:mbconnectome-graph}
 \end{figure}
 
 \begin{figure}[H]
@@ -2296,7 +2296,7 @@ Fitting two quadratic Bezier curves to the ASE (figure \ref{fig:mbconnectome-kcu
 
 }
 
-\caption{ASE of the Drosophila connectome graph. The embedding vectors are labeled by neuron type.}\label{fig:mbconnectome-ase}
+\caption{ASE of the Drosophila connectome graphs. The embedding vectors are labeled by neuron type.}\label{fig:mbconnectome-ase}
 \end{figure}
 
 \begin{figure}[H]
@@ -2305,7 +2305,7 @@ Fitting two quadratic Bezier curves to the ASE (figure \ref{fig:mbconnectome-kcu
 
 }
 
-\caption{ASE of the Drosophila connectome graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.}\label{fig:mbconnectome-kcurves}
+\caption{ASEs of the Drosophila connectome graphs with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.}\label{fig:mbconnectome-kcurves}
 \end{figure}
 
 \hypertarget{conclusions}{%
