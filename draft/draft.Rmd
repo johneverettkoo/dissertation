@@ -2472,7 +2472,7 @@ In these graphs, each vertex is a neuron, and the labels correspond to one of fo
 The resulting graphs are illustrated in figure \ref{fig:mbconnectome-graph}. 
 
 The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for these graphs (figure \ref{fig:mbconnectome-ase}). 
-Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 73.3\% accuracy for the left hemisphere connectome and 76.5\% accuracy for the right hemisphere connectome. 
+Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 78.5\% accuracy for the left hemisphere connectome and 74.6\% accuracy for the right hemisphere connectome. 
 
 ```{r mbconnectome-graph, fig.cap = 'Graphs of the Drosophila connectomes. The left and right are of the left and right hemispheres, respectively. Each vertex represents a neuron, which are labeled by neuron type.', fig.height = 2, figh.width = 12, cache = TRUE}
 library(mbstructure)
@@ -2534,7 +2534,7 @@ gridExtra::grid.arrange(ase.l, ase.r, nrow = 1)
 ```
 
 ```{r mbconnectome-kcurves, fig.cap = 'ASEs of the Drosophila connectome graphs with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 2, fig.width = 8, cache = TRUE}
-set.seed(1)
+set.seed(12345)
 
 z.init.r <- sample.points(z.r, 10)
 z.init.l <- sample.points(z.l, 10)
