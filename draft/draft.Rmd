@@ -627,7 +627,7 @@ The full hierarchy of nested block models is summarized in table \@ref(tab:hiera
 blockmodel.df <- dplyr::tibble(
   Model = c('SBM', 'DCBM', 'PABM'),
   Parameters = c('$K (K-1) / 2$', '$K (K-1) / 2 + n$', '$n K$'),
-  Dimension = c('$K$', '$K$', '$K^2$'),
+  `$\\mathrm{rank}(P)$` = c('$K$', '$K$', '$K^2$'),
   `Matrix Decomposition` = c('$P = Z B Z^\\top$', '$P = (\\Omega Z) B (\\Omega Z)^\\top$', '$P = X \\Pi X^\\top$'),
   `Reduction to simpler model` = c('', '$\\omega = e$', '$\\lambda_{ik} = \\omega_i \\sqrt{\\theta_{z_i, k}}$')
 )

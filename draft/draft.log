@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.7.15)  2 NOV 2022 00:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.7.15)  2 NOV 2022 09:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -705,7 +705,7 @@ Package pdftex.def Info: draft_files/figure-latex/dating-pabm-1.pdf  used on in
 put line 659.
 (pdftex.def)             Requested size: 281.06645pt x 136.51799pt.
 [20] [21 <./draft_files/figure-latex/dating-pabm-1.pdf>] [22]
-Overfull \hbox (25.07811pt too wide) in paragraph at lines 723--734
+Overfull \hbox (12.64648pt too wide) in paragraph at lines 723--734
  [][] 
  []
 
@@ -1074,7 +1074,7 @@ onts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.
 pfb></usr/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/t
 ype1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on draft.pdf (99 pages, 24060990 bytes).
+Output written on draft.pdf (99 pages, 24060992 bytes).
 PDF statistics:
  1744 PDF objects out of 2073 (max. 8388607)
  1481 compressed objects within 15 object streams
