@@ -819,7 +819,7 @@ If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can t
 We assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
 Because the fourth community only contains two members, we omitted it from this analysis. 
 Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM. 
-$K$-means clustering on the normalized embedding vectors results in a community detection accuracy of 96.7\%. 
+$K$-means clustering on the normalized embedding vectors results in a community detection accuracy of 96.7\%, compared to an EM-based method which achieves 84\%. 
 
 ```{r ukfaculty-ase, fig.cap = 'A three-dimensional ASE of the UK faculty network using the three most positive eigenvalues and their corresponding eigenvectors. The vertices are labeled by the school to which each faculty member belongs.', fig.height = 3, fig.width = 5, cache = TRUE }
 data(UKfaculty, package = 'igraphdata')
