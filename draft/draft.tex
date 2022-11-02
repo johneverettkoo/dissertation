@@ -4,7 +4,7 @@
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
-  11pt,
+  12pt,
 ]{article}
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
@@ -276,6 +276,10 @@ An alternative algorithm is MacQueen's exchange algorithm \citep{MacQueen1967}, 
 Yet another approach to adapting $K$-means clustering to graph data is to embed the graph to Euclidean space and then apply Lloyd's algorithm on the embedding. 
 In this context, a natural choice of embedding is one in which pairwise Euclidean distances between embedding vectors are (approximately) equal to pairwise graph distances between corresponding vertices. 
 For example, the combinatorial Laplacian eigenmap is an embedding in which Euclidean distances between pairs of vectors in the embedding are equal to expected commute times between corresponding pairs of vertices in the graph \citep{vonLuxburg2007}. 
+This embedding is constructed by computing the combinatorial Laplacian matrix $L = D - A$ in which $D$ is a diagonal matrix in which each $D_{ii}$ is the degree of vertex $i$. 
+Then the components of the embedding consist of $\big[ v_{n-1} / \sqrt{\lambda_{n - 1}} \mid \cdots \mid v_1 / \sqrt{\lambda_1} \big]$ in which $\lambda_i$ is the $i^{th}$ largest eigenvalue of $L$ and $v_i$ is its corresponding eigenvector ($\lambda_n = 0$ and is omitted). 
+Then Lloyd's algorithm can be applied to this embedding. 
+More often in practice, the $d$ smallest eigenvalues are used to construct a lower dimensional embedding. 
 \end{example}
 
 We now provide a more formal description of graph data:
@@ -382,9 +386,20 @@ For example, the expected degree of each vertex of an $\ER$ graph with $n$ verti
 \subsection{Contributions of This Work}\label{contributions-of-this-work}}
 
 In this work, we explore three types of block models, the stochastic block model, the degree corrected block model, and the popularity adjusted block model, as well as a family of latent space models called generalized random dot product graphs.
+
 The contributions of this work are as follows.
-First, we show that, similar to how the stochastic block model and degree corrected block model are generalized random dot product graphs with specific latent structures, the popularity adjusted block model is also a generalized random dot product graph with a specific structure.
-Using estimators with well-established consistency properties for the generalized random dot product graph, we develop consistent community detection and parameter estimation algorithms for the popularity adjusted block model.
+
+In section \ref{sec:pabm-grdpg}, we show that, similar to how the stochastic block model and degree corrected block model are generalized random dot product graphs with specific latent structures, the popularity adjusted block model is also a generalized random dot product graph with a specific structure.
+More specifically, we show that the popularity adjusted block model is a generalized random dot product graph in which the latent vectors are organized by community and each community in the latent space is defined by a \(K\)-dimensional subspace, where \(K\) is the number of communities in the model.
+We then exploit this rigid and linear structure for community detection by applying sparse subspace clustering on the adjacency spectral embedding of the graph to infer the community labels.
+We also propose a novel algorithm called orthogonal spectral clustering, which constructs an embedding for the popularity adjusted block model which forces the communities to lie on \emph{orthogonal} subspaces.
+Finally, we propose a spectral decomposition based parameter estimation algorithm for the popularity adjusted block model.
+All three algorithms have consistency properties that result in zero error with increasing graph size.
+
+In section \ref{sec:mbm}, we extend the latent structures of the stochastic block model, degree corrected block model, and popularity adjusted block model to nonlinear latent structures.
+Instead of points, line segments, and subspaces, we propose the manifold block model which is a class of generalized random dot product graph in which the latent vectors lie on one of \(K\) manifolds.
+In the case of nonintersecting manifolds, we show that a clustering algorithm based on a nearest algorithms graph approach on an embedding is consistent, resulting in zero clustering error for large graphs, as long as the latent vectors are sampled from the manifolds densely
+In the case of intersecting manifolds, we propose the \(K\)-curves algorithm, which is a type of batch coordinate ascent algorithm which alternates between fitting manifolds to the embedding and reassigning clusters based on proximity to the manifolds.
 
 \newpage
 
@@ -874,13 +889,19 @@ $$X = \begin{bmatrix}
 The resulting rows of $X$ are point masses that have been stretched out, turning into rays. 
 \end{example}
 
+The latent structures of the SBM and DCBM when viewed as GRDPGs lend themselves to convenient community detection algorithms based on existing clustering algorithms for Euclidean data.
+The general strategy for these models is to construct the appropriate ASE, choosing the number of components based on the number of communities and whether to use positive or negative eigenvalues depending on assortativity or disassortativity, and then to apply the appropriate Euclidean-based clustering algorithm for the specific structure.
+In the case of the SBM, after embedding in \(K\) dimensions, since the original latent structure consists of \(K\) point masses, an appropriate clustering algorithm might be one based on centroids, such as \(K\)-means clustering or Gaussian mixture models.
+In the case of the DCBM, after embedding in \(K\) dimensions, since the original latent structure consists of \(K\) rays emanating from the origin, an appropriate clustering algorithm is one based on angles between points rather than distances, such as kernel \(K\)-means clustering using the cosine kernel.
+Another clustering algorithm for the ASE of a DCBM is to normalize the embedding vectors to norm 1 and then apply \(K\)-means to the normalized vectors.
+
 \begin{example}
 Recall the UK faculty network in \ref{ex:uk-faculty}. 
 If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can take the ASE of the adjacency matrix and see whether the embedding vectors lie around point masses or rays. 
-We will assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
-Because the fourth community only contains two members, we omit it from this analysis. 
+We assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
+Because the fourth community only contains two members, we omitted it from this analysis. 
 Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM. 
-Fitting three line segments to these data and clustering the embedding vectors by which line segment is closest results in a community detection accuracy of 83.5\%. 
+$K$-means clustering on the normalized embedding vectors results in a community detection accuracy of 96.7\%. 
 
 \begin{figure}[H]
 
@@ -888,12 +909,14 @@ Fitting three line segments to these data and clustering the embedding vectors b
 
 }
 
-\caption{The ASE of the UK faculty network. The vertices are labeled by the school to which each faculty member belongs.}\label{fig:ukfaculty-ase}
+\caption{A three-dimensional ASE of the UK faculty network using the three most positive eigenvalues and their corresponding eigenvectors. The vertices are labeled by the school to which each faculty member belongs.}\label{fig:ukfaculty-ase}
 \end{figure}
+
 \end{example}
 
 The PABM is also a Bernoulli random graph, so it is also a GRDPG.
-We explore this in the next section (see section \ref{sec:pabm-grdpg}).
+The latent vectors of the PABM when viewed as a GRDPG form \(K\) \(K\)-dimensional subspaces, which makes for an elegant parallel between the nested forms of the block models and the nested structures of the GRDPGs: The SBM consists of \(K\) zero-dimensional subspaces, and DCBM consists of \(K\) one-dimensional subspaces.
+We explore this connection further the next section (section \ref{sec:pabm-grdpg}).
 
 \newpage
 
@@ -2279,7 +2302,9 @@ In these graphs, each vertex is a neuron, and the labels correspond to one of fo
 The resulting graphs are illustrated in figure \ref{fig:mbconnectome-graph}.
 
 The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for these graphs (figure \ref{fig:mbconnectome-ase}).
-Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 78.5\% accuracy for the left hemisphere connectome and 74.6\% accuracy for the right hemisphere connectome.
+Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 72.2\% accuracy for the left hemisphere connectome and 83.6\% accuracy for the right hemisphere connectome.
+The curves were fitted on three-dimensional ASEs with \(p = 2\) and \(q = 1\), which were chosen based on setting the threshold \(|\lambda_i| > \sqrt{n}\) where \(\lambda_i\) is the \(i\)\textsuperscript{th} greatest eigenvalue.
+Figure \ref{fig:mbconnectome-kcurves} shows the embedding and curves projected to the first two components.
 
 \begin{figure}[H]
 
