@@ -2137,7 +2137,7 @@ Alternatively, if we turn this problem into a semi-supervised problem in which w
 
 \begin{theorem}
 \label{thm:kcurves-semisupervised}
-Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a Bezier curve of order $R$. 
+Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a Bezier curve of order $R$ that does not self-intersect (for any $s \neq t$, $g_k(s) \neq g_k(t)$). 
 Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
 Then if $n \rho_n = \omega(\log^{4c} n)$, as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
 $$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_K; X) \stackrel{p}{\to} 0,$$
