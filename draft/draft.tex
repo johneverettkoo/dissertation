@@ -277,7 +277,7 @@ Yet another approach to adapting $K$-means clustering to graph data is to embed 
 In this context, a natural choice of embedding is one in which pairwise Euclidean distances between embedding vectors are (approximately) equal to pairwise graph distances between corresponding vertices. 
 For example, the combinatorial Laplacian eigenmap is an embedding in which Euclidean distances between pairs of vectors in the embedding are equal to expected commute times between corresponding pairs of vertices in the graph \citep{vonLuxburg2007}. 
 This embedding is constructed by computing the combinatorial Laplacian matrix $L = D - A$ in which $D$ is a diagonal matrix in which each $D_{ii}$ is the degree of vertex $i$. 
-Then the components of the embedding consist of $\big[ v_{n-1} / \sqrt{\lambda_{n - 1}} \mid \cdots \mid v_1 / \sqrt{\lambda_1} \big]$ in which $\lambda_i$ is the $i^{th}$ largest eigenvalue of $L$ and $v_i$ is its corresponding eigenvector ($\lambda_n = 0$ and is omitted). 
+Then the components of the embedding consist of $\big[ v_{n-1} / \sqrt{\lambda_{n - 1}} \mid \cdots \mid v_1 / \sqrt{\lambda_1} \big]^\top$ in which $\lambda_i$ is the $i^{th}$ largest eigenvalue of $L$ and $v_i$ is its corresponding eigenvector ($\lambda_n = 0$ and is omitted). 
 Then Lloyd's algorithm can be applied to this embedding. 
 More often in practice, the $d$ smallest eigenvalues are used to construct a lower dimensional embedding. 
 \end{example}
@@ -355,7 +355,7 @@ where $\omega_i$ is the $i^{th}$ planet's radio signal strength, $d_{ij}$ is the
 Let $P$ be the $n \times n$ matrix of these edge probabilities. 
 Then $A \sim \BG(P)$ represents the network of planets that have made contact. 
 
-To estimate $\omega = \Big[ \omega_1, \cdots, \omega_n \Big]^\top$ after observing $A$ and supposing that the relative locations of the planets as well as the normalizing constant $C$ are known, one approach might be maximum likelihood maximization. 
+To estimate $\omega = \big[ \omega_1, \cdots, \omega_n \big]^\top$ after observing $A$ and supposing that the relative locations of the planets as well as the normalizing constant $C$ are known, one approach might be maximum likelihood maximization. 
 For simplicity, set $C = 1$. 
 Then the log-likelihood function can be written as:
 $$
@@ -1853,7 +1853,7 @@ Village 46 & 0.052 & 0.069 & 0.056\\
 \hypertarget{community-detection-as-clustering-in-the-latent-space}{%
 \subsection{Community Detection as Clustering in the Latent Space}\label{community-detection-as-clustering-in-the-latent-space}}
 
-As established in section \ref{sec:grdpg}, all Bernoulli random graphs are generalized random dot product graphs.
+As established in section \ref{sec:sbm-dcbm-grdpg}, it is possible to represent any Bernoulli random graph as a generalized random dot product graph.
 Whether this is useful for community detection in block models depends entirely on the configuration of the latent vectors.
 In the case of the \(\ER\) model, SBM, DCBM, and PABM, each community forms a linear structure, i.e., a subspace, and this rigid structure can be exploited for community detection.
 In this section, we explore GRDPGs with community-wise parameterized nonlinear latent structures.
@@ -1934,6 +1934,7 @@ Outside of random graph inference, there is a larger body of work on fitting par
 \hypertarget{sec:nonintersect}{%
 \subsection{Algorithm for Nonintersecting Manifolds}\label{sec:nonintersect}}
 
+For the sake of completeness, we begin with the case of GRDPGs in which communities are represented by nonintersecting manifolds.
 In this section, we consider the following setting: Suppose that each community \(C_k\) is represented by a closed manifold \(\mathcal{M}_k\) in the latent space of a RDPG or GRDPG.
 Define \(\delta = \min\limits_{k \neq \ell} \min\limits_{x \in \mathcal{M}_k, y \in \mathcal{M}_\ell} \|x - y\|\), the minimum distance between two manifolds.
 Furthermore, assume that \(\delta > 0\), i.e., the manifolds do not intersect.
