@@ -1,0 +1,289 @@
+\begin{thebibliography}{}
+
+\bibitem[Abbe, 2018]{JMLR:v18:16-480}
+Abbe, E. (2018).
+\newblock Community detection and stochastic block models: Recent developments.
+\newblock {\em Journal of Machine Learning Research}, 18(177):1--86.
+
+\bibitem[Adamic and Glance, 2005]{10.1145/1134271.1134277}
+Adamic, L.~A. and Glance, N. (2005).
+\newblock The political blogosphere and the 2004 {U.S.} election: Divided they
+  blog.
+\newblock In {\em Proceedings of the 3rd International Workshop on Link
+  Discovery}, LinkKDD '05, page 36–43, New York, NY, USA. Association for
+  Computing Machinery.
+
+\bibitem[Airoldi et~al., 2009]{NIPS2008_3578}
+Airoldi, E.~M., Blei, D.~M., Fienberg, S.~E., and Xing, E.~P. (2009).
+\newblock Mixed membership stochastic blockmodels.
+\newblock In Koller, D., Schuurmans, D., Bengio, Y., and Bottou, L., editors,
+  {\em Advances in Neural Information Processing Systems 21}, pages 33--40.
+  Curran Associates, Inc.
+
+\bibitem[Asta, 2021]{https://doi.org/10.48550/arxiv.2107.08089}
+Asta, D.~M. (2021).
+\newblock Non-parametric manifold learning.
+
+\bibitem[Athreya et~al., 2017]{https://doi.org/10.48550/arxiv.1709.05454}
+Athreya, A., Fishkind, D.~E., Levin, K., Lyzinski, V., Park, Y., Qin, Y.,
+  Sussman, D.~L., Tang, M., Vogelstein, J.~T., and Priebe, C.~E. (2017).
+\newblock Statistical inference on random dot product graphs: a survey.
+
+\bibitem[Athreya et~al., 2018]{athreya2017statistical}
+Athreya, A., Fishkind, D.~E., Tang, M., Priebe, C.~E., Park, Y., Vogelstein,
+  J.~T., Levin, K., Lyzinski, V., Qin, Y., and Sussman, D.~L. (2018).
+\newblock Statistical inference on random dot product graphs: a survey.
+\newblock {\em Journal of Machine Learning Research}, 18(226):1--92.
+
+\bibitem[Athreya et~al., 2020]{athreya2020estimation}
+Athreya, A., Tang, M., Park, Y., and Priebe, C.~E. (2020).
+\newblock On estimation and inference in latent structure random graphs.
+
+\bibitem[Banerjee et~al., 2013]{DVN/U3BIHX_2013}
+Banerjee, A., Chandrasekhar, A.~G., Duflo, E., and Jackson, M.~O. (2013).
+\newblock {The Diffusion of Microfinance}.
+
+\bibitem[Belkin and Niyogi, 2003]{belkin03:_laplac}
+Belkin, M. and Niyogi, P. (2003).
+\newblock Laplacian eigenmaps for dimensionality reduction and data
+  representation.
+\newblock {\em Neural Computation}, 15:1373--1396.
+
+\bibitem[Cape et~al., 2019]{cape_biometrika}
+Cape, J., Tang, M., and Priebe, C.~E. (2019).
+\newblock Signal-plus-noise matrix models: eigenvector deviations and
+  fluctuations.
+\newblock {\em Biometrika}, 106:243--250.
+
+\bibitem[Csardi and Nepusz, 2006]{igraph}
+Csardi, G. and Nepusz, T. (2006).
+\newblock The igraph software package for complex network research.
+\newblock {\em InterJournal}, Complex Systems:1695.
+
+\bibitem[Dempster et~al., 1977]{10.2307/2984875}
+Dempster, A.~P., Laird, N.~M., and Rubin, D.~B. (1977).
+\newblock Maximum likelihood from incomplete data via the {EM} algorithm.
+\newblock {\em Journal of the Royal Statistical Society. Series B
+  (Methodological)}, 39(1):1--38.
+
+\bibitem[Eichler et~al., 2017]{Eichler141762}
+Eichler, K., Li, F., Litwin-Kumar, A., Park, Y., Andrade, I., Schneider-Mizell,
+  C.~M., Saumweber, T., Huser, A., Eschbach, C., Gerber, B., Fetter, R.~D.,
+  Truman, J.~W., Priebe, C.~E., Abbott, L.~F., Thum, A.~S., Zlatic, M., and
+  Cardona, A. (2017).
+\newblock The complete connectome of a learning and memory center in an insect
+  brain.
+\newblock {\em bioRxiv}.
+
+\bibitem[Elhamifar and Vidal, 2009]{5206547}
+Elhamifar, E. and Vidal, R. (2009).
+\newblock Sparse subspace clustering.
+\newblock In {\em 2009 IEEE Conference on Computer Vision and Pattern
+  Recognition}, pages 2790--2797.
+
+\bibitem[Fraley and Raftery, 2002]{doi:10.1198/016214502760047131}
+Fraley, C. and Raftery, A.~E. (2002).
+\newblock Model-based clustering, discriminant analysis, and density
+  estimation.
+\newblock {\em Journal of the American Statistical Association},
+  97(458):611--631.
+
+\bibitem[Gao et~al., 2009]{NIPS2009_3855}
+Gao, J., Liang, F., Fan, W., Sun, Y., and Han, J. (2009).
+\newblock Graph-based consensus maximization among multiple supervised and
+  unsupervised models.
+\newblock In Bengio, Y., Schuurmans, D., Lafferty, J.~D., Williams, C. K.~I.,
+  and Culotta, A., editors, {\em Advances in Neural Information Processing
+  Systems 22}, pages 585--593. Curran Associates, Inc.
+
+\bibitem[Gilbert, 1959]{Gilbert:1959}
+Gilbert, E.~N. (1959).
+\newblock {Random Graphs}.
+\newblock {\em The Annals of Mathematical Statistics}, 30:1141 -- 1144.
+
+\bibitem[Greene and Cunningham, 2013]{greene2013producing}
+Greene, D. and Cunningham, P. (2013).
+\newblock Producing a unified graph representation from multiple social network
+  views.
+\newblock {\em CoRR}, abs/1301.5809.
+
+\bibitem[Ji et~al., 2010]{10.1007/978-3-642-15880-3_42}
+Ji, M., Sun, Y., Danilevsky, M., Han, J., and Gao, J. (2010).
+\newblock Graph regularized transductive classification on heterogeneous
+  information networks.
+\newblock In Balc{\'a}zar, J.~L., Bonchi, F., Gionis, A., and Sebag, M.,
+  editors, {\em Machine Learning and Knowledge Discovery in Databases}, pages
+  570--586, Berlin, Heidelberg. Springer Berlin Heidelberg.
+
+\bibitem[Jones, 2022]{gallup-lgbt}
+Jones, J.~M. (2022).
+\newblock {LGBT} identification in {U.S.} ticks up to 7.1\%.
+\newblock {\em Gallup}.
+
+\bibitem[Karakus and Pandey, 2014]{harrypotter}
+Karakus, E. and Pandey, J. (2014).
+\newblock Potterverse.
+\newblock \url{https://github.com/efekarakus/potter-network}.
+
+\bibitem[Karrer and Newman, 2011]{Karrer_2011}
+Karrer, B. and Newman, M. E.~J. (2011).
+\newblock Stochastic blockmodels and community structure in networks.
+\newblock {\em Physical Review E}, 83(1).
+
+\bibitem[Kolaczyk and Cs{\'a}rdi, 2014]{kolaczyk2014statistical}
+Kolaczyk, E. and Cs{\'a}rdi, G. (2014).
+\newblock {\em Statistical Analysis of Network Data with {R}}.
+\newblock Use R! Springer New York.
+
+\bibitem[Le et~al., 2016]{le2016}
+Le, C.~M., Levina, E., and Vershynin, R. (2016).
+\newblock Optimization via low-rank approximation for community detection in
+  networks.
+\newblock {\em Ann. Statist.}, 44(1):373--400.
+
+\bibitem[Li et~al., 2022]{https://doi.org/10.48550/arxiv.2201.10000}
+Li, Z., Chen, Y., LeCun, Y., and Sommer, F.~T. (2022).
+\newblock Neural manifold clustering and embedding.
+
+\bibitem[Liu et~al., 2013]{liu_ssc}
+Liu, G., Lin, Z., Yan, S., Sun, J., Yu, Y., and Ma, Y. (2013).
+\newblock Robust recovery of subspace structures by low-rank representation.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  35:171--184.
+
+\bibitem[Lloyd, 1982]{1056489}
+Lloyd, S. (1982).
+\newblock Least squares quantization in {PCM}.
+\newblock {\em IEEE Transactions on Information Theory}, 28(2):129--137.
+
+\bibitem[Lorrain and White, 1971]{doi:10.1080/0022250X.1971.9989788}
+Lorrain, F. and White, H.~C. (1971).
+\newblock Structural equivalence of individuals in social networks.
+\newblock {\em The Journal of Mathematical Sociology}, 1(1):49--80.
+
+\bibitem[MacQueen, 1967]{MacQueen1967}
+MacQueen, J.~B. (1967).
+\newblock Some methods for classification and analysis of multivariate
+  observations.
+\newblock In Cam, L. M.~L. and Neyman, J., editors, {\em Proc. of the fifth
+  Berkeley Symposium on Mathematical Statistics and Probability}, volume~1,
+  pages 281--297. University of California Press.
+
+\bibitem[Nasihatkon and Hartley, 2011]{sdp_sufficiency}
+Nasihatkon, B. and Hartley, R. (2011).
+\newblock Graph connectivity in sparse subspace clustering.
+\newblock In {\em Computer Vision and Pattern Recognition}, pages 2137--2144.
+
+\bibitem[Nepusz et~al., 2008]{PhysRevE.77.016107}
+Nepusz, T., Petr\'oczi, A., N\'egyessy, L., and Bazs\'o, F. (2008).
+\newblock Fuzzy communities and the concept of bridgeness in complex networks.
+\newblock {\em Phys. Rev. E}, 77:016107.
+
+\bibitem[Noroozi and Pensky, 2022]{Noroozi2022}
+Noroozi, M. and Pensky, M. (2022).
+\newblock The hierarchy of block models.
+\newblock {\em Sankhya A}, 84(1):64--107.
+
+\bibitem[Noroozi et~al., 2019]{noroozi2019estimation}
+Noroozi, M., Rimal, R., and Pensky, M. (2019).
+\newblock Estimation and clustering in popularity adjusted block model.
+\newblock {\em Journal of the Royal Statistical Society: Series B (Statistical
+  Methodology)}.
+
+\bibitem[Négyessy et~al.,
+  2006]{https://doi.org/10.1111/j.1460-9568.2006.04678.x}
+Négyessy, L., Nepusz, T., Kocsis, L., and Bazsó, F. (2006).
+\newblock Prediction of the main cortical areas and connections involved in the
+  tactile function of the visual cortex by network analysis.
+\newblock {\em European Journal of Neuroscience}, 23(7):1919--1930.
+
+\bibitem[Pastva, 1999]{10945-32767}
+Pastva, T.~A. (1999).
+\newblock Bezier curve fitting.
+
+\bibitem[Priebe et~al., 2017]{https://doi.org/10.48550/arxiv.1705.03297}
+Priebe, C.~E., Park, Y., Tang, M., Athreya, A., Lyzinski, V., Vogelstein,
+  J.~T., Qin, Y., Cocanougher, B., Eichler, K., Zlatic, M., and Cardona, A.
+  (2017).
+\newblock Semiparametric spectral modeling of the drosophila connectome.
+
+\bibitem[Rubin-Delanchy, 2020]{https://doi.org/10.48550/arxiv.2006.05168}
+Rubin-Delanchy, P. (2020).
+\newblock Manifold structure in graph embeddings.
+
+\bibitem[Rubin-Delanchy et~al., 2022]{rubindelanchy2017statistical}
+Rubin-Delanchy, P., Cape, J., Tang, M., and Priebe, C.~E. (2022).
+\newblock A statistical interpretation of spectral embedding: The generalised
+  random dot product graph.
+\newblock {\em Journal of the Royal Statistical Society: Series B (Statistical
+  Methodology)}.
+
+\bibitem[Sanna~Passino and Heard, 2022]{SannaPassino2022}
+Sanna~Passino, F. and Heard, N.~A. (2022).
+\newblock Latent structure blockmodels for bayesian spectral graph clustering.
+\newblock {\em Statistics and Computing}, 32(2):22.
+
+\bibitem[Sengupta and Chen, 2018]{307cbeb9b1be48299388437423d94bf1}
+Sengupta, S. and Chen, Y. (2018).
+\newblock A block model for node popularity in networks with community
+  structure.
+\newblock {\em Journal of the Royal Statistical Society. Series B: Statistical
+  Methodology}, 80(2):365--386.
+
+\bibitem[Soltanolkotabi and Candés, 2012]{soltanolkotabi2012}
+Soltanolkotabi, M. and Candés, E.~J. (2012).
+\newblock A geometric analysis of subspace clustering with outliers.
+\newblock {\em Ann. Statist.}, 40(4):2195--2238.
+
+\bibitem[Sussman et~al., 2012]{doi:10.1080/01621459.2012.699795}
+Sussman, D.~L., Tang, M., Fishkind, D.~E., and Priebe, C.~E. (2012).
+\newblock A consistent adjacency spectral embedding for stochastic blockmodel
+  graphs.
+\newblock {\em Journal of the American Statistical Association},
+  107:1119--1128.
+
+\bibitem[Tenenbaum et~al., 2000]{Tenenbaum2000-ff}
+Tenenbaum, J.~B., de~Silva, V., and Langford, J.~C. (2000).
+\newblock A global geometric framework for nonlinear dimensionality reduction.
+\newblock {\em Science}, 290(5500):2319--2323.
+
+\bibitem[Trosset and Buyukbas, 2020]{trosset2020rehabilitating}
+Trosset, M.~W. and Buyukbas, G. (2020).
+\newblock Rehabilitating isomap: Euclidean representation of geodesic
+  structure.
+
+\bibitem[von Luxburg, 2007]{vonLuxburg2007}
+von Luxburg, U. (2007).
+\newblock A tutorial on spectral clustering.
+\newblock {\em Statistics and Computing}, 17(4):395--416.
+
+\bibitem[Wang et~al., 2018]{Wang_2018}
+Wang, B., Pourshafeie, A., Zitnik, M., Zhu, J., Bustamante, C.~D., Batzoglou,
+  S., and Leskovec, J. (2018).
+\newblock Network enhancement as a general method to denoise weighted
+  biological networks.
+\newblock {\em Nature Communications}, 9(1).
+
+\bibitem[Wang and Xu, 2016]{jmlr-v28-wang13}
+Wang, Y.-X. and Xu, H. (2016).
+\newblock Noisy sparse subspace clustering.
+\newblock {\em Journal of Machine Learning Research}, 17(12):1--41.
+
+\bibitem[Whiteley et~al., 2022]{https://doi.org/10.48550/arxiv.2208.11665}
+Whiteley, N., Gray, A., and Rubin-Delanchy, P. (2022).
+\newblock Discovering latent topology and geometry in data: a law of large
+  dimension.
+
+\bibitem[Xie, 2021]{https://doi.org/10.48550/arxiv.2106.09840}
+Xie, F. (2021).
+\newblock Entrywise limit theorems of eigenvectors for signal-plus-noise matrix
+  models with weak signals.
+
+\bibitem[Young and Scheinerman, 2007]{10.1007/978-3-540-77004-6_11}
+Young, S.~J. and Scheinerman, E.~R. (2007).
+\newblock Random dot product graph models for social networks.
+\newblock In Bonato, A. and Chung, F. R.~K., editors, {\em Algorithms and
+  Models for the Web-Graph}, pages 138--149, Berlin, Heidelberg. Springer
+  Berlin Heidelberg.
+
+\end{thebibliography}

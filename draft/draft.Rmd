@@ -61,6 +61,7 @@ library(ggraph)
 library(mclust)
 source('~/dev/pabm-grdpg/functions.R')
 source('~/dev/manifold-block-models/functions.R')
+source('~/dev/dissertation/em-algorithms.R')
 
 doMC::registerDoMC(parallel::detectCores())
 ```
@@ -449,9 +450,11 @@ As an example, we write the EM algorithm for the likelihood function in equation
     \For {$i = 1, ..., n$} {
       \For {$k = 1, ..., K$} {
       E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log \hat{\theta}_{k \ell} + (1 - A_{ij}) \log (1 - \hat{\theta}_{k \ell})) \bigg)$.\;
-        \For {$\ell = 1, ..., K$} {
-          M-step: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
-        }
+      }
+    }
+    \For {$k = 1, ..., K$} {
+      \For {$\ell = 1, ..., K$} {
+        M-step: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
       }
     }
   }
@@ -463,6 +466,25 @@ The same algorithm applied to example \ref{ex:sbm-dating}, which is a disassorta
 \begin{example}
 \label{ex:uk-faculty-sbm}
 Recall the UK faculty friendship network from example~\ref{ex:uk-faculty}. 
+Suppose we assume that this graph is an SBM. 
+Then applying algorithm \ref{algo:sbm-em} to this network yields a community detection accuracy of 79.7\%. 
+For this analysis, the school with two faculty members is omitted (so $K=3$ and $n = 79$), and the EM algorithm was initialized with random $\{\pi_{ik}\}$, $\hat{\theta}_{k k} = 0.9$, and $\hat{\theta}_{k \ell} = 0.1$ for $k \neq \ell$. 
+```{r cache = TRUE}
+data(UKfaculty, package = 'igraphdata')
+A <- as.matrix(igraph::as_adjacency_matrix(UKfaculty, type = 'both'))
+A <- sign(A + t(A))
+z <- factor(igraph::vertex_attr(UKfaculty)$Group)
+A <- A[z != 4, z != 4]
+z <- z[z != 4]
+K <- 3
+n <- length(z)
+
+set.seed(123)
+out <- em.sbm(A, 
+              t(apply(matrix(runif(n * K), nrow = n), 
+                      1, function(x) x / sum(x))), 
+              matrix(c(.9, .1, .1, .1, .9, .1, .1, .1, .9), nrow = 3))
+```
 \end{example}
 
 ## Random Graph Models and Sparsity {#sec:sparsity}
@@ -604,15 +626,19 @@ The EM algorithms for the DCBM and PABM are similar to algorithm \ref{algo:sbm-e
   \KwData{Adjacency matrix $A$, number of communities $K$}
   \KwResult{Estimated community label probabilities $\{\pi_{ik}\}$ for which each $\pi_{ik} = P(z_i = k \mid A)$, estimated community edge probabilities $\{\hat{\theta}_{k \ell}\}_K$, estimated degree factors $\hat{\omega}$.}
   \caption{Approximate EM algorithm for the DCBM.}
-  Initialize $\{\pi_{ik}\}$, $\{\theta_{k \ell}\}_K$, $\hat{\omega}$.\;
+  Initialize $\{\pi_{ik}\}$, $\{\hat{\theta}_{k \ell}\}_K$, $\hat{\omega}$.\;
   \While{$\|\nabla \ell\| > \epsilon$} {
     \For {$i = 1, ..., n$} {
       \For {$k = 1, ..., K$} {
       E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log (\hat{\theta}_{k \ell} \hat{\omega}_i \hat{\omega}_j) + (1 - A_{ij}) \log (1 - \hat{\theta}_{k \ell} \hat{\omega}_i \hat{\omega}_j)) \bigg)$.\;
-        \For {$\ell = 1, ..., K$} {
-          M-step for $\theta_{k \ell}$: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell} \hat{\omega}_i \hat{\omega}_j}$.\;
-        }
       }
+    }
+    \For {$k = 1, ..., K$} {
+      \For {$\ell = 1, ..., K$} {
+        M-step for $\theta_{k \ell}$: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell} \hat{\omega}_i \hat{\omega}_j}$.\;
+      }
+    }
+    \For {$i = 1, ..., n$} {
       M-step for $\omega_i$: $\hat{\omega}_i = \frac{\sum_{j \neq i} \sum_{k, \ell} \pi_{ik} \pi_{j \ell} A_{ij}}{\sum_{j \neq i} \sum_{k, \ell} \pi_{ik} \pi_{j \ell} \hat{\theta}_{k \ell} \hat{\omega}_j}$.\;
     }
   }
@@ -630,8 +656,12 @@ The EM algorithms for the DCBM and PABM are similar to algorithm \ref{algo:sbm-e
   \While{$\|\nabla \ell\| > \epsilon$} {
     \For {$i = 1, ..., n$} {
       \For {$k = 1, ..., K$} {
-      E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log (\hat{\lambda}_{ik} \hat{\lambda}_{j \ell}) + (1 - A_{ij}) \log (1 - \hat{\lambda}_{ik} \hat{\lambda}_{j \ell})) \bigg)$.\;
-      M-step: $\hat{\lambda}_{ik} = \frac{\sum_{j \neq i} \sum_\ell \pi_{ik} \pi_{j \ell} A_{ij}}{\sum_{j \neq i} \sum_\ell \pi_{ik} \pi_{j \ell} \hat{\lambda}_{j \ell}}$.\;
+        E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log (\hat{\lambda}_{ik} \hat{\lambda}_{j \ell}) + (1 - A_{ij}) \log (1 - \hat{\lambda}_{ik} \hat{\lambda}_{j \ell})) \bigg)$.\;
+      }
+    }
+    \For {$i = 1, ..., n$} {
+      \For {$k = 1, ..., K$} {
+        M-step: $\hat{\lambda}_{ik} = \frac{\sum_{j \neq i} \sum_\ell \pi_{ik} \pi_{j \ell} A_{ij}}{\sum_{j \neq i} \sum_\ell \pi_{ik} \pi_{j \ell} \hat{\lambda}_{j \ell}}$.\;
       }
     }
   }
@@ -651,7 +681,36 @@ Applying algorithm \ref{algo:dcbm-em} to example \ref{ex:dcbm-dating} results in
 \begin{example}
 \label{ex:uk-faculty-dcbm-pabm}
 Recall the UK faculty friendship graph from example~\ref{ex:uk-faculty}. 
-In example~\ref{ex:uk-faculty-sbm}, we fit an SBM to this graph using an EM algorithm (algorithm~\ref{algo:sbm-em}). 
+In example~\ref{ex:uk-faculty-sbm}, we fit an SBM to this graph using an EM algorithm (algorithm~\ref{algo:sbm-em}), yielding a community detection accuracy of 79.7\%. 
+Starting with the output of algorithm~\ref{algo:sbm-em} and applying algorithm ~\ref{algo:dcbm-em} yields a greater accuracy of 94.9\%. 
+This is expected, since the SBM is a special case of the DCBM, i.e., the SBM is the DCBM with some of the parameters restricted. 
+Therefore, it is not immediately obvious from the improved accuracy whether the DCBM is a better fit for this graph than the SBM. 
+Looking at the dispersion of the fitted degree factors $\hat{\omega}$, there does appear to be some indication that the DCBM is a better fit (figure \ref{fig:uk-faculty-dcbm-omega}). 
+```{r uk-faculty-dcbm-omega, cache = TRUE, fig.width = 8, fig.height = 2, fig.cap = 'Histogram of the fitted degree factors for the UK faculty friendship network assuming that it is a DCBM. The DCBM was fit to this graph using algorithm \\ref{algo:dcbm-em}. The dispersion of the degree factors suggests that the DCBM is a better fit than the SBM.'}
+data(UKfaculty, package = 'igraphdata')
+A <- as.matrix(igraph::as_adjacency_matrix(UKfaculty, type = 'both'))
+A <- sign(A + t(A))
+z <- factor(igraph::vertex_attr(UKfaculty)$Group)
+A <- A[z != 4, z != 4]
+z <- z[z != 4]
+K <- 3
+n <- length(z)
+
+set.seed(123)
+out <- em.sbm(A, 
+              t(apply(matrix(runif(n * K), nrow = n), 1, function(x) x / sum(x))),
+              matrix(c(.9, .1, .1, .1, .9, .1, .1, .1, .9), nrow = K))
+out <- em.dcbm(A, 
+               out$pi,
+               out$theta,
+               runif(n))
+
+ggplot() + 
+  geom_histogram(aes(x = out$omega),
+                 colour = 'black', fill = 'white') + 
+  labs(x = 'Fitted degree factors for the UK faculty network') + 
+  theme_bw()
+```
 \end{example}
 
 ## A Hierarchy of Block Models {#sec:hierarchy}
@@ -777,7 +836,7 @@ see \citet{rubindelanchy2017statistical} for further details.
 \citet{doi:10.1080/01621459.2012.699795} and \citet{rubindelanchy2017statistical} showed that the ASE is consistent in estimating the latent vectors, up to an indefinite orthogonal transformation. 
 More specifically, for sparsity parameters such that $n \rho_n = \omega (\log^{4 c} n)$ for some constant $c > 1$ and indefinite orthogonal transformation $Q \in \mathbb{O}(p, q)$, 
 $$\max_i \|Q \hat{x}_i - x_i \| = O_P \bigg( \frac{\log^c n}{n^{1/2}} \bigg)$$
-where $x^\top$ and $\hat{x}^\top$ are the rows of $\hat{X}$ (from the ASE) and $X$, respectively. 
+where $x_i^\top$ and $\hat{x}_i^\top$ are the rows of $\hat{X}$ (from the ASE) and $X$, respectively. 
 
 \begin{example}
 Suppose that latent vectors for an RDPG are drawn from the curve 
@@ -889,7 +948,7 @@ Another clustering algorithm for the ASE of a DCBM is to normalize the embedding
 \begin{example}
 Recall the UK faculty network in example \ref{ex:uk-faculty}. 
 In examples~\ref{ex:uk-faculty-sbm} and \ref{ex:uk-faculty-dcbm-pabm}, we fit an SBM, DCBM, and PABM to the graph using their corresponding EM algorithms. 
-While all three algorithms were able to correctly identify the labels for most of the vertices, it is not clear which model is the most appropriate for this graph. 
+While all three algorithms were able to correctly identify the labels for most of the vertices, it is not immediately clear which model is the most appropriate for this graph. 
 Analyzing the graph as a GRDPG, however, provides a visual indication for which block model is the best fit. 
 If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can take the ASE of the adjacency matrix and see whether the embedding vectors lie around point masses or rays. 
 We assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
@@ -2776,11 +2835,13 @@ fitted.l <- plot.estimated.curves(Xhat.l, mbconnectome.out.l) +
 gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 ```
 
+\newpage
+
 # Comparisons of Models and Conclusions {#sec:comparison}
 
 \newpage
 
-\section*{Appendix A: Proofs of Theorems from Section 3}
+\section{Appendix A: Proofs of Theorems from Section 3}
 
 Let \(V_n\) and \(\hat{V}_n\)
 be the $n \times K^2$ matrices whose columns are the eigenvectors of \(P\) and \(A\) corresponding to the
@@ -3008,7 +3069,7 @@ $\|\hat{\lambda}^{(kk)} - \lambda^{(kk)}\|_{\infty}$ given above
 yields equation~\eqref{eq:param-est} in theorem~\ref{thm:param-est}. 
 \end{proof}
 
-\section*{Appendix B: Proofs of Theorems from Section 4}
+\section{Appendix B: Proofs of Theorems from Section 4}
 
 \begin{lemma}
 \label{lemma:no-noise}
@@ -3084,7 +3145,7 @@ $$P(L < 2 M n^{-1/2} \log^c n) > P(\epsilon + \delta < 2 M n^{-1/2} \log^c n) \t
 
 \newpage
 
-\section*{Appendix C: Details on Fitting Bezier Curves to Noisy Data}
+\section{Appendix C: Details on Fitting Bezier Curves to Noisy Data}
 
 The curve fitting step in algorithm \ref{alg:kcurves} requires estimation of some $g: [0, 1] \to \mathbb{R}^d$ for each subset of points corresponding to each label. 
 One choice of curve is the Bezier polynomial. 
@@ -3148,7 +3209,7 @@ In this strategy, we use the consistency of the ASE \citep{rubindelanchy2017stat
 
 \newpage
 
-\section*{Appendix D: Supplementary Materials}
+\section{Appendix D: Supplementary Materials}
 
 The RMarkdown and \LaTeX files to compile this dissertation can be found at https://github.com/johneverettkoo/dissertation. 
 The code for simulations and data analyses in section \@ref(sec:pabm-grdpg) can be found at https://github.com/johneverettkoo/pabm-grdpg. 
