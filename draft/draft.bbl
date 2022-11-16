@@ -169,6 +169,12 @@ MacQueen, J.~B. (1967).
   Berkeley Symposium on Mathematical Statistics and Probability}, volume~1,
   pages 281--297. University of California Press.
 
+\bibitem[McDaid et~al., 2013]{RePEc:eee:csdana:v:60:y:2013:i:c:p:12-31}
+McDaid, A.~F., Murphy, T.~B., Friel, N., and Hurley, N.~J. (2013).
+\newblock Improved bayesian inference for the stochastic block model with
+  application to large networks.
+\newblock {\em Computational Statistics and Data Analysis}, 60(C):12--31.
+
 \bibitem[Nasihatkon and Hartley, 2011]{sdp_sufficiency}
 Nasihatkon, B. and Hartley, R. (2011).
 \newblock Graph connectivity in sparse subspace clustering.
@@ -285,5 +291,10 @@ Young, S.~J. and Scheinerman, E.~R. (2007).
 \newblock In Bonato, A. and Chung, F. R.~K., editors, {\em Algorithms and
   Models for the Web-Graph}, pages 138--149, Berlin, Heidelberg. Springer
   Berlin Heidelberg.
+
+\bibitem[Zhang and Zhou, 2016]{10.2307/43974715}
+Zhang, A.~Y. and Zhou, H.~H. (2016).
+\newblock Minimax rates of community detection in stochastic block models.
+\newblock {\em The Annals of Statistics}, 44(5):2252--2280.
 
 \end{thebibliography}

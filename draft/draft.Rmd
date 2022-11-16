@@ -260,7 +260,7 @@ For example, the expected degree of each vertex of an $\ER$ graph with $n$ verti
 In this work, we explore three types of block models, the stochastic block model, the degree corrected block model, and the popularity adjusted block model, as well as a family of latent space models called generalized random dot product graphs. 
 
 The contributions of this work are as follows. 
-In section \@ref(sec:pabm-grdpg), we show that, similar to how the stochastic block model and degree corrected block model are generalized random dot product graphs with specific latent structures, the popularity adjusted block model is also a generalized random dot product graph with a specific structure. 
+In section \@ref(sec:pabm-grdpg), we show that, similar to how the stochastic block model and degree corrected block model are generalized random dot product graphs with specific latent structures, the popularity adjusted block model is also a generalized random dot product graph with a specific latent structure. 
 More specifically, we show that the popularity adjusted block model is a generalized random dot product graph in which the latent vectors are organized by community and each community in the latent space is defined by a $K$-dimensional subspace, where $K$ is the number of communities in the model. 
 We then exploit this rigid and linear structure for community detection by applying sparse subspace clustering on the adjacency spectral embedding of the graph to infer the community labels. 
 We also propose a novel algorithm called orthogonal spectral clustering, which constructs an embedding for the popularity adjusted block model which forces the communities to lie on *orthogonal* subspaces. 
@@ -274,6 +274,7 @@ In the case of intersecting manifolds, we propose the $K$-curves algorithm, whic
 
 We conclude with section \@ref(sec:comparison) in which we compare the four block models. 
 
+
 \newpage
 
 # Preliminaries
@@ -282,10 +283,11 @@ We conclude with section \@ref(sec:comparison) in which we compare the four bloc
 
 Network analysis is often concerned with community detection. 
 This has motivated statisticians to develop random graph models with inherent community structure in which the probability of an edge between vertices $v_i$ and $v_j$ depend on the community assignments $z_i$ and $z_j$. 
-More formally, one assigns each vertex $v_i$ a community label $z_i \in \{1, ..., K\}$ and assumes a Bernoulli random graph in which $P_{ij} = g(z_i, z_j, \theta_i, \theta_j)$ for some function $g: \{1, ..., K\}^2 \times \mathbb{R}^d \times \mathbb{R}^d \to [0, 1]$ and $\theta_i \in \mathbb{R}^d$ is a vector of real-valued parameters associated with each vertex.
+More formally, one assigns each vertex $v_i$ a community label $z_i \in \{1, ..., K\}$ and assumes a Bernoulli random graph in which $P_{ij} = g(z_i, z_j, \theta_i, \theta_j)$ for some function $g: \{1, ..., K\}^2 \times \mathbb{R}^d \times \mathbb{R}^d \to [0, 1]$ and $\theta_i \in \mathbb{R}^d$ is a vector of real-valued parameters associated with each vertex. 
+While the graph is sampled conditioned on the labels $z_i$, it is assumed that the labels are unknown when the graph is observed. 
 Within the context of this work, we will call such models *block models*. 
 This type of model framework allows us to frame the goal of community detection as a statistical inference problem: 
-construct estimators for the true community labels, up to permutation. 
+construct estimators for the unobserved true community labels, up to permutation. 
 
 In this section, we explore the three main types of block models: 
 the stochastic block model \citep{doi:10.1080/0022250X.1971.9989788}, the degree corrected block model \citep{Karrer_2011}, and the popularity adjusted block model \citep{307cbeb9b1be48299388437423d94bf1}.
@@ -313,15 +315,18 @@ Then some possible ways of sampling from an SBM are as follows:
 1. Let the size of the graph, $n$, be fixed. 
 Then each vertex $v_i$, and its corresponding label, $z_i$, are also fixed, in addition to the pairwise community edge probabilities $\{\theta_{k \ell}\}_K$, which are all treated as model parameters. 
 Under this sampling scheme, there is no notion of increasing $n$. 
+
 2. The vertices and edges are sampled in sequence, and we suppose that each vertex $v_i$ comes with a corresponding label, $z_i$, which determines its edge probabilities to the other vertices. 
 Under this sampling scheme, there is no assumed distribution on the labels, which are treated as fixed parameters rather than random variables, along with $\{\theta_{k \ell}\}_K$, but there is a notion of increasing sample size $n$, which allows for asymptotics. 
+
 3. The vertices are sampled in sequence, and each label, $z_i$, is sampled as $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$, $\sum_k^K \alpha_k = 1$. 
-The edge probabilities are then determined by the sample $\{z_i\}$ and the parameters $\{\theta_{k \ell}\}_K$.
-Under this sampling scheme, both the edges and the labels are random, with fixed parameters $\alpha = \Big[ \alpha_1, \cdots, \alpha_K \Big]^\top$ and $\{\theta_{k \ell}\}_K$. 
+The edge probabilities are then determined by the sample $z = [z_1 \cdots z_n]^\top$ and the parameters $\{\theta_{k \ell}\}_K$.
+Under this sampling scheme, both the edges and the labels are random, with fixed parameters $\alpha = [ \alpha_1, \cdots, \alpha_K ]^\top$ and $\{\theta_{k \ell}\}_K$. 
 
 We use the notation $A \sim \SBM(z, \{\theta_{k \ell}\}_K)$ for the first two sampling schemes, and we use $A \sim \SBM(\alpha, \{\theta_{k \ell}\}_K)$ for the third. 
 
 An extension to these include Bayesian models in which there are prior distributions for the parameters, e.g., each $\theta_{k \ell}$ has a prior distribution with support $[0, 1]$, such as $\theta_{k \ell} \sim \Betadist(a_{k \ell}, b_{k \ell})$, and the mixture parameters $\alpha$ has a prior distribution on the $K-1$ simplex, such as $\alpha \sim \mathrm{Dirichlet}(\beta_1, ..., \beta_K)$. 
+(See \citet{RePEc:eee:csdana:v:60:y:2013:i:c:p:12-31} and \citet{10.2307/43974715}.)
 
 \begin{example}[Stochastic block model with $K = 2$ communities]
 \label{ex:assort-sbm}
@@ -365,7 +370,8 @@ In the following example, we describe a network which can be modeled as a disass
 \label{ex:sbm-dating}
 Consider an undirected graph in which each vertex $v_i$ represents users of an online dating service, each label $z_i$ represents the user's gender, and each edge represents a successful match between pairs of users. 
 For simplicity, we will restrict the labels to female and male (denoted as $1$ and $2$). 
-If we model this as an SBM, then $\theta_{11}$ is the probability of a match between two female users, $\theta_{22}$ is the probability of a match between two male users, and $\theta_{12} = \theta_{21}$ is the probability of a match between a female user and a male user. Based on trends in the United States \citep{gallup-lgbt}, 
+If we model this as an SBM, then $\theta_{11}$ is the probability of a match between two female users, $\theta_{22}$ is the probability of a match between two male users, and $\theta_{12} = \theta_{21}$ is the probability of a match between a female user and a male user. 
+Based on trends in the United States \citep{gallup-lgbt}, 
 a plausible set of edge probabilities is $\theta_{11} = \theta_{22} = 0.02$ and $\theta_{12} = 0.2$, which are used in the sample visualized in figure \ref{fig:dating-sbm}, along with $\alpha_1 = \alpha_2 = 1/2$ and $n = 64$.
 
 ```{r dating-sbm, fig.width = 4, , fig.height = 2, fig.cap = 'Stochastic block model of a dating network. This model is disassortative.', cache = TRUE}
@@ -537,7 +543,8 @@ In example \ref{ex:sbm-dating}, we modeled an online dating network as an SBM in
 In this model, there is an implicit assumption that for each pair of genders, there is a constant probability of a match, e.g., each male member has a constant probability of matching with another male member as well as a (different) constant probability of matching with a female member. 
 This does not take into account that some individuals are more likely to form connections than others, based on each individual's activity on the online service or popularity with other users. 
 Modeling this as a DCBM allows us to take this into account by adjusting each user's expected degree by a factor of $\omega_i$. 
-The following is a visualization of the network from example \ref{ex:sbm-dating} modified as a DCBM with parameters $\theta_{11} = \theta_{22} = 0.03$, $\theta_{12} = 0.3$, each $\omega_i$ drawn uniformly between $1/3$ and $1$, and $\rho_n = 1$. 
+Figure \ref{fig:dating-dcbm} is a visualization of the network from example \ref{ex:sbm-dating} modified as a DCBM with parameters $\theta_{11} = \theta_{22} = 0.03$, $\theta_{12} = 0.3$, each $\omega_i$ drawn uniformly between $1/3$ and $1$, and $\rho_n = 1$. 
+The figure shows that some individuals (vertices) are a lot more popular than others in the form of having more matches with other individuals (edges). 
 
 ```{r dating-dcbm, fig.width = 4, , fig.height = 2, fig.cap = 'A dating network modeled as a DCBM. This model is disassortative.', cache = TRUE}
 set.seed(12345)
@@ -593,7 +600,7 @@ In these models, it is assumed that all individuals have the same sexual orienta
 Using the parameters specified in these examples, we assume that each individual is 10 times more likely to match with a member of the opposite gender compared to a member of the same gender. 
 The PABM allows us to model each individual's sexual orientation. 
 Figure \ref{fig:dating-pabm} is a visualization of the online dating network modeled as a PABM in which the popularity parameters are drawn as $\lambda_{ik} \sim \Betadist(1, 6)$ if $z_i = k$ and $\lambda_{ik} \sim \Betadist(2, 2)$ if $z_i \neq k$. 
-Like in the SBM and DCBM examples, the average edge probability between genders is approximately ten times that of the average edge probability within genders, but unlike in the SBM and DCBM examples, each individual has its own affinity toward each gender. 
+Like in the SBM and DCBM examples, the average edge probability between genders is approximately ten times that of the average edge probability within genders, but unlike in the SBM and DCBM examples, we can see that some vertices have more connections to its own gender and some have more connections to the opposite gender. 
 
 ```{r dating-pabm, fig.width = 4, , fig.height = 2, fig.cap = 'A dating network modeled as a PABM. This model is disassortative.', cache = TRUE}
 set.seed(12345)
@@ -617,6 +624,7 @@ ggraph(A, layout = 'auto') +
 Like the SBM (and most mixture models), fitting a DCBM or PABM to a graph via direct likelihood maximization is NP-hard. 
 However, like the SBM (and most mixture models), the EM algorithm is a candidate for (indirect) likelihood maximization. 
 The EM algorithms for the DCBM and PABM are similar to algorithm \ref{algo:sbm-em}, and the same independence relaxation is required. 
+Note that it is required for each $\theta_{k \ell} \omega_i \omega_j \in (0, 1)$ (for the DCBM) or $\lambda_{ik} \lambda_{j \ell} \in (0, 1)$ (for the PABM), and some attention is required to maintain this constraint when implementing these algorithms. 
 
 \begin{algorithm}
   \label{algo:dcbm-em}
@@ -697,16 +705,31 @@ K <- 3
 n <- length(z)
 
 set.seed(123)
-out <- em.sbm(A, 
-              t(apply(matrix(runif(n * K), nrow = n), 1, function(x) x / sum(x))),
-              matrix(c(.9, .1, .1, .1, .9, .1, .1, .1, .9), nrow = K))
-out <- em.dcbm(A, 
-               out$pi,
-               out$theta,
-               runif(n))
+out.sbm <- em.sbm(A, 
+                  t(apply(matrix(runif(n * K), nrow = n), 
+                          1, 
+                          function(x) x / sum(x))),
+                  matrix(c(.9, .1, .1, .1, .9, .1, .1, .1, .9), 
+                         nrow = K))
+out.dcbm <- em.dcbm(A, 
+                    out.sbm$pi,
+                    out.sbm$theta,
+                    runif(n))
+
+# zhat.dcbm <- factor(apply(out.dcbm$pi, 1, which.max))
+# zhat.dcbm <- model.matrix(~ zhat.dcbm)
+# zhat.dcbm[, 1] <- 1 - zhat.dcbm[, 2] * zhat.dcbm[, 3]
+# lambda.init <- matrix(runif(n * K), nrow = n, ncol = K)
+# lambda.init <- diag(out.dcbm$omega) %*% zhat.dcbm %*% out.dcbm$theta
+# lambda.init <- lambda.init / (max(lambda.init) + 1e-6)
+# out.pabm <- em.pabm(A, 
+#                     out.dcbm$pi,
+#                     lambda.init)
+# zhat.pabm <- apply(out.pabm$pi, 1, which.max)
+# table(z, zhat.pabm)
 
 ggplot() + 
-  geom_histogram(aes(x = out$omega),
+  geom_histogram(aes(x = out.dcbm$omega),
                  colour = 'black', fill = 'white') + 
   labs(x = 'Fitted degree factors for the UK faculty network') + 
   theme_bw()
@@ -947,14 +970,14 @@ Another clustering algorithm for the ASE of a DCBM is to normalize the embedding
 
 \begin{example}
 Recall the UK faculty network in example \ref{ex:uk-faculty}. 
-In examples~\ref{ex:uk-faculty-sbm} and \ref{ex:uk-faculty-dcbm-pabm}, we fit an SBM, DCBM, and PABM to the graph using their corresponding EM algorithms. 
+In examples~\ref{ex:uk-faculty-sbm} and \ref{ex:uk-faculty-dcbm-pabm}, we fit an SBM and a DCBM to the graph using their corresponding EM algorithms (algorithms~\ref{algo:sbm-em} and \ref{algo:dcbm-em}). 
 While all three algorithms were able to correctly identify the labels for most of the vertices, it is not immediately clear which model is the most appropriate for this graph. 
 Analyzing the graph as a GRDPG, however, provides a visual indication for which block model is the best fit. 
 If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can take the ASE of the adjacency matrix and see whether the embedding vectors lie around point masses or rays. 
-We assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
+Based on figure \ref{fig:friendship-network}, we assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
 Because the fourth community only contains two members, we omitted it from this analysis. 
 Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM, since each community appears to be described by a line segment. 
-$K$-means clustering on the normalized embedding vectors results in a community detection accuracy of 96.7\%, which is an improvement over all three block model EM algorithms. 
+$K$-means clustering on the normalized embedding vectors results in a community detection accuracy of 96.7\%, which is an improvement over the EM algorithms while being substantially faster and easier to implement. 
 
 ```{r ukfaculty-ase, fig.cap = 'A three-dimensional ASE of the UK faculty network using the three most positive eigenvalues and their corresponding eigenvectors. The vertices are labeled by the school to which each faculty member belongs.', fig.height = 3, fig.width = 5, cache = TRUE }
 data(UKfaculty, package = 'igraphdata')
@@ -981,11 +1004,11 @@ Consider the dating network examples for the SBM (example \ref{ex:sbm-dating}) a
 Since the edge probability matrices are not positive semidefinite (equation \ref{eq:sbm-eigenvalues}), these are disassortative models. 
 More specifically, the edge probability matrix for each has one positive eigenvalue and one negative eigenvalue. 
 Then the ASE for this model is $\hat{X} = \Big[ |\lambda_1|^{1/2} v_1 \mid |\lambda_n|^{1/2} v_n \Big]$. 
-A plot of the ASE of the graph in \ref{ex:sbm-dating} (figure \ref{fig:dating-ase}, left) suggests two (somewhat overlapping) ellipsoidal clusters, and fitting a GMM on the embedding results in a community detection accuracy of 96.9\%, which is comparable to algorithm \ref{algo:sbm-em} while being much simpler to implement. 
+A plot of the ASE of the graph in \ref{ex:sbm-dating} (figure \ref{fig:dating-ase}, left) suggests two (somewhat overlapping) ellipsoidal clusters, and fitting a GMM on the embedding results in a community detection accuracy of 96.9\%, which is comparable to algorithm \ref{algo:sbm-em} while being simpler to implement. 
 Likewise, a plot of the ASE of the graph in example~\ref{ex:dcbm-dating} (figure \ref{fig:dating-ase}, right) consists of points that lie along two lines that cross at the origin, and kernel $K$-means clustering using the cosine similarity kernel results in a community detection accuracy of 93.8\%, which is an improvement over algorithm \ref{algo:dcbm-em} while being simpler to implement. 
 Also note that aside from the choice of the eigenvalues and eigenvectors (positive vs negative), the community detection algorithms for the SBM ($K$-means clustering or GMM on the ASE) and DCBM (kernel $K$-means clustering) are identical regardless of whether the model is assortative or disassortative. 
 
-```{r dating-ase, cache = TRUE, fig.cap = 'ASEs of the graphs in examples \\ref{ex:sbm-dating}, which is a disassortative SBM (left), and \\ref{ex:dcbm-dating}, which is a disassortative DCBM (right). The colors correspond to vertex label. Note that the embedding vectors for the SBM cluster around two point masses while the embedding vectors for the DCBM cluster around two line segments.'}
+```{r dating-ase, cache = TRUE, fig.height = 2, fig.width = 5, fig.cap = 'ASEs of the graphs in examples \\ref{ex:sbm-dating}, which is a disassortative SBM (left), and \\ref{ex:dcbm-dating}, which is a disassortative DCBM (right). The colors correspond to vertex label. Note that the embedding vectors for the SBM cluster around two point masses while the embedding vectors for the DCBM cluster around two line segments.'}
 set.seed(123)
 
 n <- 2 ** 6
@@ -1980,7 +2003,7 @@ As established in section \@ref(sec:sbm-dcbm-grdpg), it is possible to represent
 Whether this is useful for community detection in block models depends entirely on the configuration of the latent vectors. 
 In the case of the $\ER$ model, SBM, DCBM, and PABM, each community forms a linear structure, i.e., a subspace, and this rigid structure can be exploited for community detection. 
 In this section, we explore GRDPGs with community-wise parameterized nonlinear latent structures. 
-We begin with a motivating example.
+We begin with a motivating example (example \ref{ex:macaque}).
 
 \begin{example}[Macaque visuotactile brain areas and connections]
 \label{ex:macaque}
@@ -1992,7 +2015,7 @@ The data are available in the \texttt{igraphdata} package \citep{igraph}.
 Treating this graph as an RDPG with a latent space dimension of 2, 
 we decomposed the adjacency matrix to construct its ASE (figure \ref{fig:macaque-ase}). 
 The embedding vectors, which approximate the latent vectors, appear to approximately lie along two curves that intersect at the origin, with each curve corresponding to a label (visual vs sensorimotor). 
-While the ASE suggests a community-wise structure, the SBM, DCBM, and PABM are not suitable models for these data. 
+While the ASE suggests a community-wise structure in the latent space, the SBM, DCBM, and PABM are not suitable models for these data. 
 
 ```{r macaque-graph, fig.cap = 'Macaque visuotactile brain areas and connections network. The vertices represent brain areas.', fig.height = 2, fig.width = 3}
 data(macaque, package = 'igraphdata')
@@ -2023,12 +2046,12 @@ ggplot() +
 \label{macaque}
 \end{example}
 
-One way to model the data in example \ref{ex:macaque} as a GRDPG is to suppose that there are $K$ manifolds in the latent space on which the latent vectors lie. 
-Then each manifold can be thought of as a community. 
+One way to model the data in example \ref{ex:macaque} as a GRDPG is to suppose that the latent vectors lie on one of $K$ manifolds, and the label of each latent vector's corresponding vertex is the label of its manifold. 
 The goal of community detection in this setting is to partition the graph that results from this latent configuration such that each partition maps onto each manifold. 
-Before we dive into the multi-manifold case, we can first consider the single manifold case as a generalization of the $\ER$ model. 
+Before diving into the multi-manifold case, we can first consider the single manifold case as a generalization of the $\ER$ model (example \ref{ex:er-curve}). 
 
 \begin{example}
+\label{ex:er-curve}
 In the $\ER$ model, the edge probability matrix has a fixed value $P_{ij} \equiv p \in [0, 1]$. 
 This corresponds to a one-dimensional RDPG with a latent structure $X = \Big[ \sqrt{p},  \cdots, \sqrt{p} \Big]^\top$. 
 In another view, the RDPG with latent structure $X = \Big[ \sqrt{p}, \cdots, \sqrt{p} \Big]^\top$ induces an $\ER$ model in which the edge probabilities have a fixed value. 
@@ -2068,7 +2091,8 @@ We use these constraints to construct the following example:
 Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = \Big[ \cos(\frac{\pi}{3} t), \sin(\frac{\pi}{3} t) \Big]^\top$ and $f_2(t) = \Big[ 1 - \cos(\frac{\pi}{3} t), 1 - \sin(\frac{\pi}{3} t) \Big]^\top$.
 Draw $t_1, ..., t_n \iid \Uniform(0, 1)$ and $z_1, ..., z_n \iid \Multinomial(\frac{1}{2}, \frac{1}{2})$, and compute latent vectors $x_i = f_{z_i}(t_i)$, which are collected in data matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$. 
 Finally, let $A \sim \RDPG(X)$. Figure~\ref{fig:two-curves} shows the latent configuration drawn from this latent distribution, a random dot product graph drawn from the latent configuration, and the ASE of the graph. 
-Although the community structure is not obvious from the graph, the embedding shows a clear separation between the two communities. 
+Although there is no obvious community structure in the graph itself, the embedding shows a clear separation between the two communities. 
+More specifically, similar to the latent vectors, the embedding vectors lie approximately on one of two curve segments (one-dimensional manifolds), suggesting that the appropriate community detection approach in this setting is to determine to which (unobserved) curve to which each embedding vector is closest. 
 
 ```{r two-curves, fig.cap = 'Manifold block model from two disjoint curves. The latent configuration is on the left, a random dot product graph drawn from the latent configuration is on the middle, and the ASE is on the right.', fig.height = 2, fig.width = 7}
 set.seed(123456)
@@ -2116,22 +2140,25 @@ We also derive theoretical consistency properties for both settings.
 Manifolds have been observed in the ASEs of real observed graphs when they are studied as GRDPGs. 
 The *Drosophila* connectome graph \citep{Eichler141762} displays community-wise linear and quadratic structures in the ASE. 
 \citet{https://doi.org/10.48550/arxiv.1705.03297} used GMMs on the ASE for community detection and found that the curve-like structures in the ASE were incompatible with centroid-based clustering methods. 
-\citet{SannaPassino2022} used Gaussian processes to estimate curves, which resulted in better empirical fits. 
+\citet{SannaPassino2022} used Gaussian processes to estimate curves in the embedding, which resulted in better empirical fits. 
 \citet{athreya2020estimation} considered GRDPGs in which the vertices lie on curves or manifolds, but their focus was largely on estimating distributions on a single manifold rather than estimating the manifolds or identifying multiple manifolds. 
-\citet{https://doi.org/10.48550/arxiv.2006.05168} and \citet{https://doi.org/10.48550/arxiv.2208.11665} noted that kernel GRDPGs (GRDPGs in which $P_{ij} = \kappa(x_i, x_j)$ for some kernel function $\kappa$) with community structure can have large dimensions and proposed using a lower dimension with manifold structure to approximate the kernel function. 
+\citet{https://doi.org/10.48550/arxiv.2006.05168} and \citet{https://doi.org/10.48550/arxiv.2208.11665} noted that kernel GRDPGs (GRDPGs in which $P_{ij} = \kappa(x_i, x_j)$ for some kernel function $\kappa$) with community structure can have large dimensions and proposed using a lower dimension with manifold structure to approximate the nonlinearity of the kernel function. 
 
 Outside of random graph inference, there is a larger body of work on fitting parametric curves to vectors in $\mathbb{R}^d$ or identifying vectors belonging to different manifolds in $\mathbb{R}^d$. 
-Manifold learning itself is a large area of research with a long history \citep{Tenenbaum2000-ff, trosset2020rehabilitating, https://doi.org/10.48550/arxiv.2107.08089}, so we will focus primarily on the setting in which there are multiple manifolds and the goal is to identify which vector lies on which manifold (manifold clustering). 
+Manifold learning itself is a large area of research with a long history \citep{Tenenbaum2000-ff, 10945-32767, trosset2020rehabilitating, https://doi.org/10.48550/arxiv.2107.08089}, so we will focus primarily on the setting in which there are multiple manifolds and the goal is to identify which vector lies on which manifold (manifold clustering). 
 The standard approach to manifold clustering is essentially a type of spectral clustering, involving spectral decomposition of some kernel matrix applied to the vectors lying on manifolds (or its graph Laplacian matrix). 
-Unlike standard manifold clustering techniques such as ratio cut, it has been observed that while the leading eigenvalues discern subspaces or approximations of subspaces, some of the other eigenvalues or a mixture of other eigenvalues help discern nonlinear structures \citep{10945-32767, https://doi.org/10.48550/arxiv.2208.11665, https://doi.org/10.48550/arxiv.2201.10000}.
+Unlike standard manifold clustering techniques such as ratio cut, it has been observed that while the leading eigenvalues discern subspaces or approximations of subspaces, some of the other eigenvalues or a mixture of other eigenvalues help discern nonlinear structures \citep{https://doi.org/10.48550/arxiv.2208.11665, https://doi.org/10.48550/arxiv.2201.10000}.
 Most of these methods also assume that the vectors lie exactly on the manifolds (i.e., the observed vector is $x_i \in \mathcal{M}_k$) instead of approximately on them (i.e., the observed vector is $x_i = y_i + \epsilon_i$ where $y_i \in \mathcal{M}_k$ and $\| \epsilon_i \|$ is small in some sense), which is the setting in which the clustering is done on the ASE. 
 
 ## Algorithm for Nonintersecting Manifolds {#sec:nonintersect}
 
-For the sake of completeness, we begin with the case of GRDPGs in which communities are represented by nonintersecting manifolds. 
+We begin with the case of GRDPGs in which communities are represented by nonintersecting manifolds. 
 In this section, we consider the following setting: Suppose that each community $C_k$ is represented by a closed manifold $\mathcal{M}_k$ in the latent space of a RDPG or GRDPG. 
 Define $\delta = \min\limits_{k \neq \ell} \min\limits_{x \in \mathcal{M}_k, y \in \mathcal{M}_\ell} \|x - y\|$, the minimum distance between two manifolds. 
 Furthermore, assume that $\delta > 0$, i.e., the manifolds do not intersect. 
+This model can be viewed as a generalization of the SBM, which, when viewed as a GRDPG, consists of a latent space configuration in which each community corresponds to a point mass in the latent space. 
+In this model, we generalize the point mass to a manifold. 
+In the case of the DCBM in which each $\omega_i$ is bounded away from 0, i.e., $\omega_i \geq c > 0$, the nonintersecting MBM can be applied as well. 
 
 In the original latent space, it is possible to construct for each manifold $\mathcal{M}_k$ a connected $\eta_k$-neighborhood graph for some $\eta_k > 0$. 
 If the subsample of vectors on each manifold is sufficiently dense such that $\max_k \eta_k = \eta < \delta$, then an $\eta$-neighborhood graph on the entire sample results in a graph with $K$ disconnected subgraphs that map onto each manifold exactly. 
@@ -2157,8 +2184,6 @@ Let $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$ and $A \sim \GRDPG_{p,q}(X; 
 Define $A_n(\eta)$ as the event that an $\eta$-neighborhood graph constructed from the ASE of $A$ consists of exactly $K$ disconnected subgraphs that map exactly to each manifold. 
 Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \infty} P(A_n(\eta)) = 1$. 
 \end{theorem}
-
-If the manifolds are one-dimensional, then a more precise rate of convergence can be derived. 
 
 \begin{example}
 \label{ex:separated-curves-2}
@@ -2661,7 +2686,8 @@ This graph does not come with ground truth labels.
 Indeed, if we construct an ASE with $p = 1$ and $q = 1$ and label the points by character name, we see embedding vectors lie neatly along two rays emitting from the origin, with one ray populated by protagonists and another ray populated by antagonists (figure \ref{fig:hp-ase}). 
 Nevertheless, we tried fitting an MBM on this graph via $K$-curves clustering. 
 Since the DCBM is a special case of the MBM, it should result in at least as good of a fit as the DCBM. 
-We initialized $K$-curves clustering by specifying that Lord Voldemort is in one community and Harry Potter is in another, with the other vertices not known *a priori*. 
+\citet{SannaPassino2022} fit quadratic curves on the embedding and suggested that there was some information to be gained by the nonlinearity, so we fit quadratic Bezier curves in this example. 
+The curves were initialized by specifying that Lord Voldemort is in one community and Harry Potter is in another, with the other vertices not known *a priori*. 
 The fitted quadratic curves are illustrated in figure \ref{fig:hp-kcurves}, which indeed appear to be very close to linear.
 
 ```{r hp, fig.cap = 'Harry Potter enmity graph. The vertices represent characters and the edges represent whether pairs of characters are enemies.', fig.width = 4, fig.height = 2}
