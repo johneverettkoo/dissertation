@@ -235,9 +235,9 @@ em.pabm <- function(A, pi.start, lambda.start,
     pi <- update.pi.pabm(pi.old, A, lambda)
     lambda <- update.lambda.pabm(pi, A, lambda)
     
-    print(Matrix::norm(pi.old - pi))
-    print(table(apply(pi, 1, which.max),
-                apply(pi.old, 1, which.max)))
+    # print(Matrix::norm(pi.old - pi))
+    # print(table(apply(pi, 1, which.max),
+    #             apply(pi.old, 1, which.max)))
     
     if (Matrix::norm(pi.old - pi, 'F') < eps) break
     
