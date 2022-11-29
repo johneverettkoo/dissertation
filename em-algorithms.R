@@ -211,7 +211,8 @@ update.omega.dcbm.i <- function(pi, A, theta, omega, i) {
 }
 
 em.pabm <- function(A, pi.start, lambda.start, 
-                    maxit = 100, eps = 1e-9) {
+                    maxit = 100, eps = 1e-9,
+                    lambda.eps = 1e-9) {
   pi <- pi.start
   lambda <- lambda.start
   
@@ -224,11 +225,19 @@ em.pabm <- function(A, pi.start, lambda.start,
     pi.old <- pi
     lambda.old <- lambda
     
-    if (max(lambda) >= 1) {
-      lambda <- lambda / max(lambda + 1e-6)
+    if (min(lambda) <= lambda.eps) {
+      lambda <- lambda + lambda.eps
     }
+    if (max(lambda) >= 1 - lambda.eps) {
+      lambda <- lambda / max(lambda + lambda.eps)
+    }
+    
     pi <- update.pi.pabm(pi.old, A, lambda)
     lambda <- update.lambda.pabm(pi, A, lambda)
+    
+    print(Matrix::norm(pi.old - pi))
+    print(table(apply(pi, 1, which.max),
+                apply(pi.old, 1, which.max)))
     
     if (Matrix::norm(pi.old - pi, 'F') < eps) break
     
@@ -269,8 +278,8 @@ update.pi.pabm.ik <- function(pi, A, lambda, i, k) {
       if (j != i) {
         log.pi.ik <- log.pi.ik + 
           pi[j, l] * 
-          (A[i, j] * log(lambda[i, k] * lambda[j, l]) + 
-             (1 - A[i, j]) * log(1 - lambda[i, k] * lambda[j, l]))
+          (A[i, j] * log(lambda[i, l] * lambda[j, k]) + 
+             (1 - A[i, j]) * log(1 - lambda[i, l] * lambda[j, k]))
       }
     }
   }
@@ -283,15 +292,15 @@ update.lambda.pabm <- function(pi, A, lambda) {
   lambda.new <- matrix(NA, nrow = n, ncol = K)
   
   for (i in seq(n)) {
-    for (k in seq(K)) {
-      lambda.new[i, k] <- update.lambda.pabm.ik(pi, A, lambda, i, k)
+    for (l in seq(K)) {
+      lambda.new[i, l] <- update.lambda.pabm.il(pi, A, lambda, i, l)
     }
   }
   
   return(lambda.new)
 }
 
-update.lambda.pabm.ik <- function(pi, A, lambda, i, k) {
+update.lambda.pabm.il <- function(pi, A, lambda, i, l) {
   n <- nrow(pi)
   K <- ncol(pi)
   
@@ -300,13 +309,11 @@ update.lambda.pabm.ik <- function(pi, A, lambda, i, k) {
   
   for (j in seq(n)) {
     if (j != i) {
-      for (l in seq(K)) {
-        if (l != k) {
-          numerator <- numerator + 
-            pi[i, k] * pi[j, l] * A[i, j]
-          denominator <- denominator + 
-            pi[i, k] * pi[j, l] * lambda[j, l]
-        }
+      for (k in seq(K)) {
+        numerator <- numerator + 
+          pi[i, k] * pi[j, l] * A[i, j]
+        denominator <- denominator + 
+          pi[i, k] * pi[j, l] * lambda[j, k]
       }
     }
   }
