@@ -9,7 +9,7 @@
 \contentsline {subsection}{\numberline {2.3}Random Graph Models and Sparsity}{18}{subsection.2.3}%
 \contentsline {subsection}{\numberline {2.4}Generalizations of the Stochastic Block Model: The Degree Corrected Block Model and the Popularity Adjusted Block Model}{19}{subsection.2.4}%
 \contentsline {subsection}{\numberline {2.5}A Hierarchy of Block Models}{26}{subsection.2.5}%
-\contentsline {subsection}{\numberline {2.6}The Generalized Random Dot Product Graph}{29}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.6}The Generalized Random Dot Product Graph}{28}{subsection.2.6}%
 \contentsline {subsection}{\numberline {2.7}Connecting the SBM and DCBM to the GRDPG}{31}{subsection.2.7}%
 \contentsline {section}{\numberline {3}Popularity Adjusted Block Models are Generalized Random Dot Product Graphs}{37}{section.3}%
 \contentsline {subsection}{\numberline {3.1}The Geometry of PABMs}{37}{subsection.3.1}%

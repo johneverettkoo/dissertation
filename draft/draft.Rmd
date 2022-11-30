@@ -664,12 +664,12 @@ Note that it is required for each $\theta_{k \ell} \omega_i \omega_j \in (0, 1)$
   \While{$\|\nabla \ell\| > \epsilon$} {
     \For {$i = 1, ..., n$} {
       \For {$k = 1, ..., K$} {
-        E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log (\hat{\lambda}_{ik} \hat{\lambda}_{j \ell}) + (1 - A_{ij}) \log (1 - \hat{\lambda}_{ik} \hat{\lambda}_{j \ell})) \bigg)$.\;
+        E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log (\hat{\lambda}_{i \ell} \hat{\lambda}_{j k}) + (1 - A_{ij}) \log (1 - \hat{\lambda}_{i \ell} \hat{\lambda}_{j k})) \bigg)$.\;
       }
     }
     \For {$i = 1, ..., n$} {
-      \For {$k = 1, ..., K$} {
-        M-step: $\hat{\lambda}_{ik} = \frac{\sum_{j \neq i} \sum_\ell \pi_{ik} \pi_{j \ell} A_{ij}}{\sum_{j \neq i} \sum_\ell \pi_{ik} \pi_{j \ell} \hat{\lambda}_{j \ell}}$.\;
+      \For {$\ell = 1, ..., K$} {
+        M-step: $\hat{\lambda}_{i \ell} = \frac{\sum_{j \neq i} \sum_k \pi_{ik} \pi_{j \ell} A_{ij}}{\sum_{j \neq i} \sum_k \pi_{ik} \pi_{j \ell} \hat{\lambda}_{j k}}$.\;
       }
     }
   }
@@ -683,7 +683,7 @@ Despite the lack of uniqueness without constraints, a naive EM type algorithm si
 Likewise, it is not immediately obvious how to approach the estimation of the $\theta_{k \ell}$'s, $\omega_i$'s, or $\lambda_{ik}$'s due to their non-uniqueness. 
 \citet{noroozi2019estimation} suggest focusing estimation on the edge probability matrix $P$ instead of the individual parameters to avoid this ambiguity. 
 Nevertheless, the naive EM algorithms appear to work well, at least for community detection (estimating the labels $z_i$, e.g., by setting $\hat{z}_i = \arg\max_k \pi_{ik}$), based on empirical results. 
-Applying algorithm \ref{algo:dcbm-em} to example \ref{ex:dcbm-dating} results in 84\% accuracy, and applying algorithm \ref{algo:pabm-em} to example \ref{ex:pabm-dating} results in 97\% accuracy, but they fail to capture the original (which are not necessarily ``true'') parameters. 
+Applying algorithm \ref{algo:dcbm-em} to example \ref{ex:dcbm-dating} results in 84\% accuracy, and applying algorithm \ref{algo:pabm-em} to example \ref{ex:pabm-dating} results in 95\% accuracy, but they fail to capture the original (which are not necessarily ``true'') parameters. 
 \end{remark}
 
 \begin{example}
@@ -789,8 +789,6 @@ knitr::kable(blockmodel.df, 'latex',
              escape = FALSE,
              caption = 'Summary of an hierarchical or nested view of block momdels.')
 ```
-
-\newpage
 
 ## The Generalized Random Dot Product Graph {#sec:grdpg}
 
@@ -2653,7 +2651,7 @@ ggplot(clust.summary.df) +
 ## Applications
 
 In the first example, we applied $K$-curves clustering (algorithm \ref{alg:kcurves}) to the macaque visuotactile brain areas and connections network from example \ref{ex:macaque}. 
-As in \ref{ex:macaque}, we used $d = 2$ to construct the ASE, then used $K$-curves clustering to fit two curves to these data and predict the labels. 
+As in example \ref{ex:macaque}, we used $d = 2$ to construct the ASE, then used $K$-curves clustering to fit two curves to these data and predict the labels. 
 Figure \ref{fig:macaque-fitted} shows the result of $K$-curves clustering on this graph, 
 which yields a 4.4\% error rate. 
 
@@ -2680,14 +2678,15 @@ plot.estimated.curves(Xhat, macaque.out) +
   scale_colour_brewer(palette = 'Set1')
 ```
 
-In the second example, we considered the Harry Potter enmity graph \citep{harrypotter}, visualized in figure \ref{fig:hp}. 
+In the second example, we analyzed the Harry Potter enmity graph \citep{harrypotter}, visualized in figure \ref{fig:hp}. 
+Here, the vertices represent the various characters in the *Harry Potter* series, and edges represent whether pairs of characters are enemies. 
 This graph does not come with ground truth labels. 
 \citet{rubindelanchy2017statistical} and \citet{SannaPassino2022} analyzed this graph as a GRDPG, and the ASE suggests that an appropriate model for this graph is a disassortative DCBM with $K = 2$ communities. 
 Indeed, if we construct an ASE with $p = 1$ and $q = 1$ and label the points by character name, we see embedding vectors lie neatly along two rays emitting from the origin, with one ray populated by protagonists and another ray populated by antagonists (figure \ref{fig:hp-ase}). 
 Nevertheless, we tried fitting an MBM on this graph via $K$-curves clustering. 
 Since the DCBM is a special case of the MBM, it should result in at least as good of a fit as the DCBM. 
 \citet{SannaPassino2022} fit quadratic curves on the embedding and suggested that there was some information to be gained by the nonlinearity, so we fit quadratic Bezier curves in this example. 
-The curves were initialized by specifying that Lord Voldemort is in one community and Harry Potter is in another, with the other vertices not known *a priori*. 
+The curves were initialized by specifying that Lord Voldemort (the main antagonist) is in one community and Harry Potter (the titular protagonist) is in another, with the other vertices not known *a priori*. 
 The fitted quadratic curves are illustrated in figure \ref{fig:hp-kcurves}, which indeed appear to be very close to linear.
 
 ```{r hp, fig.cap = 'Harry Potter enmity graph. The vertices represent characters and the edges represent whether pairs of characters are enemies.', fig.width = 4, fig.height = 2}
@@ -3239,7 +3238,7 @@ In this strategy, we use the consistency of the ASE \citep{rubindelanchy2017stat
 
 The RMarkdown and \LaTeX files to compile this dissertation can be found at https://github.com/johneverettkoo/dissertation. 
 The code for simulations and data analyses in section \@ref(sec:pabm-grdpg) can be found at https://github.com/johneverettkoo/pabm-grdpg. 
-An R package implementing orthogonal spectral clustering (algorithm \ref(alg:osc)) is currently in progress and can be found at https://github.com/johneverettkoo/osc. 
+An R package implementing orthogonal spectral clustering (algorithm \ref{alg:osc}) is currently in progress and can be found at https://github.com/johneverettkoo/osc. 
 The code for simulations and data analyses in section \@ref(sec:mbm) can be found at https://github.com/johneverettkoo/manifold-block-models. 
 
 \newpage
