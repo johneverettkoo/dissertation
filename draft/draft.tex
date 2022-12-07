@@ -108,7 +108,7 @@
 \theoremstyle{definition}
 \newtheorem{hypothesis}{Hypothesis}[section]
 \theoremstyle{remark}
-\newtheorem{remark}{Remark}
+\newtheorem*{remark}{Remark}
 \newtheorem*{solution}{Solution}
 \begin{document}
 
@@ -557,6 +557,7 @@ But because the SBM is a mixture model, a candidate algorithm for finding a (loc
 However, due to the \(z_{ik} z_{j \ell}\) interaction terms, the expectation step cannot be solved in closed form \citep{kolaczyk2014statistical}.
 While the labels are drawn independently, they are not necessarily conditionally independent.
 Nevertheless, making the conditional independence relaxation allows us to write the expectation and maximization steps in closed form.
+(The same type of approximation was used in the Bayesian context by \citet{10.2307/43974715}.)
 As an example, we write the EM algorithm for the likelihood function in equation \eqref{eq:sbm-loglik} in algorithm \ref{algo:sbm-em}.
 
 \begin{algorithm}
@@ -2488,6 +2489,26 @@ Figure \ref{fig:mbconnectome-kcurves} shows the embedding and curves projected t
 
 \hypertarget{sec:comparison}{%
 \section{Comparisons of Models and Conclusions}\label{sec:comparison}}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.5\linewidth]{draft_files/figure-latex/block-models-1} 
+
+}
+
+\caption{Graph visualizations (left) and ASEs (right) of the three main block models. Note the structures that the embedding vectors form for each model.}\label{fig:block-models}
+\end{figure}
+
+In this work, we showed the connection between block models and generalized random dot product graphs.
+In particular, block models are a type of generalized random dot product graph in which the latent vectors are organized by community.
+In the case of the stochastic block model, degree corrected block model, and popularity adjusted block model, the structures are linear.
+This makes community detection via clustering in the latent space a straightforward task: Construct a graph embedding and apply a well-known clustering algorithm that is appropriate for the (linear) latent structure.
+For the SBM, the appropriate choice of clustering algorithm is \(K\)-means clustering or Gaussian mixture models.
+For the DCBM, an appropriate choice is \(K\)-means clustering with the cosine kernel.
+For the PABM, an appropriate choice is sparse subspace clustering, and we also developed orthogonal spectral clustering for this setting as well.
+Furthermore, by looking at how the embedding vectors are organized, the embedding makes visibly clear which of the three block models is the best fit for the graph, and in the case in which the number of communities or the assortativity or disassortativity of the model is unknown, there are existing heuristics for determining these based on the size of the eigenvalues.
+This is in contrast to direct likelihood maximization (e.g., via expectation maximization), which can be more of a black box in determining the appropriate model, number of communities, graph structure, etc., and results in slower, less interpretable algorithms.
+In conclusion, the graph embedding approach, which relies on making the connection between the block models and the GRDPG, is a powerful tool in both exploratory data analysis and statistical inference on graphs with community structure.
 
 \newpage
 

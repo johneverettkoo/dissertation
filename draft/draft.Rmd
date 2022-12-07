@@ -441,6 +441,7 @@ But because the SBM is a mixture model, a candidate algorithm for finding a (loc
 However, due to the $z_{ik} z_{j \ell}$ interaction terms, the expectation step cannot be solved in closed form \citep{kolaczyk2014statistical}. 
 While the labels are drawn independently, they are not necessarily conditionally independent. 
 Nevertheless, making the conditional independence relaxation allows us to write the expectation and maximization steps in closed form. 
+(The same type of approximation was used in the Bayesian context by \citet{10.2307/43974715}.) 
 As an example, we write the EM algorithm for the likelihood function in equation \eqref{eq:sbm-loglik} in algorithm \ref{algo:sbm-em}.
 
 \begin{algorithm}
@@ -2726,6 +2727,7 @@ ggplot() +
   # coord_fixed() + 
   theme_bw() + 
   labs(x = expression(x[2]), y = expression(x[1]))
+
 ```
 
 ```{r hp-kcurves, fig.cap = 'ASE of the Harry Potter emnity graph with quadratic Bezier curves fitted via $K$-curves clustering. The embedding vectors are colored by predicted label.', fig.height = 3, fig.width = 10, cache = TRUE}
@@ -2863,6 +2865,142 @@ gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 \newpage
 
 # Comparisons of Models and Conclusions {#sec:comparison}
+
+```{r block-models, cache = TRUE, fig.width = 6, fig.height = 8, out.width = '50%', fig.cap = 'Graph visualizations (left) and ASEs (right) of the three main block models. Note the structures that the embedding vectors form for each model.'}
+set.seed(12345)
+
+n <- 64
+n1 <- n / 2
+n2 <- n / 2
+z.sbm <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/2
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+X.sbm <- embedding(P, 2, 0)
+A.sbm <- draw.graph(P)
+Xhat.sbm <- embedding(A.sbm, 2, 0)
+Xhat.sbm[, 2] <- -Xhat.sbm[, 2]
+
+sbm.graph.plot <- ggraph(A.sbm, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z.sbm)),
+                  show.legend = FALSE) + 
+  labs(colour = NULL, 
+       title = 'SBM') + 
+  # theme_graph() + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1') 
+
+sbm.ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat.sbm[, 2], y = Xhat.sbm[, 1],
+                 colour = factor(z.sbm)),
+             shape = 4) + 
+  geom_point(aes(x = X.sbm[, 2], y = X.sbm[, 1], 
+                 colour = factor(z.sbm))) + 
+  # coord_fixed() +
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  labs(x = NULL, y = NULL, colour = NULL, 
+       title = 'Point Masses') + 
+  scale_colour_brewer(palette = 'Set1')
+
+n <- 128
+n1 <- n / 2
+n2 <- n / 2
+z.dcbm <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/2
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+omega <- rbeta(n, 2, 1)
+P <- P * (omega %*% t(omega))
+X.dcbm <- embedding(P, 2, 0)
+A.dcbm <- draw.graph(P)
+Xhat.dcbm <- embedding(A.dcbm, 2, 0)
+Xhat.dcbm <- -Xhat.dcbm
+
+dcbm.graph.plot <- ggraph(A.dcbm, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z.dcbm)),
+                  show.legend = FALSE) + 
+  labs(colour = NULL, 
+       title = 'DCBM') + 
+  # theme_graph() + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1') 
+
+dcbm.ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat.dcbm[, 1], y = Xhat.dcbm[, 2],
+                 colour = factor(z.dcbm)),
+             shape = 4) + 
+  geom_point(aes(x = X.dcbm[, 1], y = X.dcbm[, 2], 
+                 colour = factor(z.dcbm))) + 
+  # coord_fixed() +
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  labs(x = NULL, y = NULL, colour = NULL, 
+       title = 'Rays') + 
+  scale_colour_brewer(palette = 'Set1')
+
+n <- 64
+Pz <- generate.P.beta(n)
+P <- Pz$P
+z.pabm <- Pz$clustering
+X.pabm <- embedding(P, 3, 1)
+A.pabm <- draw.graph(P)
+Xhat.pabm <- embedding(A.pabm, 3, 1)
+# Xhat.pabm[, 1] <- -Xhat.pabm[, 1]
+
+pabm.graph.plot <- ggraph(A.pabm, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z.pabm)),
+                  show.legend = FALSE) + 
+  labs(colour = NULL, 
+       title = 'PABM') + 
+  # theme_graph() + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1') 
+
+pabm.ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat.pabm[, 1], y = Xhat.pabm[, 2],
+                 colour = factor(z.pabm)),
+             shape = 4) + 
+  geom_point(aes(x = X.pabm[, 1], y = X.pabm[, 2], 
+                 colour = factor(z.pabm))) + 
+  # coord_fixed() +
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  labs(x = NULL, y = NULL, colour = NULL, 
+       title = 'Subspaces (Projected)') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(sbm.graph.plot, sbm.ase.plot, 
+                        dcbm.graph.plot, dcbm.ase.plot,
+                        pabm.graph.plot, pabm.ase.plot,
+                        nrow = 3)
+```
+
+In this work, we showed the connection between block models and generalized random dot product graphs. 
+In particular, block models are a type of generalized random dot product graph in which the latent vectors are organized by community. 
+In the case of the stochastic block model, degree corrected block model, and popularity adjusted block model, the structures are linear. 
+This makes community detection via clustering in the latent space a straightforward task: Construct a graph embedding and apply a well-known clustering algorithm that is appropriate for the (linear) latent structure. 
+For the SBM, the appropriate choice of clustering algorithm is $K$-means clustering or Gaussian mixture models. 
+For the DCBM, an appropriate choice is $K$-means clustering with the cosine kernel. 
+For the PABM, an appropriate choice is sparse subspace clustering, and we also developed orthogonal spectral clustering for this setting as well. 
+Furthermore, by looking at how the embedding vectors are organized, the embedding makes visibly clear which of the three block models is the best fit for the graph, and in the case in which the number of communities or the assortativity or disassortativity of the model is unknown, there are existing heuristics for determining these based on the size of the eigenvalues. 
+This is in contrast to direct likelihood maximization (e.g., via expectation maximization), which can be more of a black box in determining the appropriate model, number of communities, graph structure, etc., and results in slower, less interpretable algorithms. 
+In conclusion, the graph embedding approach, which relies on making the connection between the block models and the GRDPG, is a powerful tool in both exploratory data analysis and statistical inference on graphs with community structure. 
+
+Moving beyond the linear-structure block models (SBM, DCBM, PABM), we showed that the GRDPG and ASE approach can recover nonlinear structures in the latent space. 
+This type of nonlinearity has been observed in various real networks, in particular brain connectivity networks. 
+While analyzing these graphs as GRDPGs reveals the (nonlinear) community structure, the linear block models are insufficient in modeling these graphs or performing statistical inference. 
+For this setting, we proposed the Manifold Block Model, which is a type of GRDPG in which the communities lie on nonlinear manifolds in the latent space. 
+
 
 \newpage
 

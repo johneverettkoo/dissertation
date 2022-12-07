@@ -31,7 +31,7 @@
 \contentsline {subsection}{\numberline {4.5}Simulation Study}{75}{subsection.4.5}%
 \contentsline {subsection}{\numberline {4.6}Applications}{79}{subsection.4.6}%
 \contentsline {section}{\numberline {5}Comparisons of Models and Conclusions}{84}{section.5}%
-\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{85}{section.6}%
-\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{90}{section.7}%
-\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{94}{section.8}%
-\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{97}{section.9}%
+\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{86}{section.6}%
+\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{91}{section.7}%
+\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{95}{section.8}%
+\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{98}{section.9}%
