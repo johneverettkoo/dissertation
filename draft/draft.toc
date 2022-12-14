@@ -26,12 +26,11 @@
 \contentsline {subsection}{\numberline {4.1}Community Detection as Clustering in the Latent Space}{63}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}The Manifold Block Model}{65}{subsection.4.2}%
 \contentsline {subsubsection}{\numberline {4.2.1}Previous Work}{67}{subsubsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.3}Algorithm for Nonintersecting Manifolds}{68}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Algorithm for Intersecting Manifolds}{70}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Simulation Study}{75}{subsection.4.5}%
-\contentsline {subsection}{\numberline {4.6}Applications}{79}{subsection.4.6}%
-\contentsline {section}{\numberline {5}Comparisons of Models and Conclusions}{84}{section.5}%
-\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{86}{section.6}%
-\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{91}{section.7}%
-\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{95}{section.8}%
-\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{98}{section.9}%
+\contentsline {subsection}{\numberline {4.3}Algorithms}{68}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Simulation Study}{76}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Applications}{80}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Discussion}{85}{section.5}%
+\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{88}{section.6}%
+\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{93}{section.7}%
+\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{97}{section.8}%
+\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{100}{section.9}%

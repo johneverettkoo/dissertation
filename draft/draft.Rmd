@@ -2045,7 +2045,8 @@ ggplot() +
 \label{macaque}
 \end{example}
 
-One way to model the data in example \ref{ex:macaque} as a GRDPG is to suppose that the latent vectors lie on one of $K$ manifolds, and the label of each latent vector's corresponding vertex is the label of its manifold. 
+One way to model the data in example \ref{ex:macaque} as a GRDPG is to suppose that the latent vectors lie on one of $K$ curves, and the label of each latent vector's corresponding vertex is the label of its curve. 
+If we were to extend this to communities represented by higher dimensional structures, similar to the DCBM vs. PABM, a suitable modeling approach is to suppose that the latent vectors lie on one of $K$ manifolds, each of which represent one of the $K$ labels. 
 The goal of community detection in this setting is to partition the graph that results from this latent configuration such that each partition maps onto each manifold. 
 Before diving into the multi-manifold case, we can first consider the single manifold case as a generalization of the $\ER$ model (example \ref{ex:er-curve}). 
 
@@ -2131,7 +2132,7 @@ plot(Xhat, col = z * 2, asp = 1,
 
 In the case of the SBM, a GRDPG-motivated community detection algorithm is to construct the ASE of the graph and then apply a point cloud based clustering algorithm such as $K$-means or GMM on the embedding. 
 We saw that in the case of the DCBM and PABM, because the latent structures are not based on point masses, while the ASE does reveal the communities, the final clustering step requires other clustering algorithms that are tailored to the latent community structure. 
-Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds (section \@ref(sec:nonintersect)) and one in the general case in which the latent manifolds can intersect (section \@ref(sec:intersect)). 
+Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds and one in the general case in which the latent manifolds can intersect. 
 We also derive theoretical consistency properties for both settings.
 
 ### Previous Work
@@ -2149,7 +2150,7 @@ The standard approach to manifold clustering is essentially a type of spectral c
 Unlike standard manifold clustering techniques such as ratio cut, it has been observed that while the leading eigenvalues discern subspaces or approximations of subspaces, some of the other eigenvalues or a mixture of other eigenvalues help discern nonlinear structures \citep{https://doi.org/10.48550/arxiv.2208.11665, https://doi.org/10.48550/arxiv.2201.10000}.
 Most of these methods also assume that the vectors lie exactly on the manifolds (i.e., the observed vector is $x_i \in \mathcal{M}_k$) instead of approximately on them (i.e., the observed vector is $x_i = y_i + \epsilon_i$ where $y_i \in \mathcal{M}_k$ and $\| \epsilon_i \|$ is small in some sense), which is the setting in which the clustering is done on the ASE. 
 
-## Algorithm for Nonintersecting Manifolds {#sec:nonintersect}
+## Algorithms {#sec:nonintersect}
 
 We begin with the case of GRDPGs in which communities are represented by nonintersecting manifolds. 
 In this section, we consider the following setting: Suppose that each community $C_k$ is represented by a closed manifold $\mathcal{M}_k$ in the latent space of a RDPG or GRDPG. 
@@ -2205,21 +2206,107 @@ singlelink %>%
 ```
 \end{example}
 
-## Algorithm for Intersecting Manifolds {#sec:intersect}
-
-The consistency of the ASE provides asymptotic guarantees for perfect community label recovery for the nonintersecting MBM. 
-This relies on the fact that single-linkage clustering and $\eta$-neighborhood clustering graphs result in disconnected components if clusters of points are far away from each other. 
-However, many graphs do not behave so nicely. 
-For example, the DCBM and PABM can both be viewed as MBMs in which the latent vectors come from (linear) manifolds that intersect at the origin (see section \@ref(sec:sbm-dcbm-grdpg)). 
-Nonlinear intersecting manifolds have also been observed in ASEs of real graphs \citep{SannaPassino2022, https://doi.org/10.48550/arxiv.1709.05454}. 
-While the DCBM and PABM cases can be handled by algorithms specific to linear structures such as SSC and OSC, nonlinear intersecting manifolds require a more flexible approach. 
-For the intersecting case, we restrict the MBM to the case in which each $F_{z_i}$ is identical and univariate on the unit interval $[0, 1]$. 
+Algorithm \ref{alg:ase-singlelink} depends on the fact that the minimum distances between manifolds are nonzero and that the ASE is consistent. 
+Single linkage clustering assumes that the asymptotic result is true to some extent, i.e., the ASE error is small enough that the gap between embedding vectors from different manifolds is still nonzero. 
+When the ASE error is insufficiently small, single linkage clustering on the ASE will not produce the correct result. 
+An alternative algorithm that may work when this condition is not fulfilled is a parametric approach in which we model the manifolds directly. 
+For ease of modeling, we restrict the MBM to the case in which each $F_{z_i}$ is identical and univariate on the unit interval $[0, 1]$. 
 The full mixture model is described as follows:
 
 1. Draw $t_1, ..., t_n \iid F$ for probability distribution $F$ with support $[0, 1]$.
 2. Draw $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$, the community labels.
 3. Let each $x_i = g_{z_i}(t_i)$ be the latent vector for vertex $v_i$, and collect the latent vectors into matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$.
 4. Draw $A \sim \GRDPG_{p,q}(X; \rho_n)$.
+
+In this setting, if we know the labels $z_1, ..., z_n$, then for each $k$^th^ subsample for which $z_i = k$, we can fit the curve $\hat{g}_k$ (up to an indefinite orthogonal transformation). 
+On the other hand, if we know the curves $g_1, ..., g_K$, then we can assign each embedding vector $\hat{x}_i$ the predicted label $\hat{z}_i$ based on which curve it is closest to. 
+This lends itself to an alternating coordinate descent algorithm in which we alternate between fitting curves and assigning labels at each iteration (algorithm \ref{alg:kcurves}). 
+We call this algorithm $K$-curves clustering. 
+In this algorithm, the loss function that we wish to minimize is
+\begin{equation}
+\label{eq:kcurves-loss}
+L(z_1, ..., z_n, g_1, ..., g_n; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
+\end{equation}
+
+\begin{algorithm}[h]
+\label{alg:kcurves}
+\DontPrintSemicolon
+\SetAlgoLined
+\setstretch{1.5}
+\KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $p$, $q$, stopping criterion $\epsilon$}
+\KwResult{Community assignments $1, ..., K$, curves $g_1, ..., g_K$}
+Compute $X$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
+Initialize community labels $z_1, ..., z_n$.\;
+\Repeat {the change in $\sum_k \sum_{i \in C_k} \|x_i - g_k(t_i)\|^2$ is less than $\epsilon$} {
+\For {$k = 1, ..., K$} {
+Define $X_k$ as the rows of $X$ for which $z_i = k$.\;
+Fit curve $g_k$ and positions $t_{k_i}$ to $X_k$ by minimizing $\sum_{k_i} \|x_{k_i} - g_k(t_{k_i})\|^2$.\;
+}
+\For {$k = 1, ..., K$} {
+Assign $z_i \leftarrow \arg\min_\ell \|x_i - g_\ell(t_i)\|^2$.\;
+}
+}
+\caption{$K$-curves clustering.}
+\end{algorithm}
+
+Similar to $K$-means clustering or the EM algorithm, $K$-curves clustering is sensitive to initialization. 
+One plausible initialization setting is the semi-supervised case, in which a few vertices from each community are labeled. 
+Such a setting allows for theoretical guarantees (theorem \ref{thm:kcurves-semisupervised}) and appears to work well in numerical examples. 
+
+$K$-curves clustering either requires knowledge of the functional form of each $g_k$ or a function that is flexible enough to approximate it. 
+The choice of $g_k$ affects the difficulty of the algorithm. 
+As a balance between flexibility and ease of estimation, we consider the case where each $g_k$ is a Bezier polynomial of degree $R$ with coefficients $p_k$. 
+Then we have $g_k(t) = g(t; p_k) = \sum_{r=0}^R p_k^{(r)} \binom{R}{r} (1-t)^{R-r} t^r$. 
+However, as we see in figure \ref{fig:sim-nonintersect}, an incorrect yet sufficiently flexible parametric curve can provide good results. 
+
+\begin{example}
+\label{ex:sim-nonintersect}
+
+Consider the setting of example \ref{ex:separated-curves-2} but for various $n$, in this case, $n = 16, 32, 64, 128, 256, 512, 1024$. 
+For each $n$, we sampled 50 RDPGs with this latent configuration, and for each graph, we applied algorithm \ref{alg:ase-singlelink} as well as algorithm \ref{alg:kcurves} both with random initialization and with four known labels per community. 
+Figure \ref{sim-nonintersect} shows that for sufficiently large graphs, single linkage clustering on the ASE is able to consistently produce perfect clustering, but $K$-curves clustering performs better for very small graphs. 
+
+```{r sim-nonintersect, fig.height = 3, fig.width = 8, fig.cap = 'Median and IQR error rates over 50 replicates in the simulation setting for $K = 2$ curves.', cache = TRUE}
+n.vec <- 2 ^ c(4, 5, 6, 7, 8, 9, 10)
+
+clustering.df <- readr::read_csv('~/dev/manifold-block-models/simulations/nonintersect/nonintersect.csv')
+
+clust.summary.df <- clustering.df %>% 
+  dplyr::filter(n %in% n.vec) %>% 
+  dplyr::filter(nsamp != '8') %>% 
+  dplyr::group_by(n, nsamp) %>% 
+  dplyr::summarise(
+    med.rate = median(error),
+    first.q.rate = quantile(error, .25),
+    third.q.rate = quantile(error, .75)
+  ) %>% 
+  dplyr::ungroup()
+
+ggplot(clust.summary.df) + 
+  theme_bw() + 
+  theme(text = element_text(size = 10)) + 
+  scale_y_log10() +
+  scale_x_log10(breaks = n.vec) +
+  labs(y = 'community detection error rate',
+       x = 'n',
+       colour = 'known labels\nper community', 
+       shape = NULL) + 
+  geom_line(aes(x = n, y = med.rate, colour = factor(nsamp))) + 
+  geom_point(aes(x = n, y = med.rate, colour = factor(nsamp))) + 
+  geom_errorbar(aes(x = n, 
+                    ymin = first.q.rate, ymax = third.q.rate, 
+                    colour = factor(nsamp)),
+                width = .125) + 
+  scale_colour_brewer(palette = 'Set1')
+```
+\end{example}
+
+Algorithm \ref{alg:ase-singlelink} also relies on the fact that the distances between manifolds is nonzero, i.e., they do not intersect. 
+However, many graphs do not behave so nicely. 
+For example, the DCBM and PABM can both be viewed as MBMs in which the latent vectors come from (linear) manifolds that intersect at the origin (see section \@ref(sec:sbm-dcbm-grdpg)). 
+Nonlinear intersecting manifolds have also been observed in ASEs of real graphs \citep{SannaPassino2022, https://doi.org/10.48550/arxiv.1709.05454}. 
+Example \ref{ex:macaque} also suggests that the MBM with intersecting curves is an appropriate approach to modeling the graph. 
+While the DCBM and PABM cases can be handled by algorithms specific to linear structures such as SSC and OSC, nonlinear intersecting manifolds require a more flexible approach. 
 
 \begin{example}
 \label{ex:intersect-curves}
@@ -2294,42 +2381,6 @@ ase <- ggplot() +
 gridExtra::grid.arrange(latent.vecs, rdpg, ase, nrow = 1)
 ```
 \end{example}
-
-In this setting, if we know the labels $z_1, ..., z_n$, then for each $k$^th^ subsample for which $z_i = k$, we can fit the curve $\hat{g}_k$ (up to an indefinite orthogonal transformation). 
-On the other hand, if we know the curves $g_1, ..., g_K$, then we can assign each embedding vector $\hat{x}_i$ the predicted label $\hat{z}_i$ based on which curve it is closest to. 
-This lends itself to an alternating coordinate descent algorithm in which we alternate between fitting curves and assigning labels at each iteration (algorithm \ref{alg:kcurves}). 
-We call this algorithm $K$-curves clustering. 
-In this algorithm, the loss function that we wish to minimize is
-\begin{equation}
-\label{eq:kcurves-loss}
-L(z_1, ..., z_n, g_1, ..., g_n; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
-\end{equation}
-
-\begin{algorithm}[h]
-\label{alg:kcurves}
-\DontPrintSemicolon
-\SetAlgoLined
-\setstretch{1.5}
-\KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $p$, $q$, stopping criterion $\epsilon$}
-\KwResult{Community assignments $1, ..., K$, curves $g_1, ..., g_K$}
-Compute $X$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
-Initialize community labels $z_1, ..., z_n$.\;
-\Repeat {the change in $\sum_k \sum_{i \in C_k} \|x_i - g_k(t_i)\|^2$ is less than $\epsilon$} {
-\For {$k = 1, ..., K$} {
-Define $X_k$ as the rows of $X$ for which $z_i = k$.\;
-Fit curve $g_k$ and positions $t_{k_i}$ to $X_k$ by minimizing $\sum_{k_i} \|x_{k_i} - g_k(t_{k_i})\|^2$.\;
-}
-\For {$k = 1, ..., K$} {
-Assign $z_i \leftarrow \arg\min_\ell \|x_i - g_\ell(t_i)\|^2$.\;
-}
-}
-\caption{$K$-curves clustering.}
-\end{algorithm}
-
-$K$-curves clustering either requires knowledge of the functional form of each $g_k$ or a function that is flexible enough to approximate it. 
-The choice of $g_k$ affects the difficulty of the algorithm. 
-As a balance between flexibility and ease of estimation, we consider the case where each $g_k$ is a Bezier polynomial of degree $R$ with coefficients $p_k$. 
-Then we have $g_k(t) = g(t; p_k) = \sum_{r=0}^R p_k^{(r)} \binom{R}{r} (1-t)^{R-r} t^r$. 
 
 \begin{example}
 \label{ex:intersect-curves-fit}
@@ -2864,9 +2915,9 @@ gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 
 \newpage
 
-# Comparisons of Models and Conclusions {#sec:comparison}
+# Discussion {#sec:comparison}
 
-```{r block-models, cache = TRUE, fig.width = 6, fig.height = 8, out.width = '50%', fig.cap = 'Graph visualizations (left) and ASEs (right) of the three main block models. Note the structures that the embedding vectors form for each model.'}
+```{r block-models, cache = TRUE, fig.width = 6, fig.height = 8, out.width = '50%', fig.cap = 'Graph visualizations (left) and ASEs (right) of the three main block models. The dots are the original Note the structures that the embedding vectors form for each model.'}
 set.seed(12345)
 
 n <- 64
@@ -2996,11 +3047,29 @@ Furthermore, by looking at how the embedding vectors are organized, the embeddin
 This is in contrast to direct likelihood maximization (e.g., via expectation maximization), which can be more of a black box in determining the appropriate model, number of communities, graph structure, etc., and results in slower, less interpretable algorithms. 
 In conclusion, the graph embedding approach, which relies on making the connection between the block models and the GRDPG, is a powerful tool in both exploratory data analysis and statistical inference on graphs with community structure. 
 
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-graph-1} 
+
+}
+
+\caption{Macaque visuotactile brain areas and connections network. The vertices represent brain areas.}\label{fig:macaque-graph-conclusion}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-ase-1} 
+
+}
+
+\caption{ASE on the Macaque brain areas network. The embedding suggests a community-wise manifold structure.}\label{fig:macaque-ase}
+\end{figure}
+
 Moving beyond the linear-structure block models (SBM, DCBM, PABM), we showed that the GRDPG and ASE approach can recover nonlinear structures in the latent space. 
 This type of nonlinearity has been observed in various real networks, in particular brain connectivity networks. 
 While analyzing these graphs as GRDPGs reveals the (nonlinear) community structure, the linear block models are insufficient in modeling these graphs or performing statistical inference. 
 For this setting, we proposed the Manifold Block Model, which is a type of GRDPG in which the communities lie on nonlinear manifolds in the latent space. 
-
+We then proposed two algorithms, one in which the manifolds are disjoint and another in which the manifolds intersect
 
 \newpage
 

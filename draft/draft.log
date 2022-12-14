@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.7.15)  7 DEC 2022 09:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.7.15)  14 DEC 2022 09:43
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -593,7 +593,11 @@ File: l3backend-pdftex.def 2022-01-12 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count318
 \l__pdf_internal_box=\box72
 )
-(./draft.aux)
+(./draft.aux
+
+LaTeX Warning: Label `fig:macaque-ase' multiply defined.
+
+)
 \openout1 = `draft.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 113.
@@ -766,7 +770,7 @@ LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 3
  (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<draft_files/figure-latex/friendship-network-1.pdf, id=153, 333.245pt x 202.757
+<draft_files/figure-latex/friendship-network-1.pdf, id=151, 333.245pt x 202.757
 5pt>
 File: draft_files/figure-latex/friendship-network-1.pdf Graphic file (type pdf)
 
@@ -777,35 +781,35 @@ d on input line 314.
 
 [6 <./draft_files/figure-latex/friendship-network-1.pdf>] [7] [8] [9] [10]
 [11] [12] [13]
-<draft_files/figure-latex/assort-sbm-1.pdf, id=259, 202.7575pt x 136.51pt>
+<draft_files/figure-latex/assort-sbm-1.pdf, id=257, 202.7575pt x 136.51pt>
 File: draft_files/figure-latex/assort-sbm-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/assort-sbm-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/assort-sbm-1.pdf  used on inp
 ut line 486.
 (pdftex.def)             Requested size: 202.76318pt x 136.51382pt.
  [14 <./draft_files/figure-latex/assort-sbm-1.pdf>]
-<draft_files/figure-latex/dating-sbm-1.pdf, id=283, 281.05pt x 136.51pt>
+<draft_files/figure-latex/dating-sbm-1.pdf, id=281, 281.05pt x 136.51pt>
 File: draft_files/figure-latex/dating-sbm-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/dating-sbm-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/dating-sbm-1.pdf  used on inp
 ut line 513.
 (pdftex.def)             Requested size: 281.06645pt x 136.51799pt.
  [15 <./draft_files/figure-latex/dating-sbm-1.pdf>] [16] [17] [18] [19]
-<draft_files/figure-latex/dating-dcbm-1.pdf, id=369, 281.05pt x 136.51pt>
+<draft_files/figure-latex/dating-dcbm-1.pdf, id=367, 281.05pt x 136.51pt>
 File: draft_files/figure-latex/dating-dcbm-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/dating-dcbm-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/dating-dcbm-1.pdf  used on in
 put line 655.
 (pdftex.def)             Requested size: 281.06645pt x 136.51799pt.
  [20 <./draft_files/figure-latex/dating-dcbm-1.pdf>] [21]
-<draft_files/figure-latex/dating-pabm-1.pdf, id=400, 281.05pt x 136.51pt>
+<draft_files/figure-latex/dating-pabm-1.pdf, id=398, 281.05pt x 136.51pt>
 File: draft_files/figure-latex/dating-pabm-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/dating-pabm-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/dating-pabm-1.pdf  used on in
 put line 691.
 (pdftex.def)             Requested size: 281.06645pt x 136.51799pt.
  [22 <./draft_files/figure-latex/dating-pabm-1.pdf>] [23] [24]
-<draft_files/figure-latex/uk-faculty-dcbm-omega-1.pdf, id=481, 568.1225pt x 134
+<draft_files/figure-latex/uk-faculty-dcbm-omega-1.pdf, id=479, 568.1225pt x 134
 .5025pt>
 File: draft_files/figure-latex/uk-faculty-dcbm-omega-1.pdf Graphic file (type p
 df)
@@ -819,7 +823,7 @@ Overfull \hbox (12.64648pt too wide) in paragraph at lines 828--839
  []
 
 [28] [29]
-<draft_files/figure-latex/ase-example-1.pdf, id=547, 324.21124pt x 132.495pt>
+<draft_files/figure-latex/ase-example-1.pdf, id=545, 324.21124pt x 132.495pt>
 File: draft_files/figure-latex/ase-example-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/ase-example-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/ase-example-1.pdf  used on in
@@ -827,14 +831,14 @@ put line 920.
 (pdftex.def)             Requested size: 324.23022pt x 132.50273pt.
  [30 <./draft_files/figure-latex/ase-example-1.pdf>] [31] [32]
 [33]
-<draft_files/figure-latex/ukfaculty-ase-1.pdf, id=591, 351.3125pt x 204.765pt>
+<draft_files/figure-latex/ukfaculty-ase-1.pdf, id=589, 351.3125pt x 204.765pt>
 File: draft_files/figure-latex/ukfaculty-ase-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/ukfaculty-ase-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/ukfaculty-ase-1.pdf  used on 
 input line 1015.
 (pdftex.def)             Requested size: 351.33307pt x 204.77698pt.
  [34 <./draft_files/figure-latex/ukfaculty-ase-1.pdf>]
-<draft_files/figure-latex/dating-ase-1.pdf, id=614, 265.99374pt x 132.495pt>
+<draft_files/figure-latex/dating-ase-1.pdf, id=612, 265.99374pt x 132.495pt>
 File: draft_files/figure-latex/dating-ase-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/dating-ase-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/dating-ase-1.pdf  used on inp
@@ -850,7 +854,7 @@ LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 ) [53]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim-1.pdf
-, id=883, 614.295pt x 252.945pt>
+, id=881, 614.295pt x 252.945pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim-
 1.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim-1
@@ -864,7 +868,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1745--1747
  []
 
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p-1.pdf, id
-=886, 614.295pt x 252.945pt>
+=884, 614.295pt x 252.945pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p-1.pd
 f Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p-1.pdf
@@ -875,7 +879,7 @@ x/lambda_est_p-1.pdf  used on input line 1757.
 [54 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim-1
 .pdf>]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim_imba-
-1.pdf, id=908, 614.295pt x 252.945pt>
+1.pdf, id=906, 614.295pt x 252.945pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim_
 imba-1.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_ct_sim_i
@@ -891,7 +895,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1804--1807
 [55 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p-1.pdf
 >]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p_imba-1.pd
-f, id=923, 614.295pt x 252.945pt>
+f, id=921, 614.295pt x 252.945pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p_imba
 -1.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_p_imba-
@@ -908,7 +912,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1811--1817
 mba-1.pdf> </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_
 p_imba-1.pdf>]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_k_disassorta
-tive.pdf, id=956, 614.295pt x 252.945pt>
+tive.pdf, id=954, 614.295pt x 252.945pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_k_disas
 sortative.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/clust_err_k_disass
@@ -923,7 +927,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1854--1859
 
 [57]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_disassortat
-ive.pdf, id=964, 614.295pt x 252.945pt>
+ive.pdf, id=962, 614.295pt x 252.945pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_disass
 ortative.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_est_disasso
@@ -940,7 +944,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1864--1872
 ortative.pdf> </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/lambda_e
 st_disassortative.pdf>]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/butterfly-1.pdf, id=99
-8, 144.54pt x 144.54pt>
+6, 144.54pt x 144.54pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/butterfly-1.pdf G
 raphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/butterfly-1.pdf>
@@ -948,7 +952,7 @@ Package pdftex.def Info: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-late
 x/butterfly-1.pdf  used on input line 1900.
 (pdftex.def)             Requested size: 144.54623pt x 144.54623pt.
  [59]
-</home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf, id=1021, 578
+</home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf, id=1019, 578
 .16pt x 144.54pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf Graphic 
 file (type pdf)
@@ -969,7 +973,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1919--1921
 [60 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/butterfly-1.pdf> <
 /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf>]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1.pdf,
- id=1043, 578.16pt x 144.54pt>
+ id=1041, 578.16pt x 144.54pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1
 .pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1.
@@ -989,14 +993,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 1954--1956
 
 [61 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1.
 pdf>] [62]
-<draft_files/figure-latex/macaque-graph-1.pdf, id=1067, 202.7575pt x 136.51pt>
+<draft_files/figure-latex/macaque-graph-1.pdf, id=1065, 202.7575pt x 136.51pt>
 File: draft_files/figure-latex/macaque-graph-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/macaque-graph-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/macaque-graph-1.pdf  used on 
 input line 2003.
 (pdftex.def)             Requested size: 202.76318pt x 136.51382pt.
  [63]
-<draft_files/figure-latex/macaque-ase-1.pdf, id=1078, 154.5775pt x 133.49875pt>
+<draft_files/figure-latex/macaque-ase-1.pdf, id=1076, 154.5775pt x 133.49875pt>
 
 File: draft_files/figure-latex/macaque-ase-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/macaque-ase-1.pdf>
@@ -1005,193 +1009,218 @@ put line 2012.
 (pdftex.def)             Requested size: 154.59125pt x 133.5106pt.
  [64 <./draft_files/figure-latex/macaque-graph-1.pdf> <./draft_files/figure-lat
 ex/macaque-ase-1.pdf>] [65]
-<draft_files/figure-latex/two-curves-1.pdf, id=1112, 465.74pt x 118.4425pt>
+<draft_files/figure-latex/two-curves-1.pdf, id=1111, 465.74pt x 118.4425pt>
 File: draft_files/figure-latex/two-curves-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/two-curves-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/two-curves-1.pdf  used on inp
-ut line 2072.
+ut line 2073.
 (pdftex.def)             Requested size: 465.75307pt x 118.4458pt.
  [66 <./draft_files/figure-latex/two-curves-1.pdf>] [67] [68]
-<draft_files/figure-latex/two-curves-2-1.pdf, id=1182, 410.53375pt x 85.31876pt
+<draft_files/figure-latex/two-curves-2-1.pdf, id=1179, 410.53375pt x 85.31876pt
 >
 File: draft_files/figure-latex/two-curves-2-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/two-curves-2-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/two-curves-2-1.pdf  used on i
-nput line 2145.
+nput line 2146.
 (pdftex.def)             Requested size: 410.53275pt x 85.31853pt.
- [69] [70 <./draft_files/figure-latex/two-curves-2-1.pdf>]
-<draft_files/figure-latex/intersect-curves-example-1.pdf, id=1214, 508.90125pt 
+ [69] [70 <./draft_files/figure-latex/two-curves-2-1.pdf>] [71]
+
+LaTeX Warning: Reference `sim-nonintersect' on page 72 undefined on input line 
+2220.
+
+<draft_files/figure-latex/sim-nonintersect-1.pdf, id=1229, 562.1pt x 204.765pt>
+
+File: draft_files/figure-latex/sim-nonintersect-1.pdf Graphic file (type pdf)
+<use draft_files/figure-latex/sim-nonintersect-1.pdf>
+Package pdftex.def Info: draft_files/figure-latex/sim-nonintersect-1.pdf  used 
+on input line 2224.
+(pdftex.def)             Requested size: 469.75067pt x 171.12343pt.
+[72 <./draft_files/figure-latex/sim-nonintersect-1.pdf>]
+<draft_files/figure-latex/intersect-curves-example-1.pdf, id=1252, 508.90125pt 
 x 136.51pt>
 File: draft_files/figure-latex/intersect-curves-example-1.pdf Graphic file (typ
 e pdf)
 <use draft_files/figure-latex/intersect-curves-example-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/intersect-curves-example-1.pd
-f  used on input line 2190.
+f  used on input line 2251.
 (pdftex.def)             Requested size: 469.77116pt x 126.01355pt.
- [71 <./draft_files/figure-latex/intersect-curves-example-1.pdf>]
-<draft_files/figure-latex/intersect-curves-2-1.pdf, id=1237, 99.37125pt x 132.4
+<draft_files/figure-latex/intersect-curves-2-1.pdf, id=1256, 99.37125pt x 132.4
 95pt>
 File: draft_files/figure-latex/intersect-curves-2-1.pdf Graphic file (type pdf)
 
 <use draft_files/figure-latex/intersect-curves-2-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/intersect-curves-2-1.pdf  use
-d on input line 2242.
+d on input line 2267.
 (pdftex.def)             Requested size: 99.37402pt x 132.49869pt.
- [72]
+ [73 <./draft_files/figure-latex/intersect-curves-example-1.pdf>]
 </home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed
--chunk-7-1.pdf, id=1265, 416.55624pt x 351.3125pt>
+-chunk-7-1.pdf, id=1284, 416.55624pt x 351.3125pt>
 File: /home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/un
 named-chunk-7-1.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unn
 amed-chunk-7-1.pdf>
 Package pdftex.def Info: /home/johnkoo/dev/manifold-block-models/draft/draft_fi
-les/figure-latex/unnamed-chunk-7-1.pdf  used on input line 2257.
+les/figure-latex/unnamed-chunk-7-1.pdf  used on input line 2282.
 (pdftex.def)             Requested size: 416.57428pt x 351.3277pt.
-
-[73 <./draft_files/figure-latex/intersect-curves-2-1.pdf>]
+ [74 <./draft_files/figure-latex/intersect-curves-2-1.pdf>]
 </home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed
--chunk-6-1.pdf, id=1279, 417.56pt x 137.51375pt>
+-chunk-6-1.pdf, id=1299, 417.56pt x 137.51375pt>
 File: /home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/un
 named-chunk-6-1.pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unn
 amed-chunk-6-1.pdf>
 Package pdftex.def Info: /home/johnkoo/dev/manifold-block-models/draft/draft_fi
-les/figure-latex/unnamed-chunk-6-1.pdf  used on input line 2266.
+les/figure-latex/unnamed-chunk-6-1.pdf  used on input line 2291.
 (pdftex.def)             Requested size: 417.58444pt x 137.5218pt.
- [74 </home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/un
-named-chunk-7-1.pdf>] [75 </home/johnkoo/dev/manifold-block-models/draft/draft_
+ [75 </home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/un
+named-chunk-7-1.pdf>] [76 </home/johnkoo/dev/manifold-block-models/draft/draft_
 files/figure-latex/unnamed-chunk-6-1.pdf>]
-<draft_files/figure-latex/sim-curves-1.pdf, id=1314, 562.1pt x 204.765pt>
+<draft_files/figure-latex/sim-curves-1.pdf, id=1332, 562.1pt x 204.765pt>
 File: draft_files/figure-latex/sim-curves-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/sim-curves-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/sim-curves-1.pdf  used on inp
-ut line 2313.
+ut line 2338.
 (pdftex.def)             Requested size: 469.75067pt x 171.12343pt.
-<draft_files/figure-latex/repeat-losses-1.pdf, id=1317, 568.1225pt x 205.76875p
+<draft_files/figure-latex/repeat-losses-1.pdf, id=1335, 568.1225pt x 205.76875p
 t>
 File: draft_files/figure-latex/repeat-losses-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/repeat-losses-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/repeat-losses-1.pdf  used on 
-input line 2327.
+input line 2352.
 (pdftex.def)             Requested size: 469.7731pt x 170.14749pt.
- [76 <./draft_files/figure-latex/sim-curves-1.pdf>]
-<draft_files/figure-latex/repeat-curves-1.pdf, id=1332, 427.5975pt x 168.63pt>
+ [77 <./draft_files/figure-latex/sim-curves-1.pdf>]
+<draft_files/figure-latex/repeat-curves-1.pdf, id=1350, 427.5975pt x 168.63pt>
 File: draft_files/figure-latex/repeat-curves-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/repeat-curves-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/repeat-curves-1.pdf  used on 
-input line 2336.
+input line 2361.
 (pdftex.def)             Requested size: 427.59645pt x 168.62958pt.
-
-[77 <./draft_files/figure-latex/repeat-losses-1.pdf> <./draft_files/figure-late
-x/repeat-curves-1.pdf>]
-<draft_files/figure-latex/three-curves-1.pdf, id=1363, 401.5pt x 121.45375pt>
+ [78 <./draft_files/figure-latex/repeat-losses-1.pdf> <./draft_files/figure-lat
+ex/repeat-curves-1.pdf>]
+<draft_files/figure-latex/three-curves-1.pdf, id=1381, 401.5pt x 121.45375pt>
 File: draft_files/figure-latex/three-curves-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/three-curves-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/three-curves-1.pdf  used on i
-nput line 2374.
+nput line 2399.
 (pdftex.def)             Requested size: 401.49901pt x 121.45343pt.
-<draft_files/figure-latex/sim-curves-3-1.pdf, id=1365, 562.1pt x 204.765pt>
+<draft_files/figure-latex/sim-curves-3-1.pdf, id=1383, 562.1pt x 204.765pt>
 File: draft_files/figure-latex/sim-curves-3-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/sim-curves-3-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/sim-curves-3-1.pdf  used on i
-nput line 2389.
+nput line 2414.
 (pdftex.def)             Requested size: 469.75067pt x 171.12343pt.
- [78 <./draft_files/figure-latex/three-curves-1.pdf>]
-<draft_files/figure-latex/macaque-fitted-1.pdf, id=1384, 117.43875pt x 133.4987
+ [79 <./draft_files/figure-latex/three-curves-1.pdf>]
+<draft_files/figure-latex/macaque-fitted-1.pdf, id=1403, 117.43875pt x 133.4987
 5pt>
 File: draft_files/figure-latex/macaque-fitted-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/macaque-fitted-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/macaque-fitted-1.pdf  used on
- input line 2406.
+ input line 2431.
 (pdftex.def)             Requested size: 117.43845pt x 133.4984pt.
-
-[79 <./draft_files/figure-latex/sim-curves-3-1.pdf> <./draft_files/figure-latex
-/macaque-fitted-1.pdf>]
-<draft_files/figure-latex/hp-1.pdf, id=1417, 236.885pt x 124.465pt>
+ [80 <./draft_files/figure-latex/sim-curves-3-1.pdf> <./draft_files/figure-late
+x/macaque-fitted-1.pdf>]
+<draft_files/figure-latex/hp-1.pdf, id=1436, 236.885pt x 124.465pt>
 File: draft_files/figure-latex/hp-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/hp-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/hp-1.pdf  used on input line 
-2426.
+2451.
 (pdftex.def)             Requested size: 236.88802pt x 124.46658pt.
-<draft_files/figure-latex/hp-ase-1.pdf, id=1418, 712.6625pt x 206.7725pt>
+<draft_files/figure-latex/hp-ase-1.pdf, id=1437, 712.6625pt x 206.7725pt>
 File: draft_files/figure-latex/hp-ase-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/hp-ase-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/hp-ase-1.pdf  used on input l
-ine 2435.
+ine 2460.
 (pdftex.def)             Requested size: 469.74974pt x 136.29358pt.
- [80 <./draft_files/figure-latex/hp-1.pdf>]
-<draft_files/figure-latex/hp-kcurves-1.pdf, id=1436, 672.5125pt x 206.7725pt>
+ [81 <./draft_files/figure-latex/hp-1.pdf>]
+<draft_files/figure-latex/hp-kcurves-1.pdf, id=1454, 672.5125pt x 206.7725pt>
 File: draft_files/figure-latex/hp-kcurves-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/hp-kcurves-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/hp-kcurves-1.pdf  used on inp
-ut line 2444.
+ut line 2469.
 (pdftex.def)             Requested size: 469.76015pt x 144.43372pt.
- [81 <./draft_files/figure-latex/hp-ase-1.pdf> <./draft_files/figure-latex/hp-k
+ [82 <./draft_files/figure-latex/hp-ase-1.pdf> <./draft_files/figure-latex/hp-k
 curves-1.pdf>]
-<draft_files/figure-latex/mbconnectome-graph-1.pdf, id=1469, 351.3125pt x 136.5
+<draft_files/figure-latex/mbconnectome-graph-1.pdf, id=1487, 351.3125pt x 136.5
 1pt>
 File: draft_files/figure-latex/mbconnectome-graph-1.pdf Graphic file (type pdf)
 
 <use draft_files/figure-latex/mbconnectome-graph-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/mbconnectome-graph-1.pdf  use
-d on input line 2463.
+d on input line 2488.
 (pdftex.def)             Requested size: 351.33307pt x 136.51799pt.
-<draft_files/figure-latex/mbconnectome-ase-1.pdf, id=1470, 483.8075pt x 132.495
+<draft_files/figure-latex/mbconnectome-ase-1.pdf, id=1488, 483.8075pt x 132.495
 pt>
 File: draft_files/figure-latex/mbconnectome-ase-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/mbconnectome-ase-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/mbconnectome-ase-1.pdf  used 
-on input line 2472.
+on input line 2497.
 (pdftex.def)             Requested size: 469.77257pt x 128.65138pt.
-<draft_files/figure-latex/mbconnectome-kcurves-1.pdf, id=1471, 483.8075pt x 132
+<draft_files/figure-latex/mbconnectome-kcurves-1.pdf, id=1489, 483.8075pt x 132
 .495pt>
 File: draft_files/figure-latex/mbconnectome-kcurves-1.pdf Graphic file (type pd
 f)
 <use draft_files/figure-latex/mbconnectome-kcurves-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/mbconnectome-kcurves-1.pdf  u
-sed on input line 2481.
+sed on input line 2506.
 (pdftex.def)             Requested size: 469.77257pt x 128.65138pt.
- [82 <./draft_files/figure-latex/mbconnectome-graph-1.pdf> <./draft_files/figur
-e-latex/mbconnectome-ase-1.pdf>] [83 <./draft_files/figure-latex/mbconnectome-k
+ [83 <./draft_files/figure-latex/mbconnectome-graph-1.pdf> <./draft_files/figur
+e-latex/mbconnectome-ase-1.pdf>] [84 <./draft_files/figure-latex/mbconnectome-k
 curves-1.pdf>]
-<draft_files/figure-latex/block-models-1.pdf, id=1504, 431.6125pt x 568.1225pt>
+<draft_files/figure-latex/block-models-1.pdf, id=1523, 431.6125pt x 568.1225pt>
 
 File: draft_files/figure-latex/block-models-1.pdf Graphic file (type pdf)
 <use draft_files/figure-latex/block-models-1.pdf>
 Package pdftex.def Info: draft_files/figure-latex/block-models-1.pdf  used on i
-nput line 2495.
+nput line 2520.
 (pdftex.def)             Requested size: 234.87839pt x 309.1655pt.
- [84 <./draft_files/figure-latex/block-models-1.pdf>] [85]
-[86] [87] [88] [89] [90] [91] [92] [93] [94] [95] [96] [97] [98] (./draft.bbl
-[99] [100] [101] [102] [103]) [104] (./draft.aux) ) 
+ [85 <./draft_files/figure-latex/block-models-1.pdf>]
+File: draft_files/figure-latex/macaque-graph-1.pdf Graphic file (type pdf)
+<use draft_files/figure-latex/macaque-graph-1.pdf>
+Package pdftex.def Info: draft_files/figure-latex/macaque-graph-1.pdf  used on 
+input line 2540.
+(pdftex.def)             Requested size: 202.76318pt x 136.51382pt.
+File: draft_files/figure-latex/macaque-ase-1.pdf Graphic file (type pdf)
+<use draft_files/figure-latex/macaque-ase-1.pdf>
+Package pdftex.def Info: draft_files/figure-latex/macaque-ase-1.pdf  used on in
+put line 2549.
+(pdftex.def)             Requested size: 154.59125pt x 133.5106pt.
+ [86] [87] [88] [89] [90] [91] [92] [93] [94] [95]
+[96] [97] [98] [99] [100] (./draft.bbl [101] [102] [103] [104] [105]) [106]
+(./draft.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
 Here is how much of TeX's memory you used:
- 17746 strings out of 478287
- 297802 string characters out of 5849289
- 651819 words of memory out of 5000000
- 34940 multiletter control sequences out of 15000+600000
+ 17761 strings out of 478287
+ 298356 string characters out of 5849289
+ 651940 words of memory out of 5000000
+ 34950 multiletter control sequences out of 15000+600000
  536349 words of font info for 167 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  74i,21n,77p,1416b,681s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/
-dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/
-texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-
-mathit.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fon
-ts/enc/dvips/lm/lm-mathex.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx12.pf
-b></usr/share/texmf/fonts/type1/public/lm/lmbx8.pfb></usr/share/texmf/fonts/typ
-e1/public/lm/lmcsc10.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></u
-sr/share/texmf/fonts/type1/public/lm/lmmi12.pfb></usr/share/texmf/fonts/type1/p
-ublic/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi8.pfb></usr/shar
-e/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm
-/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/f
-onts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri12.pf
-b></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr
-/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on draft.pdf (109 pages, 26482758 bytes).
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/d
+vips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/shar
+e/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/enc/dvips/lm/l
+m-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}</usr/share/texmf/f
+onts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx8.p
+fb></usr/share/texmf/fonts/type1/public/lm/lmcsc10.pfb></usr/share/texmf/fonts/
+type1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi12.pfb><
+/usr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/
+public/lm/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/l
+m/lmr6.pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/f
+onts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.
+pfb></usr/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/t
+ype1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on draft.pdf (111 pages, 26492929 bytes).
 PDF statistics:
- 1982 PDF objects out of 2073 (max. 8388607)
- 1695 compressed objects within 17 object streams
- 472 named destinations out of 1000 (max. 500000)
- 37300 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 2004 PDF objects out of 2073 (max. 8388607)
+ 1711 compressed objects within 18 object streams
+ 476 named destinations out of 1000 (max. 500000)
+ 37297 words of extra memory for PDF output out of 42996 (max. 10000000)
 

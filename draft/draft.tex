@@ -2018,7 +2018,8 @@ While the ASE suggests a community-wise structure in the latent space, the SBM, 
 \label{macaque}
 \end{example}
 
-One way to model the data in example \ref{ex:macaque} as a GRDPG is to suppose that the latent vectors lie on one of \(K\) manifolds, and the label of each latent vector's corresponding vertex is the label of its manifold.
+One way to model the data in example \ref{ex:macaque} as a GRDPG is to suppose that the latent vectors lie on one of \(K\) curves, and the label of each latent vector's corresponding vertex is the label of its curve.
+If we were to extend this to communities represented by higher dimensional structures, similar to the DCBM vs.~PABM, a suitable modeling approach is to suppose that the latent vectors lie on one of \(K\) manifolds, each of which represent one of the \(K\) labels.
 The goal of community detection in this setting is to partition the graph that results from this latent configuration such that each partition maps onto each manifold.
 Before diving into the multi-manifold case, we can first consider the single manifold case as a generalization of the \(\ER\) model (example \ref{ex:er-curve}).
 
@@ -2079,7 +2080,7 @@ More specifically, similar to the latent vectors, the embedding vectors lie appr
 
 In the case of the SBM, a GRDPG-motivated community detection algorithm is to construct the ASE of the graph and then apply a point cloud based clustering algorithm such as \(K\)-means or GMM on the embedding.
 We saw that in the case of the DCBM and PABM, because the latent structures are not based on point masses, while the ASE does reveal the communities, the final clustering step requires other clustering algorithms that are tailored to the latent community structure.
-Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds (section \ref{sec:nonintersect}) and one in the general case in which the latent manifolds can intersect (section \ref{sec:intersect}).
+Likewise, in the following sections, we develop algorithms specific to the structure of the MBM, one in the case of disjoint manifolds and one in the general case in which the latent manifolds can intersect.
 We also derive theoretical consistency properties for both settings.
 
 \hypertarget{previous-work-1}{%
@@ -2099,7 +2100,7 @@ Unlike standard manifold clustering techniques such as ratio cut, it has been ob
 Most of these methods also assume that the vectors lie exactly on the manifolds (i.e., the observed vector is \(x_i \in \mathcal{M}_k\)) instead of approximately on them (i.e., the observed vector is \(x_i = y_i + \epsilon_i\) where \(y_i \in \mathcal{M}_k\) and \(\| \epsilon_i \|\) is small in some sense), which is the setting in which the clustering is done on the ASE.
 
 \hypertarget{sec:nonintersect}{%
-\subsection{Algorithm for Nonintersecting Manifolds}\label{sec:nonintersect}}
+\subsection{Algorithms}\label{sec:nonintersect}}
 
 We begin with the case of GRDPGs in which communities are represented by nonintersecting manifolds.
 In this section, we consider the following setting: Suppose that each community \(C_k\) is represented by a closed manifold \(\mathcal{M}_k\) in the latent space of a RDPG or GRDPG.
@@ -2150,16 +2151,11 @@ Applying single-linkage clustering on the ASE results in recovering the original
 \end{figure}
 \end{example}
 
-\hypertarget{sec:intersect}{%
-\subsection{Algorithm for Intersecting Manifolds}\label{sec:intersect}}
-
-The consistency of the ASE provides asymptotic guarantees for perfect community label recovery for the nonintersecting MBM.
-This relies on the fact that single-linkage clustering and \(\eta\)-neighborhood clustering graphs result in disconnected components if clusters of points are far away from each other.
-However, many graphs do not behave so nicely.
-For example, the DCBM and PABM can both be viewed as MBMs in which the latent vectors come from (linear) manifolds that intersect at the origin (see section \ref{sec:sbm-dcbm-grdpg}).
-Nonlinear intersecting manifolds have also been observed in ASEs of real graphs \citep{SannaPassino2022, https://doi.org/10.48550/arxiv.1709.05454}.
-While the DCBM and PABM cases can be handled by algorithms specific to linear structures such as SSC and OSC, nonlinear intersecting manifolds require a more flexible approach.
-For the intersecting case, we restrict the MBM to the case in which each \(F_{z_i}\) is identical and univariate on the unit interval \([0, 1]\).
+Algorithm \ref{alg:ase-singlelink} depends on the fact that the minimum distances between manifolds are nonzero and that the ASE is consistent.
+Single linkage clustering assumes that the asymptotic result is true to some extent, i.e., the ASE error is small enough that the gap between embedding vectors from different manifolds is still nonzero.
+When the ASE error is insufficiently small, single linkage clustering on the ASE will not produce the correct result.
+An alternative algorithm that may work when this condition is not fulfilled is a parametric approach in which we model the manifolds directly.
+For ease of modeling, we restrict the MBM to the case in which each \(F_{z_i}\) is identical and univariate on the unit interval \([0, 1]\).
 The full mixture model is described as follows:
 
 \begin{enumerate}
@@ -2174,26 +2170,6 @@ The full mixture model is described as follows:
 \item
   Draw \(A \sim \GRDPG_{p,q}(X; \rho_n)\).
 \end{enumerate}
-
-\begin{example}
-\label{ex:intersect-curves}
-Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two curves defined by the parameterizations $g_1(t) = \Big[ t^2, 2 t (1-t) \Big]^\top$ and $g_2(t) = \Big[ 2 t (1-t), (1-t)^2 \Big]^\top$. 
-This can be described as a two-community MBM in which the manifolds are both one-dimensional. 
-For simplicity, we restrict $F_1 = F_2 = \Uniform(0, 1)$. 
-$g_1$ and $g_2$ intersect at two points, $t = 0$ and $t = 2/3$, which in the latent space correspond to $(0, 0)$ and $(4/9, 4/9)$. 
-Clearly, single-linkage or $\eta$-neighborhood clustering does not work for this setting, both in the original latent space and in the ASE. 
-The community structure is also not clear from the adjacency matrix. 
-However, there still is a clear pattern in the ASE that reveals the community structure (figure \ref{fig:intersect-curves-example}). 
-
-\begin{figure}[H]
-
-{\centering \includegraphics{draft_files/figure-latex/intersect-curves-example-1} 
-
-}
-
-\caption{Latent vectors on intersecting curves (left), along with an RDPG drawn from this configuration (center) and its ASE (right).}\label{fig:intersect-curves-example}
-\end{figure}
-\end{example}
 
 In this setting, if we know the labels \(z_1, ..., z_n\), then for each \(k\)\textsuperscript{th} subsample for which \(z_i = k\), we can fit the curve \(\hat{g}_k\) (up to an indefinite orthogonal transformation).
 On the other hand, if we know the curves \(g_1, ..., g_K\), then we can assign each embedding vector \(\hat{x}_i\) the predicted label \(\hat{z}_i\) based on which curve it is closest to.
@@ -2226,10 +2202,59 @@ Assign $z_i \leftarrow \arg\min_\ell \|x_i - g_\ell(t_i)\|^2$.\;
 \caption{$K$-curves clustering.}
 \end{algorithm}
 
+Similar to \(K\)-means clustering or the EM algorithm, \(K\)-curves clustering is sensitive to initialization.
+One plausible initialization setting is the semi-supervised case, in which a few vertices from each community are labeled.
+Such a setting allows for theoretical guarantees (theorem \ref{thm:kcurves-semisupervised}) and appears to work well in numerical examples.
+
 \(K\)-curves clustering either requires knowledge of the functional form of each \(g_k\) or a function that is flexible enough to approximate it.
 The choice of \(g_k\) affects the difficulty of the algorithm.
 As a balance between flexibility and ease of estimation, we consider the case where each \(g_k\) is a Bezier polynomial of degree \(R\) with coefficients \(p_k\).
 Then we have \(g_k(t) = g(t; p_k) = \sum_{r=0}^R p_k^{(r)} \binom{R}{r} (1-t)^{R-r} t^r\).
+However, as we see in figure \ref{fig:sim-nonintersect}, an incorrect yet sufficiently flexible parametric curve can provide good results.
+
+\begin{example}
+\label{ex:sim-nonintersect}
+
+Consider the setting of example \ref{ex:separated-curves-2} but for various $n$, in this case, $n = 16, 32, 64, 128, 256, 512, 1024$. 
+For each $n$, we sampled 50 RDPGs with this latent configuration, and for each graph, we applied algorithm \ref{alg:ase-singlelink} as well as algorithm \ref{alg:kcurves} both with random initialization and with four known labels per community. 
+Figure \ref{sim-nonintersect} shows that for sufficiently large graphs, single linkage clustering on the ASE is able to consistently produce perfect clustering, but $K$-curves clustering performs better for very small graphs. 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/sim-nonintersect-1} 
+
+}
+
+\caption{Median and IQR error rates over 50 replicates in the simulation setting for $K = 2$ curves.}\label{fig:sim-nonintersect}
+\end{figure}
+\end{example}
+
+Algorithm \ref{alg:ase-singlelink} also relies on the fact that the distances between manifolds is nonzero, i.e., they do not intersect.
+However, many graphs do not behave so nicely.
+For example, the DCBM and PABM can both be viewed as MBMs in which the latent vectors come from (linear) manifolds that intersect at the origin (see section \ref{sec:sbm-dcbm-grdpg}).
+Nonlinear intersecting manifolds have also been observed in ASEs of real graphs \citep{SannaPassino2022, https://doi.org/10.48550/arxiv.1709.05454}.
+Example \ref{ex:macaque} also suggests that the MBM with intersecting curves is an appropriate approach to modeling the graph.
+While the DCBM and PABM cases can be handled by algorithms specific to linear structures such as SSC and OSC, nonlinear intersecting manifolds require a more flexible approach.
+
+\begin{example}
+\label{ex:intersect-curves}
+Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two curves defined by the parameterizations $g_1(t) = \Big[ t^2, 2 t (1-t) \Big]^\top$ and $g_2(t) = \Big[ 2 t (1-t), (1-t)^2 \Big]^\top$. 
+This can be described as a two-community MBM in which the manifolds are both one-dimensional. 
+For simplicity, we restrict $F_1 = F_2 = \Uniform(0, 1)$. 
+$g_1$ and $g_2$ intersect at two points, $t = 0$ and $t = 2/3$, which in the latent space correspond to $(0, 0)$ and $(4/9, 4/9)$. 
+Clearly, single-linkage or $\eta$-neighborhood clustering does not work for this setting, both in the original latent space and in the ASE. 
+The community structure is also not clear from the adjacency matrix. 
+However, there still is a clear pattern in the ASE that reveals the community structure (figure \ref{fig:intersect-curves-example}). 
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/intersect-curves-example-1} 
+
+}
+
+\caption{Latent vectors on intersecting curves (left), along with an RDPG drawn from this configuration (center) and its ASE (right).}\label{fig:intersect-curves-example}
+\end{figure}
+\end{example}
 
 \begin{example}
 \label{ex:intersect-curves-fit}
@@ -2488,7 +2513,7 @@ Figure \ref{fig:mbconnectome-kcurves} shows the embedding and curves projected t
 \newpage
 
 \hypertarget{sec:comparison}{%
-\section{Comparisons of Models and Conclusions}\label{sec:comparison}}
+\section{Discussion}\label{sec:comparison}}
 
 \begin{figure}[H]
 
@@ -2496,7 +2521,7 @@ Figure \ref{fig:mbconnectome-kcurves} shows the embedding and curves projected t
 
 }
 
-\caption{Graph visualizations (left) and ASEs (right) of the three main block models. Note the structures that the embedding vectors form for each model.}\label{fig:block-models}
+\caption{Graph visualizations (left) and ASEs (right) of the three main block models. The dots are the original Note the structures that the embedding vectors form for each model.}\label{fig:block-models}
 \end{figure}
 
 In this work, we showed the connection between block models and generalized random dot product graphs.
@@ -2509,6 +2534,30 @@ For the PABM, an appropriate choice is sparse subspace clustering, and we also d
 Furthermore, by looking at how the embedding vectors are organized, the embedding makes visibly clear which of the three block models is the best fit for the graph, and in the case in which the number of communities or the assortativity or disassortativity of the model is unknown, there are existing heuristics for determining these based on the size of the eigenvalues.
 This is in contrast to direct likelihood maximization (e.g., via expectation maximization), which can be more of a black box in determining the appropriate model, number of communities, graph structure, etc., and results in slower, less interpretable algorithms.
 In conclusion, the graph embedding approach, which relies on making the connection between the block models and the GRDPG, is a powerful tool in both exploratory data analysis and statistical inference on graphs with community structure.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-graph-1} 
+
+}
+
+\caption{Macaque visuotactile brain areas and connections network. The vertices represent brain areas.}\label{fig:macaque-graph-conclusion}
+\end{figure}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{draft_files/figure-latex/macaque-ase-1} 
+
+}
+
+\caption{ASE on the Macaque brain areas network. The embedding suggests a community-wise manifold structure.}\label{fig:macaque-ase}
+\end{figure}
+
+Moving beyond the linear-structure block models (SBM, DCBM, PABM), we showed that the GRDPG and ASE approach can recover nonlinear structures in the latent space.
+This type of nonlinearity has been observed in various real networks, in particular brain connectivity networks.
+While analyzing these graphs as GRDPGs reveals the (nonlinear) community structure, the linear block models are insufficient in modeling these graphs or performing statistical inference.
+For this setting, we proposed the Manifold Block Model, which is a type of GRDPG in which the communities lie on nonlinear manifolds in the latent space.
+We then proposed two algorithms, one in which the manifolds are disjoint and another in which the manifolds intersect
 
 \newpage
 
