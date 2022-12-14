@@ -2242,7 +2242,7 @@ Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two
 This can be described as a two-community MBM in which the manifolds are both one-dimensional. 
 For simplicity, we restrict $F_1 = F_2 = \Uniform(0, 1)$. 
 $g_1$ and $g_2$ intersect at two points, $t = 0$ and $t = 2/3$, which in the latent space correspond to $(0, 0)$ and $(4/9, 4/9)$. 
-Clearly, single-linkage or $\eta$-neighborhood clustering does not work for this setting, both in the original latent space and in the ASE. 
+Clearly, single-linkage or $\eta$-neighborhood clustering does not work in this setting, both in the original latent space and in the ASE. 
 The community structure is also not clear from the adjacency matrix. 
 However, there still is a clear pattern in the ASE that reveals the community structure (figure \ref{fig:intersect-curves-example}). 
 
@@ -2254,13 +2254,10 @@ However, there still is a clear pattern in the ASE that reveals the community st
 
 \caption{Latent vectors on intersecting curves (left), along with an RDPG drawn from this configuration (center) and its ASE (right).}\label{fig:intersect-curves-example}
 \end{figure}
-\end{example}
 
-\begin{example}
-\label{ex:intersect-curves-fit}
 Figure \ref{fig:intersect-curves-2} shows one result of applying algorithm \ref{alg:kcurves} on example \ref{ex:intersect-curves}. 
 In this implementation, $g_1$ and $g_2$ are assumed to be Bezier curves in which $p_1^{(0)} = p_2^{(0)} = \Big[ 0, 0 \Big]^\top$, i.e., the curves meet at the origin. 
-Here, an accuracy of 87.5\% is achieved. 
+This clustering achieves 87.5\% accuracy. 
 
 \begin{figure}[H]
 
@@ -2272,30 +2269,28 @@ Here, an accuracy of 87.5\% is achieved.
 \end{figure}
 \end{example}
 
-While example \ref{ex:intersect-curves-fit} achieved high accuracy, algorithm \ref{alg:kcurves} often results in poor performance when it is paired with poor initialization.
-In example \ref{ex:intersect-curves-fit}, it just so happened that we randomly chose initial curves that iterated to good fits, but this is not guaranteed.
-We also restricted the curves to meet at the origin, which appears to have helped guide the curves to good fits.
-In figures \ref{fig:loss} and \ref{fig:init-strategies}, we show the results of various initializations on fitting curves to example \ref{ex:intersect-curves}, such as random initialization and spectral clustering.
+While the result of algorithm \ref{alg:kcurves} in example \ref{ex:intersect-curves} achieved high accuracy, this is not always guaranteed even for properly parameterized curves, especially when paired with poor initialization.
+Performance as a measure of clustering accuracy is also problematic when there are multiple plausible curve fits.
+Figures \ref{fig:multifit} and \ref{fig:loss} show the results of various curve fits and initialization strategies to example \ref{ex:intersect-curves}.
+While only one of them (quadratic fit with random initialization) results in high clustering accuracy, cubic fit with spectral clustering initialization achieves a lower loss value.
 
 \begin{figure}[H]
 
-{\centering \includegraphics{/home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed-chunk-7-1} 
+{\centering \includegraphics{draft_files/figure-latex/multifit-1} 
 
 }
 
-\caption{ASE labeled by estimated community labels for each initialization strategy. Upper right: random initialization assuming intersection at the origin. Upper middle: random initialization without assuming intersection at the origin. Upper right: initialization via spectral clustering assuming intersection at the origin. Lower left: initialization via spectral clustering without assuming intersection at the origin. Lower middle: initialization with ground truth labels, assuming intersection at the origin. Lower right: initialization with ground truth labels, without assuming intersection at the origin.}\label{fig:init-strategies}
+\caption{$K$-curve clustering fits on the ASE using various approaches. Left: quadratic fit with random initialization. Middle: quadratic fit initialized via spectral clustering. Right: cubic fit initialized via spectral clustering.}\label{fig:multifit}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
 
-{\centering \includegraphics{/home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed-chunk-6-1} 
+{\centering \includegraphics{draft_files/figure-latex/loss-1} 
 
 }
 
 \caption{Clustering loss vs. iteration for each run of $K$-curve clustering.}\label{fig:loss}
 \end{figure}
-
-Alternatively, if we turn this problem into a semi-supervised problem in which we know a few of the community labels, then the convergence of the ASE guarantees high accuracy.
 
 \begin{theorem}
 \label{thm:kcurves-semisupervised}
@@ -2310,7 +2305,7 @@ where $L$ is the loss function defined in equation (\ref{eq:kcurves-loss}).
 \subsection{Simulation Study}\label{simulation-study-1}}
 
 We performed two simulation experiments for algorithm \ref{alg:kcurves}.
-In the first simulation setup, we again turn to examples \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit}.
+In the first simulation setup, we again turn to example \ref{ex:intersect-curves}.
 The setup is as follows:
 
 \begin{enumerate}
@@ -2365,7 +2360,7 @@ Plotting each of the \(256 \times 2\) fitted curves confirms this conclusion (fi
 \caption{Fitted curves over 256 replicates. The curves are colored by the loss values.}\label{fig:repeat-curves}
 \end{figure}
 
-In the second simulation, we extended the first simulation setup based on examples \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit} into three dimensions and three curves.
+In the second simulation, we extended the first simulation setup based on example \ref{ex:intersect-curves} into three dimensions and three curves.
 The mixture model is as follows (also see figure \ref{fig:three-curves}):
 
 \begin{enumerate}

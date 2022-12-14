@@ -2314,7 +2314,7 @@ Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two
 This can be described as a two-community MBM in which the manifolds are both one-dimensional. 
 For simplicity, we restrict $F_1 = F_2 = \Uniform(0, 1)$. 
 $g_1$ and $g_2$ intersect at two points, $t = 0$ and $t = 2/3$, which in the latent space correspond to $(0, 0)$ and $(4/9, 4/9)$. 
-Clearly, single-linkage or $\eta$-neighborhood clustering does not work for this setting, both in the original latent space and in the ASE. 
+Clearly, single-linkage or $\eta$-neighborhood clustering does not work in this setting, both in the original latent space and in the ASE. 
 The community structure is also not clear from the adjacency matrix. 
 However, there still is a clear pattern in the ASE that reveals the community structure (figure \ref{fig:intersect-curves-example}). 
 
@@ -2380,13 +2380,10 @@ ase <- ggplot() +
 
 gridExtra::grid.arrange(latent.vecs, rdpg, ase, nrow = 1)
 ```
-\end{example}
 
-\begin{example}
-\label{ex:intersect-curves-fit}
 Figure \ref{fig:intersect-curves-2} shows one result of applying algorithm \ref{alg:kcurves} on example \ref{ex:intersect-curves}. 
 In this implementation, $g_1$ and $g_2$ are assumed to be Bezier curves in which $p_1^{(0)} = p_2^{(0)} = \Big[ 0, 0 \Big]^\top$, i.e., the curves meet at the origin. 
-Here, an accuracy of 87.5\% is achieved. 
+This clustering achieves 87.5\% accuracy. 
 
 ```{r intersect-curves-2, fig.height = 2, fig.length = 2, cache = TRUE, fig.cap = '$K$-curves clustering applied to example \\ref{ex:intersect-curves}. The embedding vectors are labeled by predicted community.'}
 f1 <- function(t) {
@@ -2439,30 +2436,135 @@ plot.estimated.curves(Xhat, out) +
 ```
 \end{example}
 
-While example \ref{ex:intersect-curves-fit} achieved high accuracy, algorithm \ref{alg:kcurves} often results in poor performance when it is paired with poor initialization. 
-In example \ref{ex:intersect-curves-fit}, it just so happened that we randomly chose initial curves that iterated to good fits, but this is not guaranteed. 
-We also restricted the curves to meet at the origin, which appears to have helped guide the curves to good fits. 
-In figures \ref{fig:loss} and \ref{fig:init-strategies}, we show the results of various initializations on fitting curves to example \ref{ex:intersect-curves}, such as random initialization and spectral clustering. 
+While the result of algorithm \ref{alg:kcurves} in example \ref{ex:intersect-curves} achieved high accuracy, this is not always guaranteed even for properly parameterized curves, especially when paired with poor initialization. 
+Performance as a measure of clustering accuracy is also problematic when there are multiple plausible curve fits. 
+Figures \ref{fig:multifit} and \ref{fig:loss} show the results of various curve fits and initialization strategies to example \ref{ex:intersect-curves}. 
+While only one of them (quadratic fit with random initialization) results in high clustering accuracy, cubic fit with spectral clustering initialization achieves a lower loss value. 
 
-\begin{figure}[H]
-
-{\centering \includegraphics{/home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed-chunk-7-1} 
-
+```{r multifit, cache = TRUE, fig.height = 3, fig.width = 8, fig.cap = '$K$-curve clustering fits on the ASE using various approaches. Left: quadratic fit with random initialization. Middle: quadratic fit initialized via spectral clustering. Right: cubic fit initialized via spectral clustering.'}
+f1 <- function(t) {
+  x1 <- t ^ 2
+  x2 <- 2 * t - 2 * t ^ 2
+  return(cbind(x1, x2))
 }
 
-\caption{ASE labeled by estimated community labels for each initialization strategy. Upper right: random initialization assuming intersection at the origin. Upper middle: random initialization without assuming intersection at the origin. Upper right: initialization via spectral clustering assuming intersection at the origin. Lower left: initialization via spectral clustering without assuming intersection at the origin. Lower middle: initialization with ground truth labels, assuming intersection at the origin. Lower right: initialization with ground truth labels, without assuming intersection at the origin.}\label{fig:init-strategies}
-\end{figure}
-
-\begin{figure}
-
-{\centering \includegraphics{/home/johnkoo/dev/manifold-block-models/draft/draft_files/figure-latex/unnamed-chunk-6-1} 
-
+f2 <- function(t) {
+  x1 <- 2 * t - 2 * t ^ 2
+  x2 <- 1 - 2 * t + t ^ 2
+  return(cbind(x1, x2))
 }
 
-\caption{Clustering loss vs. iteration for each run of $K$-curve clustering.}\label{fig:loss}
-\end{figure}
+set.seed(314159)
 
-Alternatively, if we turn this problem into a semi-supervised problem in which we know a few of the community labels, then the convergence of the ASE guarantees high accuracy. 
+n1 <- 2 ** 7
+n2 <- n1
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+
+a <- 1
+b <- 1
+t1 <- rbeta(n1, a, b)
+t2 <- rbeta(n2, a, b)
+T <- rbind(t1, t2)
+
+X1 <- f1(t1)
+X2 <- f2(t2)
+X <- rbind(X1, X2)
+
+P <- X %*% t(X)
+diag(P) <- 0
+A <- draw.graph(P)
+
+Xhat <- embedding(A, 2, 0)
+
+maxit <- 2 ** 4
+animation.dir <- '.'
+random.starts <- 2
+eps <- 1e-6
+normalize <- TRUE
+animate <- FALSE
+
+set.seed(1)
+random <- manifold.clustering(Xhat, 2, 
+                              A = A, 
+                              parallel = TRUE,
+                              intercept = FALSE,
+                              maxit = maxit, 
+                              normalize = normalize,
+                              eps = eps,
+                              verbose = FALSE,
+                              animate = animate,
+                              animation.dir = animation.dir,
+                              animation.title = 'random')
+random.plot <- plot.estimated.curves(Xhat, random) + 
+  labs(x = NULL, y = NULL, title = 'random initialization') + 
+  scale_colour_brewer(palette = 'Set1')
+
+set.seed(2)
+spectral <- manifold.clustering(
+  Xhat, 2, 
+  A = A, 
+  parallel = TRUE, 
+  intercept = FALSE, 
+  normalize = normalize, 
+  maxit = maxit, 
+  eps = eps,
+  initialization = 'spectral',
+  verbose = FALSE,
+  animate = animate,
+  animation.dir = animation.dir,
+  animation.title = 'spectral')
+spectral.plot <- plot.estimated.curves(Xhat, spectral) + 
+  labs(x = NULL, y = NULL, title = 'spectral initialization') + 
+  scale_colour_brewer(palette = 'Set1')
+
+set.seed(3)
+cubic <- manifold.clustering(
+  Xhat, 2, 
+  degree = 3, 
+  A = A, 
+  parallel = TRUE, 
+  intercept = FALSE, 
+  normalize = normalize, 
+  maxit = maxit, 
+  eps = eps,
+  initialization = 'spectral',
+  verbose = FALSE,
+  animate = animate,
+  animation.dir = animation.dir,
+  animation.title = 'cubic')
+cubic.plot <- plot.estimated.curves(Xhat, cubic) + 
+  labs(x = NULL, y = NULL, title = 'cubic fit') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(random.plot, spectral.plot, cubic.plot, nrow = 1)
+```
+
+```{r loss, cache = TRUE, fig.cap = 'Clustering loss vs. iteration for each run of $K$-curve clustering.', fig.width = 8, fig.height = 2}
+loss.df <- dplyr::bind_rows(
+  dplyr::tibble(loss = random$loss, 
+                initialization = 'random, quadratic',
+                iteration = seq_along(random$loss)),
+  dplyr::tibble(loss = spectral$loss, 
+                initialization = 'spectral, quadratic',
+                iteration = seq_along(spectral$loss)),
+  dplyr::tibble(loss = cubic$loss, 
+                initialization = 'spectral, cubic',
+                iteration = seq_along(cubic$loss))
+) %>% 
+  dplyr::mutate(initialization = factor(initialization,
+                                        levels = c('random, quadratic',
+                                                   'spectral, quadratic',
+                                                   'spectral, cubic')))
+
+ggplot(loss.df) + 
+  geom_point(aes(x = iteration, y = loss, colour = initialization)) + 
+  geom_line(aes(x = iteration, y = loss, colour = initialization)) + 
+  # ylim(0, max.loss) +
+  scale_y_log10() +
+  labs(y = 'clustering loss') + 
+  theme_bw()
+```
 
 \begin{theorem}
 \label{thm:kcurves-semisupervised}
@@ -2476,7 +2578,7 @@ where $L$ is the loss function defined in equation (\ref{eq:kcurves-loss}).
 ## Simulation Study
 
 We performed two simulation experiments for algorithm \ref{alg:kcurves}.
-In the first simulation setup, we again turn to examples \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit}. 
+In the first simulation setup, we again turn to example \ref{ex:intersect-curves}. 
 The setup is as follows:
 
 1. Draw $z_1, ..., z_n \iid \Multinomial(1/2, 1/2)$.
@@ -2593,7 +2695,7 @@ plot.repeat.study <- function(repeat.df) {
 plot.repeat.study(repeat.df)
 ```
 
-In the second simulation, we extended the first simulation setup based on examples \ref{ex:intersect-curves} and \ref{ex:intersect-curves-fit} into three dimensions and three curves. 
+In the second simulation, we extended the first simulation setup based on example \ref{ex:intersect-curves} into three dimensions and three curves. 
 The mixture model is as follows (also see figure \ref{fig:three-curves}):
 
 1. Draw $z_1, ..., z_n \iid \Multinomial(1/3, 1/3, 1/3)$.
