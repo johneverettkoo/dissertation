@@ -991,7 +991,7 @@ $$X = \begin{bmatrix}
 \vdots & \vdots \\
 \omega_n \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_n \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
 \end{bmatrix}.$$
-The resulting rows of $X$ are point masses that have been stretched out, turning into rays. 
+The resulting rows of $X$ are point masses that have been stretched out toward the origin, turning into rays. 
 \end{example}
 
 The latent structures of the SBM and DCBM when viewed as GRDPGs lend themselves to convenient community detection algorithms based on existing clustering algorithms for Euclidean data.
@@ -999,16 +999,18 @@ The general strategy for these models is to construct the appropriate ASE, choos
 In the case of the SBM, after embedding in \(K\) dimensions, since the original latent structure consists of \(K\) point masses, an appropriate clustering algorithm might be one based on centroids, such as \(K\)-means clustering or Gaussian mixture models.
 In the case of the DCBM, after embedding in \(K\) dimensions, since the original latent structure consists of \(K\) rays emanating from the origin, an appropriate clustering algorithm is one based on angles between points rather than distances, such as kernel \(K\)-means clustering using the cosine kernel.
 Another clustering algorithm for the ASE of a DCBM is to normalize the embedding vectors to norm 1 and then apply \(K\)-means to the normalized vectors.
+This suggests that the ASE is not only useful for clustering and inference but also for exploratory data analysis.
+The structure of the ASE reveals the appropriate model for the graph.
 
 \begin{example}
 Recall the UK faculty network in example \ref{ex:uk-faculty}. 
 In examples~\ref{ex:uk-faculty-sbm} and \ref{ex:uk-faculty-dcbm-pabm}, we fit an SBM and a DCBM to the graph using their corresponding EM algorithms (algorithms~\ref{algo:sbm-em} and \ref{algo:dcbm-em}). 
 While all three algorithms were able to correctly identify the labels for most of the vertices, it is not immediately clear which model is the most appropriate for this graph. 
 Analyzing the graph as a GRDPG, however, provides a visual indication for which block model is the best fit. 
-If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can take the ASE of the adjacency matrix and see whether the embedding vectors lie around point masses or rays. 
+If we wish to analyze this as an SBM or DCBM under the GRDPG framework, we can look at the ASE of the adjacency matrix and determine visually whether the embedding vectors lie around point masses or rays. 
 Based on figure \ref{fig:friendship-network}, we assume that this model is assortative, so $p = K$ and $q = 0$ in constructing the ASE. 
 Because the fourth community only contains two members, we omitted it from this analysis. 
-Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM, since each community appears to be described by a line segment. 
+Figure \ref{fig:ukfaculty-ase} suggests that the appropriate model here is the DCBM, since the embedding vectors for each community appear to lie on or near one of three line segments, which correspond to the three communities. 
 $K$-means clustering on the normalized embedding vectors results in a community detection accuracy of 96.7\%, which is an improvement over the EM algorithms while being substantially faster and easier to implement. 
 
 \begin{figure}[H]
@@ -1996,7 +1998,7 @@ The data are available in the \texttt{igraphdata} package \citep{igraph}.
 
 Treating this graph as an RDPG with a latent space dimension of 2, 
 we decomposed the adjacency matrix to construct its ASE (figure \ref{fig:macaque-ase}). 
-The embedding vectors, which approximate the latent vectors, appear to approximately lie along two curves that intersect at the origin, with each curve corresponding to a label (visual vs sensorimotor). 
+The embedding vectors, which approximate the latent vectors, appear to lie on or near two curves that intersect at the origin, with each curve corresponding to a label (visual vs. sensorimotor). 
 While the ASE suggests a community-wise structure in the latent space, the SBM, DCBM, and PABM are not suitable models for these data. 
 
 \begin{figure}[H]
