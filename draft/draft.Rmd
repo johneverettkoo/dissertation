@@ -99,15 +99,16 @@ doMC::registerDoMC(parallel::detectCores())
 Graph and network data have become increasingly widespread in various fields including sociology, neuroscience, biostatistics, and computer science. 
 This has resulted in challenges for researchers who rely on traditional statistical and machine learning methods that are incompatible with graph data and instead assume that the data exist as feature vectors. 
 To illustrate this, consider the typical approach to building a statistical or machine learning model. 
-Data are often represented as an $n \times d$ matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$ in which each row $x_i \in \mathbb{R}^d$ is an observation of $d$ features and each column is a set of $n$ feature measurements. 
+Data are often represented as an $n \times d$ matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$ in which each row $x_i \in \mathbb{R}^d$ is an observation of $d$ features and each column is a set of $n$ feature measurements. 
 An analysis task for these data might be to come up with a classification model $\phi : \mathbb{R}^d \to \{1, 2, ..., K\}$ that uses the numerical values of each feature of a vector $x_i$ to calculate a predicted label $z_i \in \{1, 2, ..., K\}$. 
 For instance, $\phi(x)$ might first compute the distances from $x$ to $K$ points in $\mathbb{R}^d$ and then assign $x$ to the label of the nearest point. 
 Examples of this include linear discriminant analysis (in the case of supervised learning) and Lloyd's algorithm \citep{1056489} or Gaussian mixture models \citep{doi:10.1198/016214502760047131} (in the case of unsupervised learning). 
 However, it is not obvious how this method would translate to data that are represented as graphs, in which observations consist of relationships among a set of objects rather than numerical attributes associated with each object: 
-Instead of feature vector $x_i = \Big[ x_{i1} \mid \cdots \mid x_{id} \Big]^\top \in \mathbb{R}^d$, we observe $a_i = \Big[ a_{i1} \mid \cdots \mid a_{in} \Big]^\top \in \mathbb{R}^n$ in which each $a_{ij}$ is object $i$'s relationship to object $j$. 
-For such data, it is often necessary to alter existing algorithms, transform the graph data into Euclidean data, often called *graph embedding* or *spectral clustering* \citep{vonLuxburg2007}, and apply algorithms for Euclidean data on the embedding, or come up with new algorithms altogether. 
+Instead of feature vector $x_i = [ x_{i1} \mid \cdots \mid x_{id} ]^\top \in \mathbb{R}^d$, we observe $a_i = [ a_{i1} \mid \cdots \mid a_{in} ]^\top \in \mathbb{R}^n$ in which each $a_{ij}$ is object $i$'s relationship to object $j$. 
+For such data, it is often necessary to alter existing algorithms, transform the graph data into Euclidean data, often called *graph embedding*, and apply algorithms for Euclidean data on the embedding, or come up with new algorithms altogether. 
 
 \begin{example}[Graph clustering]
+We now provide an example of an example contrasting the difference between clustering $n$ objects represented as a collection of feature vectors vs. $n$ objects represented as vertices of a graph using the same clustering approach. 
 $K$-means clustering \citep{MacQueen1967} is a nonparametric clustering method that assigns labels $z_1, ..., z_n \in \{1, ..., K\}$ to feature vectors $x_1, ..., x_n \in \mathbb{R}^d$ by minimizing the objective function
 \begin{equation}
 \label{eq:kmeans}
@@ -115,7 +116,7 @@ $K$-means clustering \citep{MacQueen1967} is a nonparametric clustering method t
 \argmin_{z_1, ..., z_n} ~ \sum_{k = 1}^K \sum_{x_i : z_i = k} \|x_i - \bar{x}_k\|_2^2.
 \end{equation}
 $\bar{x}_1, ..., \bar{x}_K \in \mathbb{R}^p$ are the centroids of each cluster, which act as nuisance parameters. 
-A popular implementation of $K$-means clustering is Lloyd's algorithm \citep{1056489}, which is a type of coordinate descent algorithm in which at each iteration the cluster labels are updated according to the label of its nearest centroid and centroids are updated as the sample means of the points in each cluster. 
+A popular implementation of $K$-means clustering is Lloyd's algorithm \citep{1056489}, which is a type of alternating coordinate descent algorithm in which at each iteration the cluster labels are updated according to the label of its nearest centroid and centroids are updated as the sample means of the points in each cluster. 
 
 If we have a graph instead of vectors in $\mathbb{R}^d$, it is not obvious how to translate $K$-means clustering to these data. 
 In particular, there is no inherent notion of centroid or sample mean for graph data. 
@@ -135,7 +136,7 @@ Yet another approach to adapting $K$-means clustering to graph data is to embed 
 In this context, a natural choice of embedding is one in which pairwise Euclidean distances between embedding vectors are (approximately) equal to pairwise graph distances between corresponding vertices. 
 For example, the combinatorial Laplacian eigenmap is an embedding in which Euclidean distances between pairs of vectors in the embedding are equal to expected commute times between corresponding pairs of vertices in the graph \citep{vonLuxburg2007}. 
 This embedding is constructed by computing the combinatorial Laplacian matrix $L = D - A$ in which $D$ is a diagonal matrix in which each $D_{ii}$ is the degree of vertex $i$. 
-Then the components of the embedding consist of $\big[ v_{n-1} / \sqrt{\lambda_{n - 1}} \mid \cdots \mid v_1 / \sqrt{\lambda_1} \big]^\top$ in which $\lambda_i$ is the $i^{th}$ largest eigenvalue of $L$ and $v_i$ is its corresponding eigenvector ($\lambda_n = 0$ and is omitted). 
+Then the components of the embedding consist of $[ v_{n-1} / \sqrt{\lambda_{n - 1}} \mid \cdots \mid v_1 / \sqrt{\lambda_1} ]^\top$ in which $\lambda_i$ is the $i^{th}$ largest eigenvalue of $L$ and $v_i$ is its corresponding eigenvector ($\lambda_n = 0$ and is omitted). 
 Then Lloyd's algorithm can be applied to this embedding. 
 More often in practice, the $d \ll n$ smallest eigenvalues are used to construct a lower dimensional embedding. 
 \end{example}
@@ -152,7 +153,7 @@ If $A$ is binary, we call it an *adjacency matrix*.
 In this work, we focus primarily on undirected and unweighted graphs without self loops. 
 Oftentimes, graph data are paired with vertex attributes. 
 For instance, in a social network graph, in which vertices correspond to individuals and edges correspond to connections between pairs of individuals, each vertex (individual) might also have a set or vector of other observations (e.g., age, sex, location, etc.). 
-This is often the setting for inference in the *exponential family of random graphs* (ERGM) \citep{kolaczyk2014statistical}.
+This is often the setting for inference in the *exponential family of random graphs* (ERGM) \citep{10.2307/2287037}.
 Another setting in which vertices have attributes is when the (oftentimes single) attribute is hidden or unobserved, and the inference task is to identify the attributes. 
 If those hidden attributes are discrete labels, then the inference task is called *community detection*, which is the main interest in this work. 
 
@@ -197,9 +198,9 @@ Within the scope of this work, we focus primarily on unweighted and undirected g
 The adjacency matrix that describes these graphs is binary, symmetric, and hollow. 
 In this setting, a plausible model is to sample each edge independently from a Bernoulli distribution, i.e., $A_{ij} \indep \Bernoulli(P_{ij})$ for some $P_{ij} \in [0, 1]$ for each $i < j$ (setting $A_{ji} = A_{ij}$ since $A$ is symmetric, and $A_{ii} = 0$ since $A$ is hollow). 
 Then similar to how the edges are compiled into an adjacency matrix $A$, the edge probabilities can be compiled into an edge probability matrix $P \in [0, 1]^{n \times n}$. 
-This type of graph model is defined as a *Bernoulli random graph* (also called an inhomogeneous $\ER$ graph). 
+This type of graph model is defined as a *Bernoulli random graph* (also called an inhomogeneous $\ER$ graph \citep{10.5555/1276871.1276872}). 
 If $A$ is the adjacency matrix of a Bernoulli random graph with edge probability matrix $P$, we denote $A \sim \BG(P)$. 
-If the vertices and edge probabilities are sampled as a sequence of $n$ i.i.d. random variables from probability distribution $F$, then we denote $A \sim \BG(F, n)$. 
+If the vertices and edge probabilities are sampled as a sequence of $n$ i.i.d. random variables from probability distribution $F$, then we denote $A \sim \BG(F)$. 
 
 Statistical inference is not possible on a general Bernoulli random graph with arbitrary edge probabilities since the number of parameters (individual edge probabilities) is equal to the number of observations (presence or absence of an edge). 
 Additional structure must be introduced. 
@@ -218,7 +219,7 @@ This can be solved directly by setting $\frac{d \ell}{d \theta} = 0$, which yiel
 
 $\ER$ graphs lie on the opposite end of the spectrum in that they restrict the model to a single parameter, which does not result in a very interesting model or reflect many networks observed in real data. 
 Much work has been done in developing various Bernoulli random graph models that strike a balance between structure and flexibility. 
-Two common types of structure for graph models, that are of particular interest in this work, are edge probabilities based on latent communities \citep{doi:10.1080/0022250X.1971.9989788, NIPS2008_3578, Karrer_2011, 307cbeb9b1be48299388437423d94bf1}, called *block models*, and edge probabilities based on positions in a latent space \citep{10.1007/978-3-540-77004-6_11, rubindelanchy2017statistical}, called *latent space models*.
+Two common types of structure for graph models, that are of particular interest in this work, are edge probabilities based on latent communities \citep{doi:10.1080/0022250X.1971.9989788, NIPS2008_3578, Karrer_2011, 307cbeb9b1be48299388437423d94bf1}, called *block models*, and edge probabilities based on positions in a latent space \citep{doi:10.1198/016214502388618906, 10.1007/978-3-540-77004-6_11, rubindelanchy2017statistical}, called *latent space models*.
 
 \begin{example}
 Consider a graph in which the vertices represent a collection of $n$ planets with intelligent life sending out radio waves, and the existence of an edge between vertices $i$ and $j$ represents whether planets $i$ and $j$ have established contact.  
@@ -228,7 +229,7 @@ where $\omega_i$ is the $i^{th}$ planet's radio signal strength, $d_{ij}$ is the
 Let $P$ be the $n \times n$ matrix of these edge probabilities. 
 Then $A \sim \BG(P)$ represents the network of planets that have made contact. 
 
-To estimate $\omega = \big[ \omega_1, \cdots, \omega_n \big]^\top$ after observing $A$ and supposing that the relative locations of the planets as well as the normalizing constant $C$ are known, one approach might be maximum likelihood maximization. 
+To estimate $\omega = [ \omega_1, \cdots, \omega_n ]^\top$ after observing $A$ and supposing that the relative locations of the planets as well as the normalizing constant $C$ are known, one approach might be maximum likelihood maximization. 
 For simplicity, set $C = 1$. 
 Then the log-likelihood function can be written as:
 $$
@@ -269,7 +270,8 @@ All three algorithms have consistency properties that result in zero error with 
 
 In section \@ref(sec:mbm), we extend the latent structures of the stochastic block model, degree corrected block model, and popularity adjusted block model to nonlinear latent structures. 
 Instead of points, line segments, and subspaces, we propose the manifold block model which is a class of generalized random dot product graph in which the latent vectors lie on one of $K$ manifolds. 
-In the case of nonintersecting manifolds, we show that a clustering algorithm based on a nearest algorithms graph approach on an embedding is consistent, resulting in zero clustering error for large graphs, as long as the latent vectors are sampled from the manifolds densely 
+In the case of nonintersecting manifolds, we propose an algorithm that first embeds the graph followed by nearest neighbors clustering, such as single linkage. 
+This algorithm is consistent, resulting in zero clustering error for large graphs, as long as the distribution of latent vectors on each manifold is dense. 
 In the case of intersecting manifolds, we propose the $K$-curves algorithm, which is a type of batch coordinate ascent algorithm which alternates between fitting manifolds to the embedding and reassigning clusters based on proximity to the manifolds. 
 We conclude with section \@ref(sec:comparison) in which we compare the four block models and summarize the ways in which one might determine which block model is most appropriate for one's data or setting. 
 
@@ -281,7 +283,7 @@ We conclude with section \@ref(sec:comparison) in which we compare the four bloc
 
 Network analysis is often concerned with community detection. 
 This has motivated statisticians to develop random graph models with inherent community structure in which the probability of an edge between vertices $v_i$ and $v_j$ depend on the community assignments $z_i$ and $z_j$. 
-More formally, one assigns each vertex $v_i$ a community label $z_i \in \{1, ..., K\}$ and assumes a Bernoulli random graph in which $P_{ij} = g(z_i, z_j, \theta_i, \theta_j)$ for some function $g: \{1, ..., K\}^2 \times \mathbb{R}^d \times \mathbb{R}^d \to [0, 1]$ and $\theta_i \in \mathbb{R}^d$ is a vector of real-valued parameters associated with each vertex. 
+More formally, one assigns each vertex $v_i$ a community label $z_i \in \{1, ..., K\}$ and assumes a Bernoulli random graph in which $P_{ij} = g(z_i, z_j, \xi_i, \xi_j)$ for some function $g: \{1, ..., K\}^2 \times \mathbb{R}^d \times \mathbb{R}^d \to [0, 1]$ and $\xi_i \in \mathbb{R}^d$ is a vector of real-valued parameters associated with each vertex. 
 While the graph is sampled conditioned on the labels $z_i$, it is assumed that the labels are unknown when the graph is observed. 
 Within the context of this work, we will call such models *block models*. 
 This type of model framework allows us to frame the goal of community detection as a statistical inference problem: 
@@ -440,7 +442,7 @@ However, due to the $z_{ik} z_{j \ell}$ interaction terms, the expectation step 
 While the labels are drawn independently, they are not necessarily conditionally independent. 
 Nevertheless, making the conditional independence relaxation allows us to write the expectation and maximization steps in closed form. 
 (The same type of approximation was used in the Bayesian context by \citet{10.2307/43974715}.) 
-The EM algorithm for maximizing the likelihood function in equation \eqref{eq:sbm-loglik} is detailed Kin algorithm \ref{algo:sbm-em}.
+The EM algorithm for maximizing the likelihood function in equation \eqref{eq:sbm-loglik} is detailed in algorithm \ref{algo:sbm-em}.
 
 \begin{algorithm}
   \label{algo:sbm-em}
@@ -500,11 +502,11 @@ For example, consider the SBM with the third sampling setup described in section
 Then the expected degree of vertex $v_i$ is 
 $$
 \begin{split}
-E[d_i] & = \sum_j P_{ij} \\
-& = \sum_{j \neq i} \theta_{z_i, z_j} \\ 
-& = \Big( \sum_k n_k \theta_{z_i, k} \Big) - \theta_{z_i, z_i} \\
-& = n \Big( \sum_k \alpha_k \theta_{z_i, k} \Big) - \theta_{z_i, z_i} \\
-& = O(n).
+E[d_i]  = \sum_j P_{ij} 
+ = \sum_{j \neq i} \theta_{z_i, z_j} \
+ = \Big( \sum_k n_k \theta_{z_i, k} \Big) - \theta_{z_i, z_i} 
+ = n \Big( \sum_k \alpha_k \theta_{z_i, k} \Big) - \theta_{z_i, z_i} 
+ = O(n).
 \end{split}
 $$
 
@@ -519,7 +521,7 @@ For example, if $\rho_n \propto 1 / \sqrt{n}$, then the expected degree for each
 In general, for consistency in estimation and inference, most results on Bernoulli random graphs require $n \rho_n = \omega \big( (\log n)^c \big)$ for some $c > 1$. 
 (See \cite{JMLR:v18:16-480}, \cite{https://doi.org/10.48550/arxiv.2106.09840}, and \cite{rubindelanchy2017statistical} for further discussion.)
 
-## Generalizations of the Stochastic Block Model: The Degree Corrected Block Model and the Popularity Adjusted Block Model {#sec:dcbm-pabm}
+## The Degree Corrected Block Model and the Popularity Adjusted Block Model {#sec:dcbm-pabm}
 
 The SBM assumes homogeneity within each community. 
 More specifically, in the SBM, each vertex's expected degree and affinity toward each community depends only on its community label. 
@@ -805,7 +807,7 @@ In these models, $P$ is decomposed into an outer product of two low-rank data ma
 Let $p \geq 1$ and $q \geq 0$ be integers. 
 Define $I_{p,q}$ as the block diagonal matrix $I_{p,q} = \Bigl[\begin{smallmatrix} I_{p} & 0 \\ 0 & - I_{q} \end{smallmatrix} \Bigr]$ where $I_p$ and $I_q$ are the identity matrices of dimensions $p \times p$ and $q \times q$ respectively. 
 Denote $d = p + q$ and let $\mathcal{X}$ be the subset of $\mathbb{R}^d$ such that, for any $x, y \in \mathcal{X}$, we have $x^\top I_{p,q} y \in [0, 1]$. 
-Let $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$ be an $n \times d$ matrix with rows $x_i \in \mathcal{X}$. 
+Let $X = [ x_1 \mid \cdots \mid x_n ]^\top$ be an $n \times d$ matrix with rows $x_i \in \mathcal{X}$. 
 A graph $G$ with adjacency matrix $A$ is said to be a generalized random dot product graph with latent positions $X$, sparsity parameter $\rho_n$, and signature $(p, q)$ if $A \sim \BG(P)$ where the edge probability matrix $P$ is given by $P = \rho_n X I_{p,q} X^\top$, i.e., the entries of $P$ are of the form $P_{ij} = \rho_n x_i^\top I_{p,q} x_j$. 
 
 We use the notation $A \sim \GRDPG_{p,q}(X; \rho_n)$ to denote a random adjacency matrix $A$ drawn from latent positions $X$, sparsity parameter $\rho_n$, and signature $(p, q)$. If the $n$ latent vectors in $X$ are drawn from probability distribution $F$ on support $\mathcal{X}$, we use the notation $A \sim \GRDPG_{p,q}(F; \rho_n)$. 
@@ -864,7 +866,7 @@ where $x_i^\top$ and $\hat{x}_i^\top$ are the rows of $X$ and $\hat{X}$, respect
 
 \begin{example}
 Suppose that latent vectors for an RDPG are drawn from the curve 
-$x(t) = \Big[ t^2, 2 t (t-1) \Big]^\top$, $t \in [0, 1]$. 
+$x(t) = [ t^2, 2 t (t-1) ]^\top$, $t \in [0, 1]$. 
 Let $x_i = x(t_i)$. 
 Then for each $i < j$, the edges are drawn as $A_{ij} \indep \Bernoulli(x_i^\top x_j)$. 
 If after observing $A$, we wish to estimate the curve, the ASE provides an estimator in which the estimated latent vectors converge to the curve, up to an orthogonal transformation (figure \ref{fig:ase-example}). 
@@ -1004,7 +1006,7 @@ Disassortative block models can also be characterized as GRDPGs.
 Consider the dating network examples for the SBM (example \ref{ex:sbm-dating}) and DCBM (example \ref{ex:dcbm-dating}). 
 Since the edge probability matrices are not positive semidefinite (equation \ref{eq:sbm-eigenvalues}), these are disassortative models. 
 More specifically, the edge probability matrix for each has one positive eigenvalue and one negative eigenvalue. 
-Then the ASE for this model is $\hat{X} = \Big[ |\lambda_1|^{1/2} v_1 \mid |\lambda_n|^{1/2} v_n \Big]$. 
+Then the ASE for this model is $\hat{X} = [ |\lambda_1|^{1/2} v_1 \mid |\lambda_n|^{1/2} v_n ]$. 
 A plot of the ASE of the graph in \ref{ex:sbm-dating} (figure \ref{fig:dating-ase}, left) suggests two (somewhat overlapping) ellipsoidal clusters, and fitting a GMM on the embedding results in a community detection accuracy of 96.9\%, which is comparable to algorithm \ref{algo:sbm-em} while being simpler to implement. 
 Likewise, a plot of the ASE of the graph in example~\ref{ex:dcbm-dating} (figure \ref{fig:dating-ase}, right) consists of points that lie along two lines that cross at the origin, and kernel $K$-means clustering using the cosine similarity kernel results in a community detection accuracy of 93.8\%, which is an improvement over algorithm \ref{algo:dcbm-em} while being simpler to implement. 
 Also note that aside from the choice of the eigenvalues and eigenvectors (positive vs negative), the community detection algorithms for the SBM ($K$-means clustering or GMM on the ASE) and DCBM (kernel $K$-means clustering) are identical regardless of whether the model is assortative or disassortative. 
@@ -1172,7 +1174,7 @@ $\tilde{P} = X \Pi X^\top$ where the rows of $X$ lie in the union of
 two 2-dimensional orthogonal subspaces and $\Pi$ is a permutation matrix. 
 
 For the general case, we can extend $\tilde{P} = X \Pi X^\top$ to larger $K$. 
-For a more concrete example of this, refer to Example~1. 
+For a more concrete example of this, refer to example~\ref{ex:pabm3}. 
 We once again consider $\tilde{P}$ as defined in
 remark~\ref{rem:pabm_view2}.  
 We first define the following matrices
@@ -1226,7 +1228,9 @@ positions $\tilde{\Pi} X U$ and known signature $(p,q) = \bigl( \tfrac{1}{2} K (
 \tfrac{1}{2} K (K - 1)\bigr)$.
 \end{proof}
 
-\begin{example} Let $A$ be a $3$ blocks PABM with latent vectors $\{\lambda^{(k \ell)} \colon 1 \leq k \leq 3, 1 \leq \ell \leq 3\}$. 
+\begin{example} 
+\label{ex:pabm3}
+Let $A$ be a $3$ blocks PABM with latent vectors $\{\lambda^{(k \ell)} \colon 1 \leq k \leq 3, 1 \leq \ell \leq 3\}$. 
 Using the same notation as in theorem~\ref{thm:pabm-grdpg}, we can define
 \begin{gather*}
 X = \begin{bmatrix}
@@ -1369,7 +1373,7 @@ $\tilde{\Pi} X U Q$ for any $n \times n$ permutation matrix $\tilde{\Pi}$.
 However, because we do not observe $P$ but rather only the noisy
 adjacency matrix $A \sim \BG(P)$, the natural approach then is
 to perform SSC on the rows of the spectral embedding of $A$, 
-since the embedding of $P$ consists of $K$ subspaces (theore \ref{thm:pabm-grdpg}), 
+since the embedding of $P$ consists of $K$ subspaces (theorem \ref{thm:pabm-grdpg}), 
 and so the embedding of $A$ will lie approximately on the $K$ subspaces. 
 We will show in theorem \ref{thm:ssc} that, with probability converging to
 one as $n \rightarrow \infty$, the rows of the ASE of $A$ also
@@ -2055,10 +2059,10 @@ Before diving into the multi-manifold case, we can first consider the single man
 \begin{example}
 \label{ex:er-curve}
 In the $\ER$ model, the edge probability matrix has a fixed value $P_{ij} \equiv p \in [0, 1]$. 
-This corresponds to a one-dimensional RDPG with a latent structure $X = \Big[ \sqrt{p},  \cdots, \sqrt{p} \Big]^\top$. 
-In another view, the RDPG with latent structure $X = \Big[ \sqrt{p}, \cdots, \sqrt{p} \Big]^\top$ induces an $\ER$ model in which the edge probabilities have a fixed value. 
+This corresponds to a one-dimensional RDPG with a latent structure $X = [ \sqrt{p},  \cdots, \sqrt{p} ]^\top$. 
+In another view, the RDPG with latent structure $X = [ \sqrt{p}, \cdots, \sqrt{p} ]^\top$ induces an $\ER$ model in which the edge probabilities have a fixed value. 
 
-Suppose that we have RDPG in which the latent space is in $\mathbb{R}^2$ and the latent vectors are drawn uniformly from the quarter unit circle defined by $g(t) = \Big[ \cos \frac{\pi}{2} t, \sin \frac{\pi}{2} t \Big]^\top$ for $t \in [0, 1]$. 
+Suppose that we have RDPG in which the latent space is in $\mathbb{R}^2$ and the latent vectors are drawn uniformly from the quarter unit circle defined by $g(t) = [ \cos \frac{\pi}{2} t, \sin \frac{\pi}{2} t ]^\top$ for $t \in [0, 1]$. 
 Then it can be shown that instead of a fixed $P_{ij} = p$, this RDPG induces a model in which the edge probabilities follow a distribution with density $f(p) = \frac{2}{\pi - 2} \Big( \frac{1}{1 - p^2} - 1 \Big)$. 
 \end{example}
 
@@ -2080,7 +2084,7 @@ Then the following mixture model is a {\em manifold block model}.
 \begin{enumerate}
 \item Draw labels $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$.
 \item Draw latent vectors by first taking each $t_i \indep F_{z_i}$ and then computing each $x_i = g_{z_i}(t_i)$. 
-\item Compile the latent vectors into data matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$ and define the adjacency matrix as $A \sim \GRDPG_{p,q}(X; \rho_n)$. 
+\item Compile the latent vectors into data matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and define the adjacency matrix as $A \sim \GRDPG_{p,q}(X; \rho_n)$. 
 \end{enumerate}
 \end{definition}
 
@@ -2090,8 +2094,8 @@ We use these constraints to construct the following example:
 
 \begin{example}
 \label{ex:separated-curves}
-Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = \Big[ \cos(\frac{\pi}{3} t), \sin(\frac{\pi}{3} t) \Big]^\top$ and $f_2(t) = \Big[ 1 - \cos(\frac{\pi}{3} t), 1 - \sin(\frac{\pi}{3} t) \Big]^\top$.
-Draw $t_1, ..., t_n \iid \Uniform(0, 1)$ and $z_1, ..., z_n \iid \Multinomial(\frac{1}{2}, \frac{1}{2})$, and compute latent vectors $x_i = f_{z_i}(t_i)$, which are collected in data matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$. 
+Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = [ \cos(\frac{\pi}{3} t), \sin(\frac{\pi}{3} t) ]^\top$ and $f_2(t) = [ 1 - \cos(\frac{\pi}{3} t), 1 - \sin(\frac{\pi}{3} t) ]^\top$.
+Draw $t_1, ..., t_n \iid \Uniform(0, 1)$ and $z_1, ..., z_n \iid \Multinomial(\frac{1}{2}, \frac{1}{2})$, and compute latent vectors $x_i = f_{z_i}(t_i)$, which are collected in data matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$. 
 Finally, let $A \sim \RDPG(X)$. Figure~\ref{fig:two-curves} shows the latent configuration drawn from this latent distribution, a random dot product graph drawn from the latent configuration, and the ASE of the graph. 
 Although there is no obvious community structure in the graph itself, the embedding shows a clear separation between the two communities. 
 More specifically, similar to the latent vectors, the embedding vectors lie approximately on one of two curve segments (one-dimensional manifolds), suggesting that the appropriate community detection approach in this setting is to determine to which (unobserved) curve to which each embedding vector is closest. 
@@ -2182,7 +2186,7 @@ Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
 \begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting manifolds]
 \label{theorem:nonintersect-grdpg}
 Let $x_1, ..., x_n$ be points sampled on $K$ compact, connected manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \subset \mathbb{R}^d$ each with probability measures $F_1, ..., F_K$, and the manifolds are separated by distance at least $\delta = \min\limits_{k \neq \ell} \min\limits_{x_i \in \mathcal{M}_k, x_j \in \mathcal{M}_\ell} \| x_i - x_j \| > 0$. 
-Let $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$ and $A \sim \GRDPG_{p,q}(X; \rho_n)$ for some $p, q \in \mathbb{N}_0$ such that $p + q = d$ and sparsity parameter $\rho_n$ that satisfies $n \rho_n = \omega(\log^c n)$ for some $c > 1$. 
+Let $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and $A \sim \GRDPG_{p,q}(X; \rho_n)$ for some $p, q \in \mathbb{N}_0$ such that $p + q = d$ and sparsity parameter $\rho_n$ that satisfies $n \rho_n = \omega(\log^c n)$ for some $c > 1$. 
 Define $A_n(\eta)$ as the event that an $\eta$-neighborhood graph constructed from the ASE of $A$ consists of exactly $K$ disconnected subgraphs that map exactly to each manifold. 
 Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \infty} P(A_n(\eta)) = 1$. 
 \end{theorem}
@@ -2217,7 +2221,7 @@ The full mixture model is described as follows:
 
 1. Draw $t_1, ..., t_n \iid F$ for probability distribution $F$ with support $[0, 1]$.
 2. Draw $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$, the community labels.
-3. Let each $x_i = g_{z_i}(t_i)$ be the latent vector for vertex $v_i$, and collect the latent vectors into matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$.
+3. Let each $x_i = g_{z_i}(t_i)$ be the latent vector for vertex $v_i$, and collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$.
 4. Draw $A \sim \GRDPG_{p,q}(X; \rho_n)$.
 
 In this setting, if we know the labels $z_1, ..., z_n$, then for each $k$^th^ subsample for which $z_i = k$, we can fit the curve $\hat{g}_k$ (up to an indefinite orthogonal transformation). 
@@ -2312,7 +2316,7 @@ While the DCBM and PABM cases can be handled by algorithms specific to linear st
 
 \begin{example}
 \label{ex:intersect-curves}
-Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two curves defined by the parameterizations $g_1(t) = \Big[ t^2, 2 t (1-t) \Big]^\top$ and $g_2(t) = \Big[ 2 t (1-t), (1-t)^2 \Big]^\top$. 
+Suppose we have a two-dimensional RDPG in which latent vectors lie on one of two curves defined by the parameterizations $g_1(t) = [ t^2, 2 t (1-t) ]^\top$ and $g_2(t) = [ 2 t (1-t), (1-t)^2 ]^\top$. 
 This can be described as a two-community MBM in which the manifolds are both one-dimensional. 
 For simplicity, we restrict $F_1 = F_2 = \Uniform(0, 1)$. 
 $g_1$ and $g_2$ intersect at two points, $t = 0$ and $t = 2/3$, which in the latent space correspond to $(0, 0)$ and $(4/9, 4/9)$. 
@@ -2384,7 +2388,7 @@ gridExtra::grid.arrange(latent.vecs, rdpg, ase, nrow = 1)
 ```
 
 Figure \ref{fig:intersect-curves-2} shows one result of applying algorithm \ref{alg:kcurves} on example \ref{ex:intersect-curves}. 
-In this implementation, $g_1$ and $g_2$ are assumed to be Bezier curves in which $p_1^{(0)} = p_2^{(0)} = \Big[ 0, 0 \Big]^\top$, i.e., the curves meet at the origin. 
+In this implementation, $g_1$ and $g_2$ are assumed to be Bezier curves in which $p_1^{(0)} = p_2^{(0)} = [ 0, 0 ]^\top$, i.e., the curves meet at the origin. 
 This clustering achieves 87.5\% accuracy. 
 
 ```{r intersect-curves-2, fig.height = 2, fig.length = 2, cache = TRUE, fig.cap = '$K$-curves clustering applied to example \\ref{ex:intersect-curves}. The embedding vectors are labeled by predicted community.'}
@@ -2585,8 +2589,8 @@ The setup is as follows:
 
 1. Draw $z_1, ..., z_n \iid \Multinomial(1/2, 1/2)$.
 2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
-3. Let each $x_i = g_{z_i}(t_i)$ where  $g_1(t) = \Big[ t^2, 2 t (1-t) \Big]^\top$ and $g_2(t) = \Big[ 2 t (1-t), (1-t)^2 \Big]^\top$. 
-Collect the latent vectors into matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$. 
+3. Let each $x_i = g_{z_i}(t_i)$ where  $g_1(t) = [ t^2, 2 t (1-t) ]^\top$ and $g_2(t) = [ 2 t (1-t), (1-t)^2 ]^\top$. 
+Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$. 
 4. Draw $A \sim \RDPG(X; \rho_n)$ (for these simulations we fix $\rho_n \equiv 1$). 
 
 For this simulation study, we set $n = 128, 256, 512, 1024, 2048$, and we start with completely random initialization as well as initializations in which we know 4 or 8 labels from each community. 
@@ -2703,10 +2707,10 @@ The mixture model is as follows (also see figure \ref{fig:three-curves}):
 1. Draw $z_1, ..., z_n \iid \Multinomial(1/3, 1/3, 1/3)$.
 2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
 3. Let each $x_i = g_{z_i}(t_i)$ where
-    i. $g_1(t) = \Big[ 2 t (t-1), t^2, 0 \Big]^\top$
-    ii. $g_2(t) = \Big[ 0, t^2, 2 t (t-1) \Big]^\top$
-    iii. $g_3(t) = \Big[2 t (t-1), t^2, 2 t (t-1) \Big]^\top$.
-4. Collect the latent vectors into matrix $X = \Big[ x_1 \mid \cdots \mid x_n \Big]^\top$.
+    i. $g_1(t) = [ 2 t (t-1), t^2, 0 ]^\top$
+    ii. $g_2(t) = [ 0, t^2, 2 t (t-1) ]^\top$
+    iii. $g_3(t) = [2 t (t-1), t^2, 2 t (t-1) ]^\top$.
+4. Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$.
 5. Draw $A \sim \RDPG(X; \rho_n)$ (for these simulations we fix $\rho_n \equiv 1$). 
 
 ```{r three-curves, cache = TRUE, fig.height = 3, fig.width = 12, fig.cap = 'Latent vectors (left) and ASE (right) of one realization of the mixture model in the simulation setup with $K=3$ manifolds.'}
@@ -3487,7 +3491,7 @@ The curve fitting step in algorithm \ref{alg:kcurves} requires estimation of som
 One choice of curve is the Bezier polynomial. 
 The Bezier polynomial of order $R$ is defined by function $g$ with parameters $p$ such that
 $$g(t; p) = \sum_{r=0}^R p^{(r)} \binom{R}{r} t^r (1-t)^{R-r}$$
-where the Bezier coefficients $p^{(r)}$ are vectors in $\mathbb{R}^d$, and $p = \Big[ p^{(0)} \mid \cdots \mid p^{(R)} \Big]^\top$.
+where the Bezier coefficients $p^{(r)}$ are vectors in $\mathbb{R}^d$, and $p = [ p^{(0)} \mid \cdots \mid p^{(R)} ]^\top$.
 
 The general idea behind Bezier curve fitting to noisy data is as follows: 
 We wish to minimize the squared loss function 
@@ -3498,14 +3502,14 @@ L(p, t; X) = \sum_i \|x_i - g(t_i; p)\|^2.
 Suppose that we know the timepoints $t_1, ..., t_n$ which we wish to use to fit Bezier coefficients $p^{(0)}, ..., p^{(R)}$ to vectors $x_1, ..., x_n \in \mathbb{R}^d$ lying on or near a Bezier curve of order $R$. 
 The squared loss then can be written as 
 $$L(p; t, X) = \|X - T p\|^2,$$
-where $p$ is defined as before, $T$ is an $n \times (R+1)$ matrix such that $T_{ir} = \binom{R}{r} t_i^r (1-t_i)^{R-r}$, and $X = \Big[ x_1 \mid \cdots \mid x_n \Big]$. 
+where $p$ is defined as before, $T$ is an $n \times (R+1)$ matrix such that $T_{ir} = \binom{R}{r} t_i^r (1-t_i)^{R-r}$, and $X = [ x_1 \mid \cdots \mid x_n ]$. 
 Then the least squares estimates for the Bezier coefficients $p$ is simply the linear least squares estimate 
 \begin{equation}
 \label{eq:bezier-p-fit}
 \hat{p} = (T^\top T)^{-1} T^\top X.
 \end{equation}
 
-On the other hand, suppose that we know the Bezier coefficients $p = \Big[ p^{(0)} \mid \cdots \mid p^{(R)} \Big]^\top$, and we wish to fit timepoints $t_1, ..., t_n$ to vectors $x_1, ..., x_n$ lying on or near a Bezier polynomial of order $R$. 
+On the other hand, suppose that we know the Bezier coefficients $p = [ p^{(0)} \mid \cdots \mid p^{(R)} ]^\top$, and we wish to fit timepoints $t_1, ..., t_n$ to vectors $x_1, ..., x_n$ lying on or near a Bezier polynomial of order $R$. 
 In this setting, we can fit each individual $t_i$ independently by minimizing $L(t_i; p, x_i) = \|x_i - g(t_i; p)\|^2$ for each $t_i$. 
 If $g(t_i; p, x_i)$ is a polynomial of order $R$, then $\dot{L}(t_i; p, x_i)$ is also a polynomial, of order $2 R - 1$. 
 Minimizing $L(t_i; p, x_i)$ then simply involves finding the roots of $\dot{L}(t_i; p, x_i)$ and choosing the root with the smallest objective value (in practice, the endpoints $t_i = 0$ and $t_i = 1$ are also checked). 

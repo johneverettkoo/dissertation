@@ -49,6 +49,11 @@ Belkin, M. and Niyogi, P. (2003).
   representation.
 \newblock {\em Neural Computation}, 15:1373--1396.
 
+\bibitem[Bollob\'{a}s et~al., 2007]{10.5555/1276871.1276872}
+Bollob\'{a}s, B., Janson, S., and Riordan, O. (2007).
+\newblock The phase transition in inhomogeneous random graphs.
+\newblock {\em Random Struct. Algorithms}, 31(1):3–122.
+
 \bibitem[Cape et~al., 2019]{cape_biometrika}
 Cape, J., Tang, M., and Priebe, C.~E. (2019).
 \newblock Signal-plus-noise matrix models: eigenvector deviations and
@@ -106,6 +111,19 @@ Greene, D. and Cunningham, P. (2013).
 \newblock Producing a unified graph representation from multiple social network
   views.
 \newblock {\em CoRR}, abs/1301.5809.
+
+\bibitem[Hoff et~al., 2002]{doi:10.1198/016214502388618906}
+Hoff, P.~D., Raftery, A.~E., and Handcock, M.~S. (2002).
+\newblock Latent space approaches to social network analysis.
+\newblock {\em Journal of the American Statistical Association},
+  97(460):1090--1098.
+
+\bibitem[Holland and Leinhardt, 1981]{10.2307/2287037}
+Holland, P.~W. and Leinhardt, S. (1981).
+\newblock An exponential family of probability distributions for directed
+  graphs.
+\newblock {\em Journal of the American Statistical Association},
+  76(373):33--50.
 
 \bibitem[Ji et~al., 2010]{10.1007/978-3-642-15880-3_42}
 Ji, M., Sun, Y., Danilevsky, M., Han, J., and Gao, J. (2010).
