@@ -180,7 +180,7 @@ ggraph(A, layout = 'stress') +
   scale_colour_brewer(palette = 'Set1')
 ```
 
-In the setting in which the labels are known and the edges are assumed to be sampled from some distribution conditioned on the labels, then one inference task is to fit an ERGM to these data. 
+In the setting in which the labels are known and the edges are assumed to be sampled from some distribution conditioned on the labels, then one inference task is to fit a generative model (such as an ERGM) to these data. 
 On the other hand, if the labels are unobserved and the task is to identify the labels (up to permutation) assuming that the labels are drawn from some distribution and the edges are also drawn from some distribution conditioned on the hidden labels, then the inference task is community detection. 
 
 \end{example}
@@ -222,6 +222,7 @@ Much work has been done in developing various Bernoulli random graph models that
 Two common types of structure for graph models, that are of particular interest in this work, are edge probabilities based on latent communities \citep{doi:10.1080/0022250X.1971.9989788, NIPS2008_3578, Karrer_2011, 307cbeb9b1be48299388437423d94bf1}, called *block models*, and edge probabilities based on positions in a latent space \citep{doi:10.1198/016214502388618906, 10.1007/978-3-540-77004-6_11, rubindelanchy2017statistical}, called *latent space models*.
 
 \begin{example}
+In this example, we explore a graph for which likelihood maximization is a reasonable approach to estimation. 
 Consider a graph in which the vertices represent a collection of $n$ planets with intelligent life sending out radio waves, and the existence of an edge between vertices $i$ and $j$ represents whether planets $i$ and $j$ have established contact.  
 Since radio waves decay according to the inverse-square law, a plausible model for the edge probability between two vertices is 
 $$P_{ij} = \frac{C \omega_i \omega_j}{d_{ij}^2}$$ 
@@ -697,7 +698,6 @@ Recall the UK faculty friendship graph from example~\ref{ex:uk-faculty}.
 In example~\ref{ex:uk-faculty-sbm}, we fit an SBM to this graph using an EM algorithm (algorithm~\ref{algo:sbm-em}), yielding a community detection accuracy of 79.7\%. 
 Starting with the output of algorithm~\ref{algo:sbm-em} and applying algorithm ~\ref{algo:dcbm-em} on the graph to fit a DCBM yields a greater accuracy of 94.9\%. 
 This is expected, since the SBM is a special case of the DCBM, i.e., the SBM is the DCBM with some of the parameters restricted. 
-Therefore, it is not immediately obvious from the improved accuracy whether the DCBM is a better fit for this graph than the SBM or it is overfitting. 
 Looking at the dispersion of the fitted degree factors $\hat{\omega}$, there does appear to be some indication that the DCBM is a more appropriate model (figure \ref{fig:uk-faculty-dcbm-omega}). 
 ```{r uk-faculty-dcbm-omega, cache = TRUE, fig.width = 8, fig.height = 2, fig.cap = 'Histogram of the fitted degree factors for the UK faculty friendship network assuming that it is a DCBM. The DCBM was fit to this graph using algorithm \\ref{algo:dcbm-em}. The dispersion of the degree factors suggests that the DCBM is a better fit than the SBM.'}
 data(UKfaculty, package = 'igraphdata')
@@ -2094,7 +2094,7 @@ We use these constraints to construct the following example:
 
 \begin{example}
 \label{ex:separated-curves}
-Define two one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = [ \cos(\frac{\pi}{3} t), \sin(\frac{\pi}{3} t) ]^\top$ and $f_2(t) = [ 1 - \cos(\frac{\pi}{3} t), 1 - \sin(\frac{\pi}{3} t) ]^\top$.
+Define two nonintersecting one-dimensional manifolds in $\mathbb{R}^2$ by $f_1(t) = [ \cos(\frac{\pi}{3} t), \sin(\frac{\pi}{3} t) ]^\top$ and $f_2(t) = [ 1 - \cos(\frac{\pi}{3} t), 1 - \sin(\frac{\pi}{3} t) ]^\top$.
 Draw $t_1, ..., t_n \iid \Uniform(0, 1)$ and $z_1, ..., z_n \iid \Multinomial(\frac{1}{2}, \frac{1}{2})$, and compute latent vectors $x_i = f_{z_i}(t_i)$, which are collected in data matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$. 
 Finally, let $A \sim \RDPG(X)$. Figure~\ref{fig:two-curves} shows the latent configuration drawn from this latent distribution, a random dot product graph drawn from the latent configuration, and the ASE of the graph. 
 Although there is no obvious community structure in the graph itself, the embedding shows a clear separation between the two communities. 
@@ -2170,6 +2170,7 @@ In the original latent space, it is possible to construct for each manifold $\ma
 If the subsample of vectors on each manifold is sufficiently dense such that $\max_k \eta_k = \eta < \delta$, then an $\eta$-neighborhood graph on the entire sample results in a graph with $K$ disconnected subgraphs that map onto each manifold exactly. 
 This is equivalent to applying single linkage clustering on the ASE and cutting the dendrogram at $K$ clusters (see algorithm \ref{alg:ase-singlelink}).
 The remainder of this section explores under which conditions these criteria are met for the latent configuration, in which the latent vectors lie exactly on manifolds, as well as for the ASE of the GRDPG sampled from these latent configurations, in which the vectors lie approximately on manifolds with some noise that approaches zero asymptotically. 
+More specifically, the following result in theorem \ref{theorem:nonintersect-grdpg} shows that single-linkage clustering on the ASE (algorithm \ref{alg:ase-singlelink}) results in perfect community detection for a sufficiently large yet finite $n$. 
 
 \begin{algorithm}[h]
 \label{alg:ase-singlelink}
@@ -2180,13 +2181,13 @@ The remainder of this section explores under which conditions these criteria are
 \KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$.}
 Compute $\hat{X}$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
 Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
-\caption{ASE clustering for nonintersecting communities.}
+\caption{Graph manifold clustering via single-linkage.}
 \end{algorithm}
 
 \begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting manifolds]
 \label{theorem:nonintersect-grdpg}
 Let $x_1, ..., x_n$ be points sampled on $K$ compact, connected manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \subset \mathbb{R}^d$ each with probability measures $F_1, ..., F_K$, and the manifolds are separated by distance at least $\delta = \min\limits_{k \neq \ell} \min\limits_{x_i \in \mathcal{M}_k, x_j \in \mathcal{M}_\ell} \| x_i - x_j \| > 0$. 
-Let $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and $A \sim \GRDPG_{p,q}(X; \rho_n)$ for some $p, q \in \mathbb{N}_0$ such that $p + q = d$ and sparsity parameter $\rho_n$ that satisfies $n \rho_n = \omega(\log^c n)$ for some $c > 1$. 
+Let $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and $A \sim \GRDPG_{p,q}(X; \rho_n)$ for some $p, q \in \mathbb{N}_0$ such that $p + q = d$ and sparsity parameter $\rho_n$ that satisfies $n \rho_n = \omega(\log^{4c} n)$ for some $c > 1$. 
 Define $A_n(\eta)$ as the event that an $\eta$-neighborhood graph constructed from the ASE of $A$ consists of exactly $K$ disconnected subgraphs that map exactly to each manifold. 
 Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \infty} P(A_n(\eta)) = 1$. 
 \end{theorem}
@@ -2270,7 +2271,9 @@ However, as we see in figure \ref{fig:sim-nonintersect}, an incorrect yet suffic
 
 Consider the setting of example \ref{ex:separated-curves-2} but for various $n$, in this case, $n = 16, 32, 64, 128, 256, 512, 1024$. 
 For each $n$, we sampled 50 RDPGs with this latent configuration, and for each graph, we applied algorithm \ref{alg:ase-singlelink} as well as algorithm \ref{alg:kcurves} both with random initialization and with four known labels per community. 
-Figure \ref{sim-nonintersect} shows that for sufficiently large graphs, single linkage clustering on the ASE is able to consistently produce perfect clustering, but $K$-curves clustering performs better for very small graphs. 
+Figure \ref{fig:sim-nonintersect} shows that for sufficiently large graphs, single linkage clustering on the ASE is able to consistently produce perfect clustering, but $K$-curves clustering performs better for very small graphs if a few labels are known beforehand. 
+$K$-curves clustering also has trouble with random initialization in this particular example. 
+This is because there are many plausible quadratic fits to random subsets of the embedding vectors. 
 
 ```{r sim-nonintersect, fig.height = 3, fig.width = 8, fig.cap = 'Median and IQR error rates over 50 replicates in the simulation setting for $K = 2$ curves.', cache = TRUE}
 n.vec <- 2 ^ c(4, 5, 6, 7, 8, 9, 10)
@@ -2447,7 +2450,7 @@ Performance as a measure of clustering accuracy is also problematic when there a
 Figures \ref{fig:multifit} and \ref{fig:loss} show the results of various curve fits and initialization strategies to example \ref{ex:intersect-curves}. 
 While only one of them (quadratic fit with random initialization) results in high clustering accuracy, cubic fit with spectral clustering initialization achieves a lower loss value. 
 
-```{r multifit, cache = TRUE, fig.height = 3, fig.width = 8, fig.cap = '$K$-curve clustering fits on the ASE using various approaches. Left: quadratic fit with random initialization. Middle: quadratic fit initialized via spectral clustering. Right: cubic fit initialized via spectral clustering.'}
+```{r multifit, cache = TRUE, fig.height = 3, fig.width = 8, fig.cap = '$K$-curves clustering fits on the ASE using various approaches. Left: quadratic fit with random initialization. Middle: quadratic fit initialized via spectral clustering. Right: cubic fit initialized via spectral clustering.'}
 f1 <- function(t) {
   x1 <- t ^ 2
   x2 <- 2 * t - 2 * t ^ 2
@@ -2546,26 +2549,26 @@ cubic.plot <- plot.estimated.curves(Xhat, cubic) +
 gridExtra::grid.arrange(random.plot, spectral.plot, cubic.plot, nrow = 1)
 ```
 
-```{r loss, cache = TRUE, fig.cap = 'Clustering loss vs. iteration for each run of $K$-curve clustering.', fig.width = 8, fig.height = 2}
+```{r loss, cache = TRUE, fig.cap = 'Clustering loss vs. iteration for each run of $K$-curves clustering.', fig.width = 8, fig.height = 2}
 loss.df <- dplyr::bind_rows(
   dplyr::tibble(loss = random$loss, 
-                initialization = 'random, quadratic',
+                `initialization and curve` = 'random, quadratic',
                 iteration = seq_along(random$loss)),
   dplyr::tibble(loss = spectral$loss, 
-                initialization = 'spectral, quadratic',
+                `initialization and curve` = 'spectral, quadratic',
                 iteration = seq_along(spectral$loss)),
   dplyr::tibble(loss = cubic$loss, 
-                initialization = 'spectral, cubic',
+                `initialization and curve` = 'spectral, cubic',
                 iteration = seq_along(cubic$loss))
 ) %>% 
-  dplyr::mutate(initialization = factor(initialization,
+  dplyr::mutate(`initialization and curve` = factor(`initialization and curve`,
                                         levels = c('random, quadratic',
                                                    'spectral, quadratic',
                                                    'spectral, cubic')))
 
 ggplot(loss.df) + 
-  geom_point(aes(x = iteration, y = loss, colour = initialization)) + 
-  geom_line(aes(x = iteration, y = loss, colour = initialization)) + 
+  geom_point(aes(x = iteration, y = loss, colour = `initialization and curve`)) + 
+  geom_line(aes(x = iteration, y = loss, colour = `initialization and curve`)) + 
   # ylim(0, max.loss) +
   scale_y_log10() +
   labs(y = 'clustering loss') + 
@@ -2574,7 +2577,7 @@ ggplot(loss.df) +
 
 \begin{theorem}
 \label{thm:kcurves-semisupervised}
-Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a Bezier curve of order $R$ that does not self-intersect (for any $s \neq t$, $g_k(s) \neq g_k(t)$). 
+Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a curve of order $R$ that does not self-intersect (for any $s \neq t$, $g_k(s) \neq g_k(t)$). 
 Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
 Then if $n \rho_n = \omega(\log^{4c} n)$, as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
 $$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_K; X) \stackrel{p}{\to} 0,$$
@@ -2919,7 +2922,7 @@ In these graphs, each vertex is a neuron, and the labels correspond to one of fo
 The resulting graphs are illustrated in figure \ref{fig:mbconnectome-graph}. 
 
 The ASE in two dimensions suggest that the MBM with one dimensional quadratic manifolds is an appropriate model for these graphs (figure \ref{fig:mbconnectome-ase}). 
-Fitting two quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 72.2\% accuracy for the left hemisphere connectome and 83.6\% accuracy for the right hemisphere connectome. 
+Fitting four quadratic Bezier curves to the ASEs (figure \ref{fig:mbconnectome-kcurves}) results in 72.2\% accuracy for the left hemisphere connectome and 83.6\% accuracy for the right hemisphere connectome. 
 The curves were fitted on three-dimensional ASEs with $p = 2$ and $q = 1$, which were chosen based on setting the threshold $|\lambda_i| > \sqrt{n}$ where $\lambda_i$ is the $i$^th^ greatest eigenvalue. 
 Figure \ref{fig:mbconnectome-kcurves} shows the embedding and curves projected to the first two components. 
 

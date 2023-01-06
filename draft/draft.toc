@@ -9,8 +9,8 @@
 \contentsline {subsection}{\numberline {2.3}Random Graph Models and Sparsity}{18}{subsection.2.3}%
 \contentsline {subsection}{\numberline {2.4}The Degree Corrected Block Model and the Popularity Adjusted Block Model}{19}{subsection.2.4}%
 \contentsline {subsection}{\numberline {2.5}A Hierarchy of Block Models}{26}{subsection.2.5}%
-\contentsline {subsection}{\numberline {2.6}The Generalized Random Dot Product Graph}{28}{subsection.2.6}%
-\contentsline {subsection}{\numberline {2.7}Connecting the SBM and DCBM to the GRDPG}{31}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.6}The Generalized Random Dot Product Graph}{27}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Connecting the SBM and DCBM to the GRDPG}{30}{subsection.2.7}%
 \contentsline {section}{\numberline {3}Popularity Adjusted Block Models are Generalized Random Dot Product Graphs}{37}{section.3}%
 \contentsline {subsection}{\numberline {3.1}The Geometry of PABMs}{37}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Algorithms}{42}{subsection.3.2}%
@@ -28,9 +28,9 @@
 \contentsline {subsubsection}{\numberline {4.2.1}Previous Work}{67}{subsubsection.4.2.1}%
 \contentsline {subsection}{\numberline {4.3}Algorithms}{68}{subsection.4.3}%
 \contentsline {subsection}{\numberline {4.4}Simulation Study}{76}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Applications}{80}{subsection.4.5}%
-\contentsline {section}{\numberline {5}Discussion}{85}{section.5}%
-\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{88}{section.6}%
-\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{93}{section.7}%
-\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{97}{section.8}%
-\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{100}{section.9}%
+\contentsline {subsection}{\numberline {4.5}Applications}{79}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Discussion}{84}{section.5}%
+\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{87}{section.6}%
+\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{92}{section.7}%
+\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{96}{section.8}%
+\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{99}{section.9}%
