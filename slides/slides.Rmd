@@ -305,7 +305,7 @@ knitr::include_graphics('../proposal/noroozi-pensky-hierarchy.png')
 
 Log-likelihood function for the SBM:
 
-$$\ell(z, \theta; A) = \sum_{i<j} \sum_{k, \ell} z_{ij} z_{j \ell} \Big(A_{ij} \log_{k \ell} + (1 - A_{ij}) \log(1 - \theta_{k \ell}) \Big)$$
+$$\ell(z, \theta; A) = \sum_{i<j} \sum_{k, \ell} z_{ik} z_{j \ell} \Big(A_{ij} \log_{k \ell} + (1 - A_{ij}) \log(1 - \theta_{k \ell}) \Big)$$
 
 * Direct maximization is NP-hard.
 
@@ -706,7 +706,7 @@ positive and $K (K-1) / 2$ most negative eigenvalues.
 
 ## Orthogonal Spectral Clustering
 
-**Theorem** (KTT): 
+**Theorem** (KTT):  
 Let $\hat{B}$ with entries $\hat{B}_{ij}$ be the affinity matrix from OSC. 
 Then $\forall$ pairs $(i, j)$ belonging to different communities 
 and sparsity factor satisfying $n \rho_n = \omega\big((\log n)^{4c}\big)$,  
