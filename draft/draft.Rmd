@@ -2232,7 +2232,7 @@ We call this algorithm $K$-curves clustering.
 In this algorithm, the loss function that we wish to minimize is
 \begin{equation}
 \label{eq:kcurves-loss}
-L(z_1, ..., z_n, g_1, ..., g_n; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
+L(z_1, ..., z_n, g_1, ..., g_K; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
 \end{equation}
 
 \begin{algorithm}[h]

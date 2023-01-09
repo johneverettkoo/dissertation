@@ -1,0 +1,1773 @@
+---
+title: Community Detection in the Setting of Generalized Random Dot Product Graphs
+author: |
+  | John Koo
+  |
+  | Department of Statistics
+  | Indiana University
+date: 'January 2023'
+output: 
+  beamer_presentation:
+    fig_crop: no
+    theme: 'default'
+    colortheme: 'beaver'
+    includes:
+      in_header: page_headers.tex
+header-includes:
+- \usepackage{setspace}
+- \usepackage{float}
+- \usepackage{mathtools}
+- \usepackage{natbib}
+- \usepackage[linesnumbered,ruled,vlined]{algorithm2e} 
+- \setcitestyle{numbers,square,comma}
+- \usepackage{verbatim}
+- \usepackage{amsthm}
+- \usepackage{comment}
+- \setbeamertemplate{itemize items}[circle]
+- \usepackage{caption}
+- \captionsetup[figure]{font=scriptsize}
+- \captionsetup[figure]{labelformat=empty}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      comment = NA, 
+                      warning = FALSE, 
+                      message = FALSE,
+                      fig.align = 'center',
+                      fig.lp = '')
+options(xtable.comment = FALSE, 
+        xtable.table.placement = 'H')
+library(ggplot2)
+library(ggraph)
+import::from(magrittr, `%>%`)
+import::from(foreach, `%dopar%`)
+theme_set(theme_bw())
+
+source('~/dev/pabm-grdpg/functions.R')
+source('~/dev/manifold-block-models/functions.R')
+set.seed(314159)
+
+doMC::registerDoMC(parallel::detectCores())
+```
+
+## Outline
+
+1. Random Graph Models
+    * Block Models
+    * Generalized Random Dot Product Graphs
+
+2. PABMs are GRDPGs
+
+3. Manifold Block Models
+
+# Random Graph Models
+
+## Problem Setup
+
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\tr}{\mathrm{Tr}}
+\newcommand{\blockdiag}{\mathrm{blockdiag}}
+\newcommand{\indep}{\stackrel{\mathrm{ind}}{\sim}}
+\newcommand{\iid}{\stackrel{\mathrm{iid}}{\sim}}
+\newcommand{\Bernoulli}{\mathrm{Bernoulli}}
+\newcommand{\Betadist}{\mathrm{Beta}}
+\newcommand{\BG}{\mathrm{BernoulliGraph}}
+\newcommand{\Uniform}{\mathrm{Uniform}}
+\newcommand{\Categorical}{\mathrm{Categorical}}
+\newcommand{\PABM}{\mathrm{PABM}}
+\newcommand{\RDPG}{\mathrm{RDPG}}
+\newcommand{\GRDPG}{\mathrm{GRDPG}}
+\newcommand{\Multinomial}{\mathrm{Multinomial}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\as}{\stackrel{\mathrm{a.s.}}{\to}}
+\newcommand{\ER}{\text{Erd\"{o}s-R\'{e}nyi}}
+\newcommand{\SBM}{\mathrm{SBM}}
+\newcommand{\DCBM}{\mathrm{DCBM}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\MBM}{\mathrm{MBM}}
+
+```{r out.width = '50%', fig.height = 3, fig.width = 4, fig.cap = 'Friendship network of 81 faculty at a UK university (Nepusz et al., 2008). The vertices are labeled by school affiliation.'}
+data('UKfaculty', package = 'igraphdata')
+A <- as.matrix(igraph::as_adjacency_matrix(UKfaculty, type = 'both'))
+A <- sign(A + t(A))
+z <- factor(igraph::vertex_attr(UKfaculty)$Group)
+n <- length(z)
+
+ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = z), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+```
+\begin{center}
+How might we cluster the nodes of a network?
+\end{center}
+
+## Bernoulli Random Graphs
+
+Let $G$ be an undirected and unweighted graph with $n$ vertices.
+
+$G$ is described by adjacency matrix $A$ such that
+$A_{ij} = \begin{cases} 
+1 & \text{an edge connects vertices } i \text{ and } j \\
+0 & \text{otherwise}
+\end{cases}$
+
+$A_{ji} = A_{ij}$ and $A_{ii} = 0$.
+
+\vspace*{1\baselineskip}
+
+$A \sim \BG(P)$ iff:
+
+1. $P$ is a matrix of edge probabilities between pairs of vertices.
+2. $A_{ij} \indep \Bernoulli(P_{ij})$ for each $i < j$.
+
+## Block Models
+
+Suppose each vertex $v_1, ..., v_n$ has labels $z_1, ..., z_n \in \{1, ..., K\}$,  
+and each $P_{ij}$ depends on labels $z_i$ and $z_j$.  
+Then $A \sim \BG(P)$ is a *block model*.
+
+**Example 1**: Stochastic Block Model with $K=2$ communities. 
+
+::: columns
+
+:::: column
+
+$P_{ij} = \begin{cases} 
+p & z_i = z_j = 1 \\
+q & z_i = z_j = 2 \\
+r & z_i \neq z_j
+\end{cases}$
+
+::::
+
+:::: column
+
+```{r, fig.height = 3, fig.width = 4, out.width = '100%'}
+set.seed(123)
+
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/4
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+A <- draw.graph(P)
+qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
+```
+
+::::
+
+:::
+
+## Block Models
+
+Erdos-Renyi Model (1959)
+
+* $P_{ij} = \theta$ (not a block model)
+* 1 parameter $\theta$
+
+Stochastic Block Model (Lorrain and White, 1971)
+
+* $P_{ij} = \theta_{z_i z_j}$
+* $K (K + 1) / 2$ parameters $\theta_{kl}$
+
+Degree Corrected Block Model (Karrer and Newman, 2011)
+
+* $P_{ij} = \theta_{z_i z_j} \omega_i \omega_j$
+* $K (K + 1) / 2 + n$ parameters $\theta_{kl}$, $\omega_i$
+
+Popularity Adjusted Block Model (Sengupta and Chen, 2017)
+
+* $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
+* $K n$ parameters $\lambda_{ik}$
+
+## Block Models
+
+Dating network as an SBM: $P_{ij} = \theta_{z_i, z_j}$
+
+* This model is disassortative; $\theta_{k \ell} > \theta_{kk}$ for $k \neq \ell$.
+* Each individual has the same probability of matching with every other individual conditioned on gender. 
+
+```{r dating-sbm, fig.width = 4, , fig.height = 2, cache = TRUE}
+set.seed(123)
+
+n <- 2 ** 6
+z <- sample(c(1, 2), n, replace = TRUE)
+z <- sort(z)
+n1 <- sum(z == 1)
+n2 <- sum(z == 2)
+z[z == 1] <- 'F'
+z[z == 2] <- 'M'
+theta11 <- .02
+theta22 <- .02
+theta12 <- .2
+P <- matrix(theta12, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- theta11
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- theta22
+A <- draw.graph(P)
+# qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
+ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = TRUE) + 
+  labs(colour = 'Gender') + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+```
+
+## Block Models
+
+Dating network as a DCBM: $P_{ij} = \omega_i \omega_j \theta_{z_i, z_j}$
+
+* Models each individual's popularity---some individuals form more connections than others.
+* Still assumes that all members of each gender have the same odds of matching between two genders. 
+
+```{r dating-dcbm, fig.width = 4, , fig.height = 2, cache = TRUE}
+set.seed(12345)
+
+n <- 2 ** 6
+z <- sample(c(1, 2), n, replace = TRUE)
+z <- sort(z)
+n1 <- sum(z == 1)
+n2 <- sum(z == 2)
+z[z == 1] <- 'F'
+z[z == 2] <- 'M'
+theta11 <- .03
+theta22 <- .03
+theta12 <- .3
+omega <- runif(n, 1/3, 1)
+Omega <- omega %*% t(omega)
+P <- matrix(theta12, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- theta11
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- theta22
+P <- P * Omega
+A <- draw.graph(P)
+ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = TRUE) + 
+  labs(colour = 'Gender') + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+```
+
+## Block Models
+
+Dating network as a PABM: $P_{ij} = \lambda_{i, z_j} \lambda_{j, z_i}$
+
+* Models each user's sexual orientation as well as popularity. 
+* Some individuals are more likely to connect with members of the same gender while others are more likely to connect with members of the opposite gender.
+
+```{r dating-pabm, fig.width = 4, , fig.height = 2, cache = TRUE}
+set.seed(12345)
+n <- 2 ** 6
+Az <- draw.pabm.beta.2(n, 1, 6, 2, 2, .5)
+A <- Az$A
+z <- Az$z
+z[z == 1] <- 'F'
+z[z == 2] <- 'M'
+
+ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = TRUE) + 
+  labs(colour = 'Gender') + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+```
+
+## Hierarchy of Block Models
+
+PABM $\to$ DCBM: $\lambda_{ik} = \sqrt{\theta_{z_i k}} \omega_i$
+
+DCBM $\to$ SBM: $\omega_i = 1$
+
+SBM $\to$ Erdos-Renyi: $\theta_{kl} = \theta$
+
+\begin{center}
+```{r, out.width = '125px'}
+knitr::include_graphics('../proposal/noroozi-pensky-hierarchy.png')
+```
+
+\tiny{Noroozi and Pensky, 2021}
+\end{center}
+
+## Estimation for Block Models
+
+Log-likelihood function for the SBM:
+
+$$\ell(z, \theta; A) = \sum_{i<j} \sum_{k, \ell} z_{ij} z_{j \ell} \Big(A_{ij} \log_{k \ell} + (1 - A_{ij}) \log(1 - \theta_{k \ell}) \Big)$$
+
+* Direct maximization is NP-hard.
+
+* Expectation-Maximization requires an independence relaxation.
+
+## Estimation for Block Models
+
+
+\begin{algorithm}[H]
+  \label{algo:sbm-em}
+  \scriptsize
+  \DontPrintSemicolon
+  \SetAlgoLined
+  \KwData{Adjacency matrix $A$, number of communities $K$}
+  \KwResult{Estimated community label probabilities $\{\pi_{ik}\}$ for which each $\pi_{ik} = P(z_i = k \mid A)$, estimated community edge probabilities $\{\hat{\theta}_{k \ell}\}_K$}
+  \caption{Approximate EM algorithm for the SBM}
+  Initialize $\{\pi_{ik}\}$, $\{\theta_{k \ell}\}$.\;
+  \While{$\|\nabla \ell\| > \epsilon$} {
+    \For {$i = 1, ..., n$} {
+      \For {$k = 1, ..., K$} {
+      E-step: $\pi_{ik} \propto \exp \bigg( \sum_{j \neq i} \sum_{\ell} \pi_{j \ell} (A_{ij} \log \hat{\theta}_{k \ell} + (1 - A_{ij}) \log (1 - \hat{\theta}_{k \ell})) \bigg)$.\;
+      }
+    }
+    \For {$k = 1, ..., K$} {
+      \For {$\ell = 1, ..., K$} {
+        M-step: $\hat{\theta}_{k \ell} = \frac{\sum_{i < j} A_{ij} \pi_{ik} \pi_{j \ell}}{\sum_{i < j} \pi_{ik} \pi_{j \ell}}$.\;
+      }
+    }
+  }
+\end{algorithm}
+
+## Generalized Random Dot Product Graphs
+
+**Def** Generalized Random Dot Product Graph  
+(Rubin-Delanchy, Cape, Tang, Priebe, 2022)
+
+Let $I_{p,q} = \blockdiag(I_p, -I_q)$ and suppose that $x_1, \ldots, x_n \in \mathbb{R}^{p+q}$ are such that $x_i^\top I_{p,q} x_j \in [0,1]$.  
+
+Then $A \sim \GRDPG_{p, q}(X)$ iff $A \sim \BG(X I_{p,q} X^\top)$, where $X = \begin{bmatrix} x_1 & \cdots & x_n \end{bmatrix}^\top$. 
+
+```{r rdpg-example, fig.length = 6, fig.height = 2, out.width = '100%', cache = TRUE, fig.cap = 'Latent vectors (left) and GRDPG (right).'}
+set.seed(123)
+
+n <- 200
+t. <- runif(n)
+x <- t. ^ 2
+y <- 2 * t. * (1 - t.)
+
+latent.vec.plot <- ggplot() + 
+  geom_point(aes(x = x, y = y, colour = t.)) + 
+  coord_fixed() + 
+  theme_bw() + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = 'none') + 
+  viridis::scale_colour_viridis()
+
+X <- cbind(x, y)
+P <- X %*% t(X)
+A <- draw.graph(P)
+
+rdpg.plot <- ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = t.), 
+                  show.legend = FALSE) + 
+  theme_void() + 
+  viridis::scale_colour_viridis()
+
+gridExtra::grid.arrange(latent.vec.plot, rdpg.plot, nrow = 1)
+```
+
+## Generalized Random Dot Product Graphs
+
+Adjacency Spectral Embedding (Sussman et al., 2012) estimates $x_1, ..., x_n \in \mathbb{R}^{p+q}$ from $A$: 
+
+1. Let $\hat{\Lambda}$ be the diagonal matrix that contains the absolute values of the $p$ most positive and the $q$ most negative eigenvalues.
+2. Let $\hat{V}$ be the matrix whose columns are the corresponding eigenvectors.
+3. Compute $\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$.
+
+**Theorem**: $\max\limits_i \|\hat{X}_i - Q_n X_i \| = O_P \Big( \frac{(\log n)^c}{n^{1/2}} \Big)$ 
+as $n \to \infty$
+
+```{r ase-example, fig.length = 8, fig.height = 2, out.width = '100%', cache = TRUE, fig.cap = 'Latent vectors (left), GRDPG (center), and ASE (right).'}
+set.seed(123)
+
+n <- 200
+t. <- runif(n)
+x <- t. ^ 2
+y <- 2 * t. * (1 - t.)
+
+latent.vec.plot <- ggplot() + 
+  geom_point(aes(x = x, y = y, colour = t.)) + 
+  coord_fixed() + 
+  theme_bw() + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = 'none') + 
+  viridis::scale_colour_viridis()
+
+X <- cbind(x, y)
+P <- X %*% t(X)
+A <- draw.graph(P)
+
+rdpg.plot <- ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = t.), 
+                  show.legend = FALSE) + 
+  theme_void() + 
+  viridis::scale_colour_viridis()
+
+Y <- embedding(P, 2, 0)
+Xhat <- embedding(A, 2, 0)
+Xhat[, 1] <- -Xhat[, 1]
+ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = t.)) + 
+  geom_line(aes(x = Y[, 1], y = Y[, 2]), colour = 'red') + 
+  coord_fixed() + 
+  theme_bw() + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = 'none') + 
+  viridis::scale_colour_viridis()
+
+gridExtra::grid.arrange(latent.vec.plot, rdpg.plot, ase.plot, nrow = 1)
+```
+
+## SBMs are GRDPGs
+
+All Bernoulli Graphs are GRDPGs. 
+
+**Example 1** (cont'd): SBM with $K = 2$.
+
+::: columns
+
+:::: column
+
+$$P_{ij} = \begin{cases} 
+p & z_i = z_j = 1 \\
+q & z_i = z_j = 2 \\
+r & z_i \neq z_j
+\end{cases}$$
+
+```{r fig.height = 3, fig.width = 6, out.width = '100%'}
+set.seed(123)
+
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/4
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+A <- draw.graph(P)
+qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
+```
+
+::::
+
+:::: column
+
+$$P = 
+\begin{bmatrix} 
+P^{(11)} & P^{(12)} \\
+P^{(21)} & P^{(22)}
+\end{bmatrix} =
+X I_{2,0} X^\top$$
+
+$$X = \begin{bmatrix} 
+\sqrt{p} & 0 \\
+\vdots & \vdots \\
+\sqrt{p} & 0 \\
+\sqrt{r^2 / p} & \sqrt{q - r^2 / p} \\
+\vdots & \vdots \\
+\sqrt{r^2 / p} & \sqrt{q - r^2 / p}
+\end{bmatrix}$$
+
+::::
+
+:::
+
+## SBMs are GRDPGs
+
+**Example 1** (cont'd): To perform community detection, 
+
+1. Note that $A$ is a GRDPG because $P = X I_{2, 0} X^\top$.
+2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$ with 
+$\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$.
+3. Apply a clustering algorithm (e.g., $K$-means) to $\hat{X}$,  
+noting that $\hat{X}$ approaches point masses as $n \to \infty$. 
+
+```{r, fig.height = 5, fig.width = 5, out.width = '50%', fig.cap = 'ASE of the adjacency matrix drawn from an SBM.'}
+P.eigen = eigen(P)
+X <- P.eigen$vectors[, 1:2] %*% diag(P.eigen$values[1:2] ** .5)
+
+A.eigen <- eigen(A)
+X.hat <- A.eigen$vectors[, 1:2] %*% diag(A.eigen$values[1:2] ** .5)
+X.hat[, 2] <- -X.hat[, 2]
+plot(X.hat, asp = 1, col = z * 2, xlab = NA, ylab = NA)
+points(X, pch = 16, col = z * 2)
+```
+
+## DCBMs are GRDPGs
+
+**Example 2**
+
+* Convert example 1 to a DCBM by $P_{ij} \leftarrow \omega_i \omega_j P_{ij}$.
+* This is equivalent to $P \leftarrow \Omega P \Omega$ where $\Omega = \diag(\omega_1, ..., \omega_n)$. 
+* This is equivalent to left-multiplying the matrix of latent vectors $X$ by $\Omega$.
+* The point masses in the latent structure of the SBM are "stretched out" toward the origin to form rays. 
+
+$$X = \begin{bmatrix}
+\omega_1 \sqrt{\theta_{11}} & 0 \\ 
+\vdots & \vdots \\ 
+\omega_{n_1} \sqrt{\theta_{11}} & 0 \\ 
+\omega_{n_1 + 1} \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_{n_1 + 1} \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\vdots & \vdots \\
+\omega_n \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_n \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\end{bmatrix}$$
+
+## DCBMs are GRDPGs
+
+**Example 2** (cont'd): To perform community detection,
+
+1. Note that $A$ is a GRDPG because $P = X I_{2, 0} X^\top$.
+2. Compute the ASE $A \approx \hat{X} \hat{X}^\top$ with 
+$\hat{X} = \hat{V} \hat{\Lambda}^{1/2}$.
+3. Apply a clustering algorithm (e.g., kernel $K$-means with the cosine kernel) to $\hat{X}$, noting that $\hat{X}$ approaches rays as $n \to \infty$. 
+
+```{r fig.height = 2, fig.width = 6, out.width = '100%', fig.cap = 'DCBM (left) and its ASE (right).'}
+set.seed(123)
+
+n1 <- 2 ** 7
+n2 <- 2 ** 7
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/4
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+
+omega <- runif(n)
+P <- diag(omega) %*% P %*% diag(omega)
+A <- draw.graph(P)
+
+dcbm.plot <- ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = FALSE) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+Xhat <- embedding(A, 2, 0)
+Y <- embedding(P, 2, 0)
+
+ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1], 
+                 y = Xhat[, 2], 
+                 colour = factor(z)),
+             size = .25) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  labs(x = NULL, y = NULL) + 
+  theme(legend.position = 'none') + 
+  coord_fixed()
+
+gridExtra::grid.arrange(dcbm.plot, ase.plot, nrow = 1)
+```
+
+## Example: UK Faculty Network
+
+* Treating graphs with community structure as a GRDPG is useful for both EDA and inference. 
+* The ASE of the UK faculty network (Nepusz et al., 2008) reveals three communities and that a DCBM is an appropriate model. 
+* Clustering on the ASE results in low community detection error. 
+
+```{r, fig.width = 6, fig.height = 2, out.width = '100%', fig.cap = 'UK faculty network (left) and its ASE (right).'}
+data(UKfaculty, package = 'igraphdata')
+A <- as.matrix(igraph::as_adjacency_matrix(UKfaculty, type = 'both'))
+A <- sign(A + t(A))
+z <- factor(igraph::vertex_attr(UKfaculty)$Group)
+A <- A[z != 4, z != 4]
+z <- z[z != 4]
+Xhat <- embedding(A, 3, 0)
+n <- length(z)
+
+graph.plot <- ggraph(A, layout = 'auto') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = FALSE) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 2], 
+                 y = Xhat[, 3], 
+                 colour = factor(z)),
+             size = .5) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  labs(x = 'comp 2', y = 'comp 3') + 
+  theme(legend.position = 'none') + 
+  coord_fixed()
+
+gridExtra::grid.arrange(graph.plot, ase.plot, nrow = 1)
+```
+
+# PABMs are GRDPGs
+
+## Popularity Vectors
+
+**Lemma** (Noroozi, Rimal, and Pensky, 2020): 
+
+$A$ is sampled from a PABM if $P$ can be described as:
+
+1. Let each $P^{(kl)}$ denote the $n_k \times n_l$ matrix of edge probabilities 
+between communities $k$ and $l$. 
+2. Organize popularity parameters as vectors 
+$\lambda^{(kl)} \in \mathbb{R}^{n_k}$ 
+such that $\lambda^{(kl)}_i = \lambda_{k_i l}$ is the popularity parameter 
+of the $i$^th^ vertex of community $k$ towards community $l$. 
+3. Each block can be decomposed as 
+$P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
+
+This result reveals that $P$ is rank $K^2$ and has a linear latent structure. 
+
+## PABMs are GRDPGs
+
+**Theorem** (KTT): $A \sim \PABM(\{\lambda_{ik}\}_K)$ is equivalent to 
+$A \sim \GRDPG_{p, q}(X U)$ with
+
+* $p = K (K + 1) / 2$, $q = K (K - 1) / 2$;
+* $U$ is an orthogonal matrix;
+* $X \in \mathbb{R}^{n \times K^2}$ is a block diagonal matrix 
+composed of popularity vectors with each block corresponding to a community.  
+
+$$X = \begin{bmatrix}
+\Lambda^{(1)} & \cdots & 0 \\
+0 & \ddots & 0 \\
+0 & \cdots & \Lambda^{(K)}
+\end{bmatrix} 
+\in \mathbb{R}^{n \times K^2}$$
+
+$$\Lambda^{(k)} = \begin{bmatrix} 
+\lambda^{(k1)} & \cdots & \lambda^{(kK)} 
+\end{bmatrix} 
+\in \mathbb{R}^{n_k \times K}$$
+
+$$A \sim \PABM(\{\lambda_{ik}\}_K) \text{ iff } A \sim \GRDPG_{p, q}(X U)$$
+
+## PABMs are GRDPGs
+
+::: columns
+
+:::: column
+
+$$X = \begin{bmatrix}
+\Lambda^{(1)} & \cdots & 0 \\
+0 & \ddots & 0 \\
+0 & \cdots & \Lambda^{(K)}
+\end{bmatrix}$$
+
+::::
+
+:::: column
+
+\vspace*{2\baselineskip}
+
+$$U \in \mathbb{O}(K^2)$$
+
+::::
+
+:::
+
+$$A \sim \PABM(\{\lambda^{(kl)}\}_K) \iff A \sim \GRDPG_{p, q}(X U)$$
+
+**Remark 1** (orthogonality of subspaces):
+If $y_i^\top$ and $y_j^\top$ are two rows of $X U$ corresponding 
+to different communities, then $y_i^\top y_j = 0$.
+
+**Remark 2** (non-uniqueness of the latent configuration):  
+If $A \sim \GRDPG_{p, q}(Y)$, then $A \sim \GRDPG_{p, q}(Y Q)$ for any $Q$ in 
+the indefinite orthogonal group with signature $p, q$.
+
+**Remark 3**: Communities correspond to subspaces even with linear transformation $Q \in \mathbb{O}(p, q)$, but this may break the orthogonality property.
+
+## Orthogonal Spectral Clustering
+
+**Theorem** (KTT): 
+If $P = V \Lambda V^\top$ and $B = n V V^\top$,  
+then $B_{ij} = 0$ if $z_i \neq z_j$.
+
+**Algorithm**: Orthogonal Spectral Clustering:
+
+1. Let $V$ be the eigenvectors of $A$ corresponding to the $K (K+1)/2$ most 
+positive and $K (K-1) / 2$ most negative eigenvalues.
+2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
+3. Construct graph $G$ using $B$ as its similarity matrix.
+4. Partition $G$ into $K$ disconnected subgraphs.
+
+**Theorem** (KTT): 
+Let $\hat{B}$ with entries $\hat{B}_{ij}$ be the affinity matrix from OSC. 
+Then $\forall$ pairs $(i, j)$ belonging to different communities 
+and sparsity factor satisfying $n \rho_n = \omega\big((\log n)^{4c}\big)$,  
+$\max_{i, j} \hat{B}_{ij} = 
+O_P \Big( \frac{(\log n)^c}{\sqrt{n \rho_n}} \Big)$ 
+as $n \to \infty$.
+
+**Corollary**: OSC results in zero clustering error as $n \to \infty$, with probability 1.
+
+## Sparse Subspace Clustering
+
+**Corollary**: The ASE of $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ lies near a collection of $K$-dimensional subspaces in $K^2$ dimensions.
+
+**Algorithm**: Sparse Subspace Clustering (Elhamifar & Vidal, 2009):
+
+1. Solve $n$ optimization problems $c_i = \arg\min_c \|c\|_1$ 
+subject to $x_i = X^\top c$ and $c^{(i)} = 0$.  
+This is typically performed via LASSO: 
+$c_i = \arg\min \frac{1}{2} \|x_i - X_{-i}^\top c\|_2^2 + \lambda \|c\|_1$
+2. Compile solutions $C = \begin{bmatrix} c_1 & \cdots & c_n \end{bmatrix}$.
+3. Construct affinity matrix $B = |C| + |C^\top|$.
+
+## Sparse Subspace Clustering
+
+Noroozi et al. observed that the rank of $P$ is $K^2$ 
+and the columns of $P$ belonging to each community has rank $K$ 
+to justify SSC for the PABM.
+
+$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } A_{\cdot, i} = A c
+\text{ and } c^{(i)} = 0$$
+
+They were able to show that this obeys SDP if we replace $A$ with $P$.
+
+GRDPG-based approach: Apply SSC to the ASE of $A$.
+
+Stronger result: Apply SSC to the eigenvectors of $A$.
+
+$$c_i = \arg\min_{c} \|c\|_1 \text{ subject to } 
+\hat{v}_i = \hat{V}^\top c \text{ and } c^{(i)} = 0$$
+$$A \approx \hat{V} \hat{\Lambda} \hat{V}^\top$$
+
+## Sparse Subspace Clustering
+
+**Theorem** (KTT): 
+
+Let 
+
+* $P_n$ describe the edge probability matrix of the PABM with $n$ vertices, and 
+$A_n \sim \BG(P_n)$;
+* $\hat{V}_n$ be the matrix of eigenvectors of $A_n$ corresponding to the 
+$K (K + 1) / 2$ most positive and $K (K - 1) / 2$ most negative eigenvalues. 
+
+Then 
+
+* For some $\lambda > 0$ and $N < \infty$, $\sqrt{n} \hat{V}_n$ obeys the Subspace Detection Property with probability 1 when $n > N$.
+
+Remarks:
+
+* For large $n$, we can identify $\lambda$ for SDP (Wang and Xu, 2016).
+* SDP does not guarantee community detection.
+
+## Simulation Results
+
+1. $z_1, ..., z_n \iid \Categorical(1 / K, ..., 1 / K)$
+2. $\lambda_{ik} \stackrel{iid}{\sim} \Betadist(a_{ik}, b_{ik})$  
+$a_{ik} = \begin{cases} 2 & z_i = k \\ 1 & z_i \neq k \end{cases}$, 
+$b_{ik} = \begin{cases} 1 & z_i = k \\ 2 & z_i \neq k \end{cases}$
+3. $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
+4. $A \sim \BG(P)$
+
+```{r, fig.height = 2, fig.width = 8, out.width = '100%'}
+clustering.df <- readr::read_csv('~/dev/pabm-grdpg/simulation-results/cluster-sim-balanced.csv')
+
+clustering.df %>%
+  dplyr::group_by(n, K) %>%
+  dplyr::summarise(
+    med.err = median(error.osc),
+    first.q = quantile(error.osc, .25),
+    third.q = quantile(error.osc, .75),
+    med.err.ssc = median(error.ssc.ase),
+    first.q.ssc = quantile(error.ssc.ase, .25),
+    third.q.ssc = quantile(error.ssc.ase, .75),
+    med.err.louvain = median(error.louvain),
+    first.q.louvain = quantile(error.louvain, .25),
+    third.q.louvain = quantile(error.louvain, .75),
+    med.err.ssc.A = median(error.ssc.A),
+    first.q.ssc.A = quantile(error.ssc.A, .25),
+    third.q.ssc.A = quantile(error.ssc.A, .75)
+  ) %>% 
+  dplyr::ungroup() %>% 
+  ggplot() +
+  theme_bw() + 
+  theme(legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.justification = 0) + 
+  scale_x_log10(breaks = c(128, 256, 512, 1024, 2048, 4096),
+                labels = c(7, 8, 9, 10, 11, 12)) +
+  scale_y_log10() + 
+  labs(y = 'error count', 
+       x = expression(log[2] (n)),
+       colour = NULL, shape = NULL) +
+  geom_line(aes(x = n, y = med.err * n,
+                colour = 'Orthogonal Spectral Clustering')) +
+  geom_point(aes(x = n, y = med.err * n,
+                 colour = 'Orthogonal Spectral Clustering', 
+                 shape = 'Orthogonal Spectral Clustering')) +
+  geom_errorbar(aes(x = n, ymin = first.q * n, ymax = third.q * n,
+                    colour = 'Orthogonal Spectral Clustering'), width = .1) + 
+  geom_line(aes(x = n, y = med.err.ssc * n,
+                colour = 'Sparse Subspace Clustering on ASE')) +
+  geom_point(aes(x = n, y = med.err.ssc * n,
+                 colour = 'Sparse Subspace Clustering on ASE', 
+                 shape = 'Sparse Subspace Clustering on ASE')) +
+  geom_errorbar(aes(x = n, ymin = first.q.ssc * n, ymax = third.q.ssc * n,
+                    colour = 'Sparse Subspace Clustering on ASE'), width = .1) +
+  geom_line(aes(x = n, y = med.err.ssc.A * n,
+                colour = 'Sparse Subspace Clustering on Adj. Matrix')) +
+  geom_point(aes(x = n, y = med.err.ssc.A * n,
+                 colour = 'Sparse Subspace Clustering on Adj. Matrix', 
+                 shape = 'Sparse Subspace Clustering on Adj. Matrix')) +
+  geom_errorbar(aes(x = n, ymin = first.q.ssc.A * n, ymax = third.q.ssc.A * n,
+                    colour = 'Sparse Subspace Clustering on Adj. Matrix'), 
+                width = .1) +
+  geom_line(aes(x = n, y = med.err.louvain * n,
+                colour = 'Modularity Maximization')) + 
+  geom_point(aes(x = n, y = med.err.louvain * n,
+                 colour = 'Modularity Maximization', 
+                 shape = 'Modularity Maximization')) + 
+  geom_errorbar(aes(x = n, ymin = first.q.louvain * n, ymax = third.q.louvain * n,
+                    colour = 'Modularity Maximization'), width = .1) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  facet_wrap(~ K, labeller = 'label_both')
+```
+
+## Simulation Results
+
+1. $z_1, ..., z_n \iid \Categorical(\alpha_1, ..., \alpha_K)$ for $\alpha_k = \frac{k^{-1}}{\sum_{\ell=1}^K \ell^{-1}}$
+2. $\lambda_{ik} \stackrel{iid}{\sim} \Betadist(a_{ik}, b_{ik})$  
+$a_{ik} = \begin{cases} 2 & z_i = k \\ 1 & z_i \neq k \end{cases}$, 
+$b_{ik} = \begin{cases} 1 & z_i = k \\ 2 & z_i \neq k \end{cases}$
+3. $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
+4. $A \sim \BG(P)$
+
+```{r, fig.height = 2, fig.width = 8, out.width = '100%'}
+clustering.df <- readr::read_csv('~/dev/pabm-grdpg/simulation-results/cluster-sim-imbalanced.csv')
+
+clustering.df %>%
+  dplyr::group_by(n, K) %>%
+  dplyr::summarise(
+    med.err = median(error.osc),
+    first.q = quantile(error.osc, .25),
+    third.q = quantile(error.osc, .75),
+    med.err.ssc = median(error.ssc.ase),
+    first.q.ssc = quantile(error.ssc.ase, .25),
+    third.q.ssc = quantile(error.ssc.ase, .75),
+    med.err.louvain = median(error.louvain),
+    first.q.louvain = quantile(error.louvain, .25),
+    third.q.louvain = quantile(error.louvain, .75),
+    med.err.ssc.A = median(error.ssc.A),
+    first.q.ssc.A = quantile(error.ssc.A, .25),
+    third.q.ssc.A = quantile(error.ssc.A, .75)
+  ) %>% 
+  dplyr::ungroup() %>% 
+  ggplot() +
+  theme_bw() + 
+  theme(legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.justification = 0) + 
+  scale_x_log10(breaks = c(128, 256, 512, 1024, 2048, 4096),
+                labels = c(7, 8, 9, 10, 11, 12)) +
+  scale_y_log10() + 
+  labs(y = 'error count', 
+       x = expression(log[2] (n)),
+       colour = NULL, shape = NULL) +
+  geom_line(aes(x = n, y = med.err * n,
+                colour = 'Orthogonal Spectral Clustering')) +
+  geom_point(aes(x = n, y = med.err * n,
+                 colour = 'Orthogonal Spectral Clustering', 
+                 shape = 'Orthogonal Spectral Clustering')) +
+  geom_errorbar(aes(x = n, ymin = first.q * n, ymax = third.q * n,
+                    colour = 'Orthogonal Spectral Clustering'), width = .1) + 
+  geom_line(aes(x = n, y = med.err.ssc * n,
+                colour = 'Sparse Subspace Clustering on ASE')) +
+  geom_point(aes(x = n, y = med.err.ssc * n,
+                 colour = 'Sparse Subspace Clustering on ASE', 
+                 shape = 'Sparse Subspace Clustering on ASE')) +
+  geom_errorbar(aes(x = n, ymin = first.q.ssc * n, ymax = third.q.ssc * n,
+                    colour = 'Sparse Subspace Clustering on ASE'), width = .1) +
+  geom_line(aes(x = n, y = med.err.ssc.A * n,
+                colour = 'Sparse Subspace Clustering on Adj. Matrix')) +
+  geom_point(aes(x = n, y = med.err.ssc.A * n,
+                 colour = 'Sparse Subspace Clustering on Adj. Matrix', 
+                 shape = 'Sparse Subspace Clustering on Adj. Matrix')) +
+  geom_errorbar(aes(x = n, ymin = first.q.ssc.A * n, ymax = third.q.ssc.A * n,
+                    colour = 'Sparse Subspace Clustering on Adj. Matrix'), 
+                width = .1) +
+  geom_line(aes(x = n, y = med.err.louvain * n,
+                colour = 'Modularity Maximization')) + 
+  geom_point(aes(x = n, y = med.err.louvain * n,
+                 colour = 'Modularity Maximization', 
+                 shape = 'Modularity Maximization')) + 
+  geom_errorbar(aes(x = n, ymin = first.q.louvain * n, ymax = third.q.louvain * n,
+                    colour = 'Modularity Maximization'), width = .1) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  facet_wrap(~ K, labeller = 'label_both')
+```
+
+## Simulation Results
+
+1. $z_1, ..., z_n \iid \Categorical(1 / K, ..., 1 / K)$
+2. $\lambda_{ik} \stackrel{iid}{\sim} \Betadist(a_{ik}, b_{ik})$  
+$a_{ik} = \begin{cases} 1 & z_i = k \\ 2 & z_i \neq k \end{cases}$, 
+$b_{ik} = \begin{cases} 2 & z_i = k \\ 1 & z_i \neq k \end{cases}$
+3. $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
+4. $A \sim \BG(P)$
+
+```{r, fig.height = 2, fig.width = 8, out.width = '100%'}
+clustering.df <- readr::read_csv('~/dev/pabm-grdpg/simulation-results/cluster-sim-disassortative.csv')
+
+clustering.df %>%
+  dplyr::group_by(n, K) %>%
+  dplyr::summarise(
+    med.err = median(error.osc),
+    first.q = quantile(error.osc, .25),
+    third.q = quantile(error.osc, .75),
+    med.err.ssc = median(error.ssc.ase),
+    first.q.ssc = quantile(error.ssc.ase, .25),
+    third.q.ssc = quantile(error.ssc.ase, .75),
+    med.err.louvain = median(error.louvain),
+    first.q.louvain = quantile(error.louvain, .25),
+    third.q.louvain = quantile(error.louvain, .75),
+    med.err.ssc.A = median(error.ssc.A),
+    first.q.ssc.A = quantile(error.ssc.A, .25),
+    third.q.ssc.A = quantile(error.ssc.A, .75)
+  ) %>% 
+  dplyr::ungroup() %>% 
+  ggplot() +
+  theme_bw() + 
+  theme(legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.justification = 0) + 
+  scale_x_log10(breaks = c(128, 256, 512, 1024, 2048, 4096),
+                labels = c(7, 8, 9, 10, 11, 12)) +
+  scale_y_log10() + 
+  labs(y = 'error count', 
+       x = expression(log[2] (n)),
+       colour = NULL, shape = NULL) +
+  geom_line(aes(x = n, y = med.err * n,
+                colour = 'Orthogonal Spectral Clustering')) +
+  geom_point(aes(x = n, y = med.err * n,
+                 colour = 'Orthogonal Spectral Clustering', 
+                 shape = 'Orthogonal Spectral Clustering')) +
+  geom_errorbar(aes(x = n, ymin = first.q * n, ymax = third.q * n,
+                    colour = 'Orthogonal Spectral Clustering'), width = .1) + 
+  geom_line(aes(x = n, y = med.err.ssc * n,
+                colour = 'Sparse Subspace Clustering on ASE')) +
+  geom_point(aes(x = n, y = med.err.ssc * n,
+                 colour = 'Sparse Subspace Clustering on ASE', 
+                 shape = 'Sparse Subspace Clustering on ASE')) +
+  geom_errorbar(aes(x = n, ymin = first.q.ssc * n, ymax = third.q.ssc * n,
+                    colour = 'Sparse Subspace Clustering on ASE'), width = .1) +
+  geom_line(aes(x = n, y = med.err.ssc.A * n,
+                colour = 'Sparse Subspace Clustering on Adj. Matrix')) +
+  geom_point(aes(x = n, y = med.err.ssc.A * n,
+                 colour = 'Sparse Subspace Clustering on Adj. Matrix', 
+                 shape = 'Sparse Subspace Clustering on Adj. Matrix')) +
+  geom_errorbar(aes(x = n, ymin = first.q.ssc.A * n, ymax = third.q.ssc.A * n,
+                    colour = 'Sparse Subspace Clustering on Adj. Matrix'), 
+                width = .1) +
+  geom_line(aes(x = n, y = med.err.louvain * n,
+                colour = 'Modularity Maximization')) + 
+  geom_point(aes(x = n, y = med.err.louvain * n,
+                 colour = 'Modularity Maximization', 
+                 shape = 'Modularity Maximization')) + 
+  geom_errorbar(aes(x = n, ymin = first.q.louvain * n, ymax = third.q.louvain * n,
+                    colour = 'Modularity Maximization'), width = .1) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  facet_wrap(~ K, labeller = 'label_both')
+```
+
+## Example
+
+\begin{figure}[H]
+{\centering \includegraphics[scale=.33]{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1}
+}
+\caption{Adjacency matrices of (from left to right) the British MPs, Political Blogs, and DBLP networks after sorting by the clustering outputted by OSC.}\label{fig:mp}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+Network & MM & SSC-ASE & OSC\\
+\hline
+British MPs & 0.003 & 0.012 & 0.006\\
+\hline
+Political Blogs & 0.050 & 0.187 & 0.062\\
+\hline
+DBLP & 0.028 & 0.072 & 0.059\\
+\hline
+\end{tabular}
+\end{table}
+
+## Example: Karantaka Villages
+
+\begin{figure}[H]
+{\centering \includegraphics[scale=.33]{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1}
+}
+\caption{Adjacency matrix of the Karnataka villages data, arranged by the clustering produced by OSC (left). The villages studied here are, from left to right, 12, 31, and 46.}\label{fig:households-figure}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+Network & MM & SSC-ASE & OSC\\
+\hline
+Village 12 & 0.270 & 0.291 & 0.227\\
+\hline
+Village 31 & 0.125 & 0.059 & 0.051\\
+\hline
+Village 46 & 0.052 & 0.069 & 0.056\\
+\hline
+\end{tabular}
+\end{table}
+
+## Overview of Block Models as GRDPGs
+
+::: columns
+
+:::: {.column width='67%'}
+
+```{r, cache = TRUE, fig.width = 6, fig.height = 2, out.width = '100%'}
+set.seed(123)
+
+n <- 64
+n1 <- n / 2
+n2 <- n / 2
+z <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/2
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+X <- embedding(P, 2, 0)
+A <- draw.graph(P)
+Xhat <- embedding(A, 2, 0)
+A.graph <- tidygraph::as_tbl_graph(A, directed = FALSE)
+
+sbm.graph.plot <- ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)),
+                  show.legend = FALSE) + 
+  labs(colour = NULL, 
+       title = 'SBM') + 
+  # theme_graph() + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1') 
+
+sbm.ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 2], y = Xhat[, 1],
+                 colour = factor(z)),
+             shape = 4) + 
+  geom_point(aes(x = X[, 2], y = X[, 1], 
+                 colour = factor(z))) + 
+  # coord_fixed() +
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  labs(x = NULL, y = NULL, colour = NULL, 
+       title = 'Point Masses') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(sbm.graph.plot, sbm.ase.plot, nrow = 1)
+```
+
+```{r, cache = TRUE, fig.width = 6, fig.height = 2, out.width = '100%'}
+set.seed(123)
+
+n <- 128
+n1 <- n / 2
+n2 <- n / 2
+z <- c(rep(1, n1), rep(2, n2))
+p <- 1/2
+q <- 1/2
+r <- 1/8
+P <- matrix(r, nrow = n, ncol = n)
+P[seq(n1), seq(n1)] <- p
+P[seq(n1 + 1, n), seq(n1 + 1, n)] <- q
+omega <- rbeta(n, 2, 1)
+P <- P * (omega %*% t(omega))
+X <- embedding(P, 2, 0)
+A <- draw.graph(P)
+Xhat <- embedding(A, 2, 0)
+Xhat[, 2] <- -Xhat[, 2]
+A.graph <- tidygraph::as_tbl_graph(A, directed = FALSE)
+
+dcbm.graph.plot <- ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)),
+                  show.legend = FALSE) + 
+  labs(colour = NULL, 
+       title = 'DCBM') + 
+  # theme_graph() + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1') 
+
+dcbm.ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2],
+                 colour = factor(z)),
+             shape = 4) + 
+  geom_point(aes(x = X[, 1], y = X[, 2], 
+                 colour = factor(z))) + 
+  # coord_fixed() +
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  labs(x = NULL, y = NULL, colour = NULL, 
+       title = 'Rays') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(dcbm.graph.plot, dcbm.ase.plot, nrow = 1)
+```
+
+```{r, cache = TRUE, fig.width = 6, fig.height = 2, out.width = '100%'}
+set.seed(123)
+
+n <- 64
+Pz <- generate.P.beta(n)
+P <- Pz$P
+z <- Pz$clustering
+X <- embedding(P, 3, 1)
+A <- draw.graph(P)
+Xhat <- embedding(A, 3, 1)
+# Xhat[, 1] <- -Xhat[, 1]
+A.graph <- tidygraph::as_tbl_graph(A, directed = FALSE)
+
+pabm.graph.plot <- ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)),
+                  show.legend = FALSE) + 
+  labs(colour = NULL, 
+       title = 'PABM') + 
+  # theme_graph() + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1') 
+
+pabm.ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2],
+                 colour = factor(z)),
+             shape = 4) + 
+  geom_point(aes(x = X[, 1], y = X[, 2], 
+                 colour = factor(z))) + 
+  # coord_fixed() +
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  labs(x = NULL, y = NULL, colour = NULL, 
+       title = 'Subspaces (Projected)') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(pabm.graph.plot, pabm.ase.plot, nrow = 1)
+```
+
+::::
+
+:::: {.column width='33%'}
+
+&nbsp;
+
+&nbsp;
+
+* K-means clustering
+* Gaussian mixture models
+
+&nbsp;
+
+* K-means with cosine similarity
+* GMM on angles
+
+&nbsp;
+
+&nbsp;
+
+* Orthogonal spectral clustering
+* Sparse subspace clustering
+
+::::
+
+:::
+
+# Manifold Block Models
+
+## Motivating Example
+
+Macaque visuotactile brain areas and connections network  
+(Negyessy et al., 2006)
+
+* ASE suggests community structure.
+* Structure is nonlinear---$K$-means, OSC, SSC, etc. are not appropriate for these data.
+
+```{r macaque-graph, fig.cap = 'Macaque visuotactile brain areas and connections network (left) and ASE (right). The vertices represent brain areas.', fig.height = 2, fig.width = 6, out.width = '100%'}
+data(macaque, package = 'igraphdata')
+A <- as.matrix(igraph::as_adjacency_matrix(macaque, type = 'both'))
+A <- sign(A + t(A))
+z <- as.numeric(factor(igraph::vertex_attr(macaque)$shape))
+
+graph.plot <- ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+Xhat <- embedding(A, 3, 0)
+
+ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1],
+                 y = Xhat[, 2],
+                 colour = factor(z))) + 
+  labs(x = NULL, y = NULL) + 
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(graph.plot, ase.plot, nrow = 1)
+```
+
+## Manifold Block Model
+
+Let $p, q \geq 0$, $d = p + q \geq 1$, $1 \leq r < d$, $K \geq 2$, and $n > K$ be integers. 
+Define manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \in \mathcal{X}$ for $\mathcal{X} = \{x, y \in \mathbb{R}^d : x^\top I_{p,q} y \in [0, 1]\}$ each by continuous function $g_k : [0, 1]^r \to \mathcal{X}$. 
+Define probability distributions $F_1, ..., F_K$ each with support $[0, 1]^r$. 
+Then the following mixture model is a *manifold block model*: 
+
+\begin{enumerate}
+\item Draw labels $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$.
+\item Draw latent vectors by first taking each $t_i \indep F_{z_i}$ and then computing each $x_i = g_{z_i}(t_i)$. 
+\item Compile the latent vectors into data matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and define the adjacency matrix as $A \sim \GRDPG_{p,q}(X)$. 
+\end{enumerate}
+
+## $K$-Curves Clustering
+
+
+\begin{algorithm}[H]
+\label{alg:kcurves}
+\scriptsize
+\DontPrintSemicolon
+\SetAlgoLined
+\KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $p$, $q$, stopping criterion $\epsilon$}
+\KwResult{Community assignments $1, ..., K$, curves $g_1, ..., g_K$}
+Compute $X$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
+Initialize community labels $z_1, ..., z_n$.\;
+\Repeat {the change in $\sum_k \sum_{i \in C_k} \|x_i - g_k(t_i)\|^2$ is less than $\epsilon$} {
+\For {$k = 1, ..., K$} {
+Define $X_k$ as the rows of $X$ for which $z_i = k$.\;
+Fit curve $g_k$ and positions $t_{k_i}$ to $X_k$ by minimizing $\sum_{k_i} \|x_{k_i} - g_k(t_{k_i})\|^2$.\;
+}
+\For {$k = 1, ..., K$} {
+Assign $z_i \leftarrow \arg\min_\ell \|x_i - g_\ell(t_i)\|^2$.\;
+}
+}
+\caption{$K$-curves clustering.}
+\end{algorithm}
+
+## $K$-Curves Clustering
+
+```{r multifit, cache = TRUE, fig.height = 3, fig.width = 8, fig.cap = '$K$-curves clustering fits on the ASE using various approaches. Left: quadratic fit with random initialization. Middle: quadratic fit initialized via spectral clustering. Right: cubic fit initialized via spectral clustering.', out.width = '100%'}
+f1 <- function(t) {
+  x1 <- t ^ 2
+  x2 <- 2 * t - 2 * t ^ 2
+  return(cbind(x1, x2))
+}
+
+f2 <- function(t) {
+  x1 <- 2 * t - 2 * t ^ 2
+  x2 <- 1 - 2 * t + t ^ 2
+  return(cbind(x1, x2))
+}
+
+set.seed(314159)
+
+n1 <- 2 ** 7
+n2 <- n1
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+
+a <- 1
+b <- 1
+t1 <- rbeta(n1, a, b)
+t2 <- rbeta(n2, a, b)
+T <- rbind(t1, t2)
+
+X1 <- f1(t1)
+X2 <- f2(t2)
+X <- rbind(X1, X2)
+
+P <- X %*% t(X)
+diag(P) <- 0
+A <- draw.graph(P)
+
+Xhat <- embedding(A, 2, 0)
+
+maxit <- 2 ** 4
+animation.dir <- '.'
+random.starts <- 2
+eps <- 1e-6
+normalize <- TRUE
+animate <- FALSE
+
+set.seed(1)
+random <- manifold.clustering(Xhat, 2, 
+                              A = A, 
+                              parallel = TRUE,
+                              intercept = FALSE,
+                              maxit = maxit, 
+                              normalize = normalize,
+                              eps = eps,
+                              verbose = FALSE,
+                              animate = animate,
+                              animation.dir = animation.dir,
+                              animation.title = 'random')
+random.plot <- plot.estimated.curves(Xhat, random) + 
+  labs(x = NULL, y = NULL, title = 'random initialization') + 
+  scale_colour_brewer(palette = 'Set1')
+
+set.seed(2)
+spectral <- manifold.clustering(
+  Xhat, 2, 
+  A = A, 
+  parallel = TRUE, 
+  intercept = FALSE, 
+  normalize = normalize, 
+  maxit = maxit, 
+  eps = eps,
+  initialization = 'spectral',
+  verbose = FALSE,
+  animate = animate,
+  animation.dir = animation.dir,
+  animation.title = 'spectral')
+spectral.plot <- plot.estimated.curves(Xhat, spectral) + 
+  labs(x = NULL, y = NULL, title = 'spectral initialization') + 
+  scale_colour_brewer(palette = 'Set1')
+
+set.seed(3)
+cubic <- manifold.clustering(
+  Xhat, 2, 
+  degree = 3, 
+  A = A, 
+  parallel = TRUE, 
+  intercept = FALSE, 
+  normalize = normalize, 
+  maxit = maxit, 
+  eps = eps,
+  initialization = 'spectral',
+  verbose = FALSE,
+  animate = animate,
+  animation.dir = animation.dir,
+  animation.title = 'cubic')
+cubic.plot <- plot.estimated.curves(Xhat, cubic) + 
+  labs(x = NULL, y = NULL, title = 'cubic fit') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(random.plot, spectral.plot, cubic.plot, nrow = 1)
+```
+
+```{r loss, cache = TRUE, fig.cap = 'Clustering loss vs. iteration for each run of $K$-curves clustering.', fig.width = 8, fig.height = 2, out.width = '100%'}
+loss.df <- dplyr::bind_rows(
+  dplyr::tibble(loss = random$loss, 
+                `initialization and curve` = 'random, quadratic',
+                iteration = seq_along(random$loss)),
+  dplyr::tibble(loss = spectral$loss, 
+                `initialization and curve` = 'spectral, quadratic',
+                iteration = seq_along(spectral$loss)),
+  dplyr::tibble(loss = cubic$loss, 
+                `initialization and curve` = 'spectral, cubic',
+                iteration = seq_along(cubic$loss))
+) %>% 
+  dplyr::mutate(`initialization and curve` = factor(`initialization and curve`,
+                                        levels = c('random, quadratic',
+                                                   'spectral, quadratic',
+                                                   'spectral, cubic')))
+
+ggplot(loss.df) + 
+  geom_point(aes(x = iteration, y = loss, colour = `initialization and curve`)) + 
+  geom_line(aes(x = iteration, y = loss, colour = `initialization and curve`)) + 
+  # ylim(0, max.loss) +
+  scale_y_log10() +
+  labs(y = 'clustering loss') + 
+  theme_bw()
+```
+
+## $K$-Curves Clustering
+
+$$L(z_1, ..., z_n, g_1, ..., g_K; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2$$
+
+**Theorem** (KKT): Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a curve of order $R$ that does not self-intersect (for any $s \neq t$, $g_k(s) \neq g_k(t)$). 
+Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
+Then if $n \rho_n = \omega(\log^{4c} n)$, as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
+$$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_K; X) \stackrel{p}{\to} 0.$$
+
+## Simulation Results
+
+1. Draw $z_1, ..., z_n \iid \Multinomial(1/2, 1/2)$.
+2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
+3. Let each $x_i = g_{z_i}(t_i)$ where  $g_1(t) = [ t^2, 2 t (1-t) ]^\top$ and $g_2(t) = [ 2 t (1-t), (1-t)^2 ]^\top$. 
+Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$. 
+4. Draw $A \sim \RDPG(X)$ . 
+
+```{r sim-curves, fig.height = 3, fig.width = 8, cache = TRUE, out.width = '100%'}
+n.vec <- 2 ^ c(7, 8, 9, 10, 11)
+nsamp.vec <- c(0, 4, 8)
+
+clustering.df <- readr::read_csv('~/dev/manifold-block-models/simulations/balanced-2/balanced.csv')
+
+clust.summary.df <- clustering.df %>% 
+  dplyr::group_by(n, nsamp) %>% 
+  dplyr::summarise(
+    med.count = median(error.count),
+    first.q.count = quantile(error.count, .25),
+    third.q.count = quantile(error.count, .75),
+    med.rate = median(error.rate),
+    first.q.rate = quantile(error.rate, .25),
+    third.q.rate = quantile(error.rate, .75)
+  ) %>% 
+  dplyr::ungroup()
+
+ggplot(clust.summary.df) + 
+  theme_bw() + 
+  theme(text = element_text(size = 10)) + 
+  scale_y_log10() +
+  scale_x_log10(breaks = n.vec) +
+  labs(y = 'community detection error rate',
+       x = 'n',
+       colour = 'known labels\nper community', 
+       shape = NULL) + 
+  geom_line(aes(x = n, y = med.rate, colour = factor(nsamp))) + 
+  geom_point(aes(x = n, y = med.rate, colour = factor(nsamp))) + 
+  geom_errorbar(aes(x = n, 
+                    ymin = first.q.rate, ymax = third.q.rate, 
+                    colour = factor(nsamp)),
+                width = .125) + 
+  scale_colour_brewer(palette = 'Set1')
+```
+
+## Simulation Results
+
+* Same setup as before but fix $n = 512$ and only random initializations.
+* Repeat simulation 256 times and look at the distribution of fitted curves and loss values.
+
+```{r repeat-curves, fig.height = 2, fig.width = 8, cache = TRUE, out.width = '100%'}
+plot.repeat.study <- function(repeat.df) {
+  repeat.df <- na.omit(repeat.df)
+  min.t <- 0
+  max.t <- 1
+  length.out <- 1e2
+  t. <- seq(min.t, max.t, length.out = length.out)
+  niter <- nrow(repeat.df)
+  p.df <- repeat.df[c('p121', 'p122', 'p131', 'p132', 
+                      'p221', 'p222', 'p231', 'p232')]
+  p.clust <- kmeans(p.df, 4)$cluster
+  loss.clust <- kmeans(repeat.df$loss, 2)$cluster
+  curves.df <- foreach::foreach(i = seq(niter), .combine = dplyr::bind_rows) %dopar% {
+    p1 <- matrix(c(repeat.df$p121[i], repeat.df$p122[i], 
+                   repeat.df$p131[i], repeat.df$p132[i]),
+                 nrow = 2, byrow = TRUE)
+    p1 <- rbind(0, p1)
+    p2 <- matrix(c(repeat.df$p221[i], repeat.df$p222[i],
+                   repeat.df$p231[i], repeat.df$p232[i]),
+                 nrow = 2, byrow = TRUE)
+    p2 <- rbind(0, p2)
+    p <- list(p1, p2)
+    plyr::ldply(seq_along(p), function(k) {
+      curve <- bezier.curve(t., p[[k]])
+      if (mean(curve[, 1]) < 0) {
+        curve[, 1] <- -curve[, 1]
+      }
+      dplyr::tibble(t = t.,
+                    x = curve[, 1],
+                    y = curve[, 2],
+                    z = k,
+                    iter = i,
+                    p.clust = p.clust[i],
+                    loss.clust = loss.clust[i],
+                    loss = repeat.df$loss[i])
+    })
+  }
+  ggplot(curves.df) + 
+    geom_path(aes(x = y, y = x, group = interaction(z, iter),
+                  colour = loss),
+              alpha = 1 / log(niter)) + 
+    theme_bw() + 
+    coord_fixed() + 
+    labs(colour = 'loss',
+         x = NULL,
+         y = NULL) + 
+    viridis::scale_color_viridis()
+}
+
+plot.repeat.study(repeat.df)
+```
+
+```{r repeat-losses, fig.height = 2, fig.width = 5, cache = TRUE, out.width = '67%'}
+repeat.df <- readr::read_csv('~/dev/manifold-block-models/simulations/repeat-study/repeat-study.csv')
+ggplot(repeat.df) + 
+  geom_histogram(aes(x = loss),
+                 colour = 'black', fill = 'white') + 
+  labs(x = 'loss values') + 
+  theme_bw()
+```
+
+## Simulation Results
+
+1. Draw $z_1, ..., z_n \iid \Multinomial(1/3, 1/3, 1/3)$.
+2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
+3. Let each $x_i = g_{z_i}(t_i)$ where
+    i. $g_1(t) = [ 2 t (t-1), t^2, 0 ]^\top$
+    ii. $g_2(t) = [ 0, t^2, 2 t (t-1) ]^\top$
+    iii. $g_3(t) = [2 t (t-1), t^2, 2 t (t-1) ]^\top$.
+4. Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$.
+5. Draw $A \sim \RDPG(X)$. 
+
+```{r three-curves, cache = TRUE, fig.height = 4, fig.width = 15, fig.cap = 'Latent vectors (left) and ASE (right) of one realization of the mixture model in the simulation setup with $K=3$ manifolds.', out.width = '100%'}
+par(mfrow = c(1, 2))
+
+n <- 512
+
+p.list <- list(matrix(c(0, 1, 0, 
+                        0, 0, 1,
+                        0, 0, 0),
+                      nrow = 3, ncol = 3),
+               matrix(c(0, 0, 0, 
+                        0, 0, 1,
+                        0, 1, 0),
+                      nrow = 3, ncol = 3),
+               matrix(c(0, 1, 0, 
+                        0, 0, 1,
+                        0, 1, 0),
+                      nrow = 3, ncol = 3))
+
+K <- length(p.list)
+
+z <- sample(seq(K), n, replace = TRUE)
+z <- sort(z)
+
+t <- runif(n)
+
+X <- lapply(seq(K), function(k) {
+  bezier.curve(t[z == k], 
+               p.list[[k]], 
+               intercept = TRUE)
+}) %>% 
+  do.call('rbind', .)
+
+p <- ncol(X)
+q <- 0
+
+P <- grdpg.edge.prob.matrix(X, p, q)
+A <- draw.graph(P)
+Xhat <- embedding(A, p, q)
+
+scatterplot3d::scatterplot3d(X[, 1], X[, 2], X[, 3],
+                             color = z, 
+                             xlab = NA, ylab = NA, zlab = NA,
+                             pch = '.', asp = 1,
+                             tick.marks = FALSE)
+
+scatterplot3d::scatterplot3d(Xhat[, 1], Xhat[, 2], Xhat[, 3], 
+                             color = z, 
+                             xlab = NA, ylab = NA, zlab = NA, 
+                             pch = '.', asp = 1, 
+                             tick.marks = FALSE,
+                             angle = 40)
+```
+
+## Simulation Results
+
+1. Draw $z_1, ..., z_n \iid \Multinomial(1/3, 1/3, 1/3)$.
+2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
+3. Let each $x_i = g_{z_i}(t_i)$ where
+    i. $g_1(t) = [ 2 t (t-1), t^2, 0 ]^\top$
+    ii. $g_2(t) = [ 0, t^2, 2 t (t-1) ]^\top$
+    iii. $g_3(t) = [2 t (t-1), t^2, 2 t (t-1) ]^\top$.
+4. Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$.
+5. Draw $A \sim \RDPG(X)$. 
+
+```{r sim-curves-3, fig.height = 3, fig.width = 8, out.width = '100%', cache = TRUE}
+n.vec <- 2 ^ c(7, 8, 9, 10, 11)
+nsamp.vec <- c(0, 4, 8)
+
+clustering.df <- readr::read_csv('~/dev/manifold-block-models/simulations/balanced-3/balanced-3.csv')
+
+clust.summary.df <- clustering.df %>% 
+  dplyr::group_by(n, nsamp) %>% 
+  dplyr::summarise(
+    med.count = median(error.count),
+    first.q.count = quantile(error.count, .25),
+    third.q.count = quantile(error.count, .75),
+    med.rate = median(error.rate),
+    first.q.rate = quantile(error.rate, .25),
+    third.q.rate = quantile(error.rate, .75)
+  ) %>% 
+  dplyr::ungroup()
+
+ggplot(clust.summary.df) + 
+  theme_bw() + 
+  theme(text = element_text(size = 10)) + 
+  scale_y_log10() +
+  scale_x_log10(breaks = n.vec) +
+  labs(y = 'community detection error rate',
+       x = 'n',
+       colour = 'known labels\nper community', 
+       shape = NULL) + 
+  geom_line(aes(x = n, y = med.rate, colour = factor(nsamp))) + 
+  geom_point(aes(x = n, y = med.rate, colour = factor(nsamp))) + 
+  geom_errorbar(aes(x = n, 
+                    ymin = first.q.rate, ymax = third.q.rate, 
+                    colour = factor(nsamp)),
+                width = .125) + 
+  scale_colour_brewer(palette = 'Set1')
+```
+
+## Example: Macaque Brain Areas Network
+
+```{r macaque-graph-fit, fig.cap = 'Macaque visuotactile brain areas and connections network (left), ASE (middle), and fitted curves (right). The vertices represent brain areas.', fig.height = 2, fig.width = 8, out.width = '100%', cache = TRUE}
+data(macaque, package = 'igraphdata')
+A <- as.matrix(igraph::as_adjacency_matrix(macaque, type = 'both'))
+A <- sign(A + t(A))
+z <- as.numeric(factor(igraph::vertex_attr(macaque)$shape))
+
+graph.plot <- ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+Xhat <- embedding(A, 2, 0)
+
+ase.plot <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1],
+                 y = Xhat[, 2],
+                 colour = factor(z))) + 
+  labs(x = NULL, y = NULL) + 
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  scale_colour_brewer(palette = 'Set1') + 
+  coord_fixed()
+
+set.seed(123)
+z.spectral <- spectral.clustering(A)
+macaque.out <- manifold.clustering(Xhat, 2, 
+                                   # initialization = 'random',
+                                   initialization = z.spectral,
+                                   # initialization = z,
+                                   intercept = FALSE, 
+                                   parallel = TRUE, 
+                                   verbose = FALSE, 
+                                   animate = FALSE, 
+                                   curve.init = 'x')
+
+fit.plot <- plot.estimated.curves(Xhat, macaque.out) + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(graph.plot, ase.plot, fit.plot, nrow = 1)
+```
+
+## Example: Drosophila connectome (Eichler et al., 2017)
+
+```{r mbconnectome-graph, fig.height = 2, figh.width = 6, cache = TRUE, out.width = '67%'}
+library(mbstructure)
+data(MBconnectome)
+
+graph.r <- generate.graph(newrdat, vdf.right)
+A.r <- as.matrix(igraph::as_adjacency_matrix(graph.r$g, type = 'both'))
+z.r <- as.numeric(graph.r$vdf$type)
+n.r <- length(z.r)
+A.r <- sign(A.r + t(A.r))
+diag(A.r) <- 0
+graph.r <- ggraph(A.r, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n.r) / 2) + 
+  geom_node_point(aes(colour = factor(z.r)), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+graph.l <- generate.graph(newldat, vdf.left)
+A.l <- as.matrix(igraph::as_adjacency_matrix(graph.l$g, type = 'both'))
+z.l <- as.numeric(graph.l$vdf$type)
+n.l <- length(z.l)
+A.l <- sign(A.l + t(A.l))
+diag(A.l) <- 0
+graph.l <- ggraph(A.l, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n.l) / 2) + 
+  geom_node_point(aes(colour = factor(z.l)), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(graph.l, graph.r, nrow = 1)
+```
+
+```{r mbconnectome-ase, fig.height = 2, fig.width = 8, out.width = '100%'}
+Xhat.l <- embedding(A.l, 2, 1)
+ase.l <- ggplot() + 
+  geom_point(aes(x = Xhat.l[, 1], y = Xhat.l[, 2],
+                 colour = factor(z.l))) + 
+  coord_fixed(.5) +
+  theme_bw() + 
+  theme(legend.position = 'none') +
+  scale_colour_brewer(palette = 'Set1') + 
+  labs(x = NULL, y = NULL, colour = NULL)
+
+Xhat.r <- embedding(A.r, 2, 1)
+ase.r <- ggplot() + 
+  geom_point(aes(x = Xhat.r[, 1], y = Xhat.r[, 2],
+                 colour = factor(z.r))) + 
+  coord_fixed(.5) +
+  theme_bw() + 
+  theme(legend.position = 'none') +
+  scale_colour_brewer(palette = 'Set1') + 
+  labs(x = NULL, y = NULL, colour = NULL)
+
+gridExtra::grid.arrange(ase.l, ase.r, nrow = 1)
+```
+
+```{r mbconnectome-kcurves, fig.height = 2, fig.width = 8, cache = TRUE, out.width = '100%'}
+set.seed(123456)
+
+z.init.r <- sample.points(z.r, 6)
+z.init.l <- sample.points(z.l, 6)
+
+mbconnectome.out.r <- manifold.clustering(Xhat.r, 
+                                          length(unique(z.r)), 
+                                          initialization = z.init.r,
+                                          intercept = FALSE, 
+                                          parallel = TRUE, 
+                                          verbose = FALSE, 
+                                          animate = FALSE, 
+                                          curve.init = 'x')
+fitted.r <- plot.estimated.curves(Xhat.r, mbconnectome.out.r) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  coord_fixed(.5) +
+  labs(x = NULL, y = NULL) + 
+  ylim(min(Xhat.r[, 2]), max(Xhat.r[, 2])) + 
+  xlim(min(Xhat.r[, 1]), max(Xhat.r[, 1]))
+
+mbconnectome.out.l <- manifold.clustering(Xhat.l, 
+                                          length(unique(z.l)), 
+                                          initialization = z.init.l,
+                                          intercept = FALSE, 
+                                          parallel = TRUE, 
+                                          verbose = FALSE, 
+                                          animate = FALSE, 
+                                          curve.init = 'x')
+fitted.l <- plot.estimated.curves(Xhat.l, mbconnectome.out.l) + 
+  scale_colour_brewer(palette = 'Set1') + 
+  coord_fixed(.5) +
+  labs(x = NULL, y = NULL) + 
+  ylim(min(Xhat.l[, 2]), max(Xhat.l[, 2])) + 
+  xlim(min(Xhat.l[, 1]), max(Xhat.l[, 1]))
+
+gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
+```
