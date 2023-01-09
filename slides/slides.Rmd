@@ -517,12 +517,12 @@ points(X, pch = 16, col = z * 2)
 * The point masses in the latent structure of the SBM are "stretched out" toward the origin to form rays. 
 
 $$X = \begin{bmatrix}
-\omega_1 \sqrt{\theta_{11}} & 0 \\ 
+\omega_1 \sqrt{p} & 0 \\ 
 \vdots & \vdots \\ 
-\omega_{n_1} \sqrt{\theta_{11}} & 0 \\ 
-\omega_{n_1 + 1} \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_{n_1 + 1} \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\omega_{n_1} \sqrt{p} & 0 \\ 
+\omega_{n_1 + 1} \sqrt{r^2 / p} & \omega_{n_1 + 1} \sqrt{q - r^2 / p} \\ 
 \vdots & \vdots \\
-\omega_n \sqrt{\theta_{12}^2 / \theta_{11}} & \omega_n \sqrt{\theta_{22} - \theta_{12}^2 / \theta_{11}} \\ 
+\omega_n \sqrt{r^2 / p} & \omega_n \sqrt{q - r^2 / p} \\ 
 \end{bmatrix}$$
 
 ## DCBMs are GRDPGs
@@ -703,6 +703,8 @@ positive and $K (K-1) / 2$ most negative eigenvalues.
 2. Compute $B = |n V V^\top|$ applying $|\cdot|$ entry-wise.
 3. Construct graph $G$ using $B$ as its similarity matrix.
 4. Partition $G$ into $K$ disconnected subgraphs.
+
+## Orthogonal Spectral Clustering
 
 **Theorem** (KTT): 
 Let $\hat{B}$ with entries $\hat{B}_{ij}$ be the affinity matrix from OSC. 
@@ -1227,6 +1229,7 @@ ase.plot <- ggplot() +
   labs(x = NULL, y = NULL) + 
   theme_bw() + 
   theme(legend.position = 'none') + 
+  coord_fixed() + 
   scale_colour_brewer(palette = 'Set1')
 
 gridExtra::grid.arrange(graph.plot, ase.plot, nrow = 1)

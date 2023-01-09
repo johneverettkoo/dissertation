@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.7.15)  9 JAN 2023 02:12
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2022.7.15)  9 JAN 2023 12:43
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1178,11 +1178,7 @@ Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-7-1.pdf  used
 
 ] [24
 
-]
-Overfull \vbox (7.53859pt too high) detected at line 703
- []
-
-[25
+] [25
 
 ] [26
 
@@ -1190,218 +1186,220 @@ Overfull \vbox (7.53859pt too high) detected at line 703
 
 ] [28
 
+] [29
+
 ]
-<slides_files/figure-beamer/unnamed-chunk-8-1.pdf, id=304, 578.16pt x 144.54pt>
+<slides_files/figure-beamer/unnamed-chunk-8-1.pdf, id=310, 578.16pt x 144.54pt>
 
 File: slides_files/figure-beamer/unnamed-chunk-8-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/unnamed-chunk-8-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-8-1.pdf  used
- on input line 806.
+ on input line 809.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-[29
+[30
 
  <./slides_files/figure-beamer/unnamed-chunk-8-1.pdf>]
-<slides_files/figure-beamer/unnamed-chunk-9-1.pdf, id=317, 578.16pt x 144.54pt>
+<slides_files/figure-beamer/unnamed-chunk-9-1.pdf, id=323, 578.16pt x 144.54pt>
 
 File: slides_files/figure-beamer/unnamed-chunk-9-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/unnamed-chunk-9-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-9-1.pdf  used
- on input line 826.
+ on input line 829.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-[30
+[31
 
  <./slides_files/figure-beamer/unnamed-chunk-9-1.pdf>]
-<slides_files/figure-beamer/unnamed-chunk-10-1.pdf, id=330, 578.16pt x 144.54pt
+<slides_files/figure-beamer/unnamed-chunk-10-1.pdf, id=337, 578.16pt x 144.54pt
 >
 File: slides_files/figure-beamer/unnamed-chunk-10-1.pdf Graphic file (type pdf)
 
 <use slides_files/figure-beamer/unnamed-chunk-10-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-10-1.pdf  use
-d on input line 845.
+d on input line 848.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-[31
+[32
 
  <./slides_files/figure-beamer/unnamed-chunk-10-1.pdf>]
-</home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf, id=344, 578.
+</home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf, id=350, 578.
 16pt x 144.54pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf Graphic 
 file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf>
 Package pdftex.def Info: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-late
-x/mp-1.pdf  used on input line 869.
+x/mp-1.pdf  used on input line 872.
 (pdftex.def)             Requested size: 190.79338pt x 47.69833pt.
-[32
+[33
 
  </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1.pdf>]
 </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1.pdf,
- id=355, 578.16pt x 144.54pt>
+ id=361, 578.16pt x 144.54pt>
 File: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1
 .pdf Graphic file (type pdf)
 <use /home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1.
 pdf>
 Package pdftex.def Info: /home/johnkoo/dev/pabm-grdpg/summary_files/figure-late
-x/unnamed-chunk-7-1.pdf  used on input line 893.
+x/unnamed-chunk-7-1.pdf  used on input line 896.
 (pdftex.def)             Requested size: 190.79338pt x 47.69833pt.
-[33
+[34
 
  </home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1.pdf
 >]
-<slides_files/figure-beamer/unnamed-chunk-11-1.pdf, id=366, 433.62pt x 144.54pt
+<slides_files/figure-beamer/unnamed-chunk-11-1.pdf, id=372, 433.62pt x 144.54pt
 >
 File: slides_files/figure-beamer/unnamed-chunk-11-1.pdf Graphic file (type pdf)
 
 <use slides_files/figure-beamer/unnamed-chunk-11-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-11-1.pdf  use
-d on input line 942.
+d on input line 945.
 (pdftex.def)             Requested size: 205.88364pt x 68.62852pt.
-<slides_files/figure-beamer/unnamed-chunk-12-1.pdf, id=367, 433.62pt x 144.54pt
+<slides_files/figure-beamer/unnamed-chunk-12-1.pdf, id=373, 433.62pt x 144.54pt
 >
 File: slides_files/figure-beamer/unnamed-chunk-12-1.pdf Graphic file (type pdf)
 
 <use slides_files/figure-beamer/unnamed-chunk-12-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-12-1.pdf  use
-d on input line 942.
+d on input line 945.
 (pdftex.def)             Requested size: 205.88364pt x 68.62852pt.
-<slides_files/figure-beamer/unnamed-chunk-13-1.pdf, id=368, 433.62pt x 144.54pt
+<slides_files/figure-beamer/unnamed-chunk-13-1.pdf, id=374, 433.62pt x 144.54pt
 >
 File: slides_files/figure-beamer/unnamed-chunk-13-1.pdf Graphic file (type pdf)
 
 <use slides_files/figure-beamer/unnamed-chunk-13-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/unnamed-chunk-13-1.pdf  use
-d on input line 942.
+d on input line 945.
 (pdftex.def)             Requested size: 205.88364pt x 68.62852pt.
-[34
+[35
 
  <./slides_files/figure-beamer/unnamed-chunk-11-1.pdf> <./slides_files/figure-b
 eamer/unnamed-chunk-12-1.pdf> <./slides_files/figure-beamer/unnamed-chunk-13-1.
-pdf>] [35
+pdf>] [36
 
 ]
-<slides_files/figure-beamer/macaque-graph-1.pdf, id=406, 433.62pt x 144.54pt>
+<slides_files/figure-beamer/macaque-graph-1.pdf, id=412, 433.62pt x 144.54pt>
 File: slides_files/figure-beamer/macaque-graph-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/macaque-graph-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/macaque-graph-1.pdf  used o
-n input line 969.
+n input line 972.
 (pdftex.def)             Requested size: 307.28987pt x 102.43442pt.
-[36
+[37
 
- <./slides_files/figure-beamer/macaque-graph-1.pdf>] [37
+ <./slides_files/figure-beamer/macaque-graph-1.pdf>] [38
 
 ]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 1011.
-[38
+(Font)              <14.4> on input line 1014.
+[39
 
 ]
-<slides_files/figure-beamer/multifit-1.pdf, id=439, 578.16pt x 216.81pt>
+<slides_files/figure-beamer/multifit-1.pdf, id=445, 578.16pt x 216.81pt>
 File: slides_files/figure-beamer/multifit-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/multifit-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/multifit-1.pdf  used on inp
-ut line 1032.
+ut line 1035.
 (pdftex.def)             Requested size: 307.28987pt x 115.23296pt.
-<slides_files/figure-beamer/loss-1.pdf, id=440, 578.16pt x 144.54pt>
+<slides_files/figure-beamer/loss-1.pdf, id=446, 578.16pt x 144.54pt>
 File: slides_files/figure-beamer/loss-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/loss-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/loss-1.pdf  used on input l
-ine 1032.
+ine 1035.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
 
-Overfull \vbox (35.11766pt too high) detected at line 1032
+Overfull \vbox (35.11766pt too high) detected at line 1035
  []
 
-[39
+[40
 
  <./slides_files/figure-beamer/multifit-1.pdf> <./slides_files/figure-beamer/lo
-ss-1.pdf>] [40
+ss-1.pdf>] [41
 
 ]
-<slides_files/figure-beamer/sim-curves-1.pdf, id=465, 578.16pt x 216.81pt>
+<slides_files/figure-beamer/sim-curves-1.pdf, id=471, 578.16pt x 216.81pt>
 File: slides_files/figure-beamer/sim-curves-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/sim-curves-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/sim-curves-1.pdf  used on i
-nput line 1069.
+nput line 1072.
 (pdftex.def)             Requested size: 307.28987pt x 115.23296pt.
-[41
+[42
 
  <./slides_files/figure-beamer/sim-curves-1.pdf>]
-<slides_files/figure-beamer/repeat-curves-1.pdf, id=477, 578.16pt x 144.54pt>
+<slides_files/figure-beamer/repeat-curves-1.pdf, id=483, 578.16pt x 144.54pt>
 File: slides_files/figure-beamer/repeat-curves-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/repeat-curves-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/repeat-curves-1.pdf  used o
-n input line 1086.
+n input line 1089.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-<slides_files/figure-beamer/repeat-losses-1.pdf, id=478, 361.35pt x 144.54pt>
+<slides_files/figure-beamer/repeat-losses-1.pdf, id=484, 361.35pt x 144.54pt>
 File: slides_files/figure-beamer/repeat-losses-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/repeat-losses-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/repeat-losses-1.pdf  used o
-n input line 1086.
+n input line 1089.
 (pdftex.def)             Requested size: 205.88364pt x 82.35335pt.
-[42
+[43
 
  <./slides_files/figure-beamer/repeat-curves-1.pdf> <./slides_files/figure-beam
 er/repeat-losses-1.pdf>]
-<slides_files/figure-beamer/three-curves-1.pdf, id=499, 1084.05pt x 289.08pt>
+<slides_files/figure-beamer/three-curves-1.pdf, id=506, 1084.05pt x 289.08pt>
 File: slides_files/figure-beamer/three-curves-1.pdf Graphic file (type pdf)
 <use slides_files/figure-beamer/three-curves-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/three-curves-1.pdf  used on
- input line 1126.
+ input line 1129.
 (pdftex.def)             Requested size: 307.28987pt x 81.94313pt.
 
-Overfull \vbox (0.40915pt too high) detected at line 1126
- []
-
-[43
-
- <./slides_files/figure-beamer/three-curves-1.pdf>]
-<slides_files/figure-beamer/sim-curves-3-1.pdf, id=513, 578.16pt x 216.81pt>
-File: slides_files/figure-beamer/sim-curves-3-1.pdf Graphic file (type pdf)
-<use slides_files/figure-beamer/sim-curves-3-1.pdf>
-Package pdftex.def Info: slides_files/figure-beamer/sim-curves-3-1.pdf  used on
- input line 1159.
-(pdftex.def)             Requested size: 307.28987pt x 115.23296pt.
-
-Overfull \vbox (0.69899pt too high) detected at line 1159
+Overfull \vbox (0.40915pt too high) detected at line 1129
  []
 
 [44
 
+ <./slides_files/figure-beamer/three-curves-1.pdf>]
+<slides_files/figure-beamer/sim-curves-3-1.pdf, id=519, 578.16pt x 216.81pt>
+File: slides_files/figure-beamer/sim-curves-3-1.pdf Graphic file (type pdf)
+<use slides_files/figure-beamer/sim-curves-3-1.pdf>
+Package pdftex.def Info: slides_files/figure-beamer/sim-curves-3-1.pdf  used on
+ input line 1162.
+(pdftex.def)             Requested size: 307.28987pt x 115.23296pt.
+
+Overfull \vbox (0.69899pt too high) detected at line 1162
+ []
+
+[45
+
  <./slides_files/figure-beamer/sim-curves-3-1.pdf>]
-<slides_files/figure-beamer/macaque-graph-fit-1.pdf, id=525, 578.16pt x 144.54p
+<slides_files/figure-beamer/macaque-graph-fit-1.pdf, id=531, 578.16pt x 144.54p
 t>
 File: slides_files/figure-beamer/macaque-graph-fit-1.pdf Graphic file (type pdf
 )
 <use slides_files/figure-beamer/macaque-graph-fit-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/macaque-graph-fit-1.pdf  us
-ed on input line 1171.
+ed on input line 1174.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-[45
+[46
 
  <./slides_files/figure-beamer/macaque-graph-fit-1.pdf>]
-<slides_files/figure-beamer/mbconnectome-graph-1.pdf, id=541, 722.7pt x 144.54p
+<slides_files/figure-beamer/mbconnectome-graph-1.pdf, id=547, 722.7pt x 144.54p
 t>
 File: slides_files/figure-beamer/mbconnectome-graph-1.pdf Graphic file (type pd
 f)
 <use slides_files/figure-beamer/mbconnectome-graph-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/mbconnectome-graph-1.pdf  u
-sed on input line 1180.
+sed on input line 1183.
 (pdftex.def)             Requested size: 205.88364pt x 41.17667pt.
-<slides_files/figure-beamer/mbconnectome-ase-1.pdf, id=542, 578.16pt x 144.54pt
+<slides_files/figure-beamer/mbconnectome-ase-1.pdf, id=548, 578.16pt x 144.54pt
 >
 File: slides_files/figure-beamer/mbconnectome-ase-1.pdf Graphic file (type pdf)
 
 <use slides_files/figure-beamer/mbconnectome-ase-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/mbconnectome-ase-1.pdf  use
-d on input line 1180.
+d on input line 1183.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-<slides_files/figure-beamer/mbconnectome-kcurves-1.pdf, id=543, 578.16pt x 144.
+<slides_files/figure-beamer/mbconnectome-kcurves-1.pdf, id=549, 578.16pt x 144.
 54pt>
 File: slides_files/figure-beamer/mbconnectome-kcurves-1.pdf Graphic file (type 
 pdf)
 <use slides_files/figure-beamer/mbconnectome-kcurves-1.pdf>
 Package pdftex.def Info: slides_files/figure-beamer/mbconnectome-kcurves-1.pdf 
- used on input line 1180.
+ used on input line 1183.
 (pdftex.def)             Requested size: 307.28987pt x 76.82196pt.
-[46
+[47
 
  <./slides_files/figure-beamer/mbconnectome-graph-1.pdf> <./slides_files/figure
 -beamer/mbconnectome-ase-1.pdf> <./slides_files/figure-beamer/mbconnectome-kcur
@@ -1417,10 +1415,10 @@ ves-1.pdf>]
 
 (./slides.aux) ) 
 Here is how much of TeX's memory you used:
- 28338 strings out of 478287
- 552420 string characters out of 5849289
- 828124 words of memory out of 5000000
- 45671 multiletter control sequences out of 15000+600000
+ 28343 strings out of 478287
+ 552489 string characters out of 5849289
+ 828125 words of memory out of 5000000
+ 45673 multiletter control sequences out of 15000+600000
  536341 words of font info for 128 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,22n,122p,1003b,669s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1442,10 +1440,10 @@ c/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/t
 exmf/fonts/type1/public/lm/lmsy7.pfb></usr/share/texmf/fonts/type1/public/lm/lm
 sy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm
 10.pfb>
-Output written on slides.pdf (46 pages, 29776323 bytes).
+Output written on slides.pdf (47 pages, 29776764 bytes).
 PDF statistics:
- 705 PDF objects out of 1000 (max. 8388607)
- 538 compressed objects within 6 object streams
- 153 named destinations out of 1000 (max. 500000)
+ 711 PDF objects out of 1000 (max. 8388607)
+ 543 compressed objects within 6 object streams
+ 156 named destinations out of 1000 (max. 500000)
  39139 words of extra memory for PDF output out of 42996 (max. 10000000)
 
