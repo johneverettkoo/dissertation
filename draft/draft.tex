@@ -169,7 +169,7 @@ Approved: & \hrulefill \\
 
 \raggedright
 
-December 1, 2022
+January 13, 2023
 
 \newpage
 
@@ -177,14 +177,31 @@ December 1, 2022
 
 \begin{center}
 \LARGE{\bf{Acknowledgements}}
+\vspace*{1\baselineskip}
 \end{center}
+
+I would like to first thank my advisors Michael W. Trosset and Minh Tang, whose leadership and insight have shaped and guided my research journey. 
+I met Michael as a first year MSSS student taking his class on high dimensional data analysis, where he challenged us to investigate an open problem. 
+From the way in which I went about my solution, he was able to identify my strengths and weaknesses as a novice researcher and provide me with additional problems suited to my abilities and interests. 
+It was through Michael that I met Minh, who became my co-advisor. 
+Much of my work is owed to following the breadcrumbs of intuition that Minh scattered for me in strategic locations. 
+Both Michael and Minh have been exceedingly patient with me as I sniffed out the paths that they set forth and slowly arrived at my own solutions. 
+I am indebted to their kindness, persistence, and wisdom. 
+
+I would like to extend my gratitude toward my research committee members, Julia Fukuyama, Roni Khardon, and Fangzheng Xie. 
+I spent much of my time at IU as a TA in Julia's computational statistics class, and I learned much from watching her teach and work with students. 
+Roni's machine learning classes provided me with insight on using probabilistic and statistical methods outside the classical statistics setting, and PAC learning in particular has helped me understand my research objectives. 
+Fangzheng always asks insightful questions and challenges me with perspectives I hadn't considered. 
+
+None of this would have been possible without Dana Fielding and Kelly Hanna, whose work behind the scenes has been invaluable in making my time at IU smooth and pleasant. 
+I do not think I would have been able to complete anything as a graduate student without their help and encouragement. 
 
 \hypersetup{linkcolor = black}
 
 \newpage
 
 \begin{center}
-\LARGE{Abstract}
+\LARGE{\bf{Abstract}}
 \end{center}
 
 \vspace*{2\baselineskip}
@@ -2186,7 +2203,7 @@ We call this algorithm \(K\)-curves clustering.
 In this algorithm, the loss function that we wish to minimize is
 \begin{equation}
 \label{eq:kcurves-loss}
-L(z_1, ..., z_n, g_1, ..., g_n; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
+L(z_1, ..., z_n, g_1, ..., g_K; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2
 \end{equation}
 
 \begin{algorithm}[h]
@@ -2533,12 +2550,21 @@ In this work, we showed the connection between block models and generalized rand
 In particular, block models are a type of generalized random dot product graph in which the latent vectors are organized by community.
 In the case of the stochastic block model, degree corrected block model, and popularity adjusted block model, the structures are linear.
 This makes community detection via clustering in the latent space a straightforward task: Construct a graph embedding and apply a well-known clustering algorithm that is appropriate for the (linear) latent structure.
-For the SBM, the appropriate choice of clustering algorithm is \(K\)-means clustering or Gaussian mixture models.
+For the SBM, some appropriate choices of clustering algorithm are \(K\)-means clustering and Gaussian mixture models.
 For the DCBM, an appropriate choice is \(K\)-means clustering with the cosine kernel.
-For the PABM, an appropriate choice is sparse subspace clustering, and we also developed orthogonal spectral clustering for this setting as well.
-Furthermore, by looking at how the embedding vectors are organized, the embedding makes visibly clear which of the three block models is the best fit for the graph, and in the case in which the number of communities or the assortativity or disassortativity of the model is unknown, there are existing heuristics for determining these based on the size of the eigenvalues.
+For the PABM, an appropriate choice is sparse subspace clustering, and we also developed orthogonal spectral clustering for this setting.
+These all have asymptotic consistency properties, and we proved that sparse subspace clustering and orthogonal spectral clustering result in perfect community detection for the PABM for a sufficiently large yet finite graph size.
+Furthermore, by looking at how the embedding vectors are organized, the embedding makes visibly clear which of the three block models is the best fit for the graph (figure \ref{fig:block-models}), and in the case in which the number of communities or the assortativity or disassortativity of the model is unknown, there are existing heuristics for determining these based on the size of the eigenvalues.
 This is in contrast to direct likelihood maximization (e.g., via expectation maximization), which can be more of a black box in determining the appropriate model, number of communities, graph structure, etc., and results in slower, less interpretable algorithms.
 In conclusion, the graph embedding approach, which relies on making the connection between the block models and the GRDPG, is a powerful tool in both exploratory data analysis and statistical inference on graphs with community structure.
+
+Moving beyond the linear-structure block models (SBM, DCBM, PABM), we showed that the GRDPG and ASE approach can recover nonlinear structures in the latent space.
+This type of nonlinearity has been observed in various real networks, in particular brain connectivity networks (figures \ref{fig:macaque-graph-conclusion} and \ref{fig:macaque-ase}).
+While analyzing these graphs as GRDPGs reveals the (nonlinear) community structure, the linear block models are insufficient in modeling these graphs or performing statistical inference.
+For this setting, we proposed the manifold block model, which is a type of GRDPG in which each community corresponds to a on nonlinear manifold in the latent space.
+This led to two algorithms for manifold clustering on the latent space, the first which assumes that the manifolds are disjoint and involves performing single linkage clustering on the embedding, and the second which assumes that the manifolds are described by parametric curves (\(K\)-curves clustering).
+Both algorithms have provable asymptotic consistency properties, which we were able to demonstrate via simulation studies.
+A natural extension of this work is modifying \(K\)-curves clustering to higher dimensional manifolds, developing more robust initialization strategies, and connecting MBMs to more interpretable block models outside the GRDPG framework.
 
 \begin{figure}[H]
 
@@ -2557,12 +2583,6 @@ In conclusion, the graph embedding approach, which relies on making the connecti
 
 \caption{ASE on the Macaque brain areas network. The embedding suggests a community-wise manifold structure.}\label{fig:macaque-ase}
 \end{figure}
-
-Moving beyond the linear-structure block models (SBM, DCBM, PABM), we showed that the GRDPG and ASE approach can recover nonlinear structures in the latent space.
-This type of nonlinearity has been observed in various real networks, in particular brain connectivity networks.
-While analyzing these graphs as GRDPGs reveals the (nonlinear) community structure, the linear block models are insufficient in modeling these graphs or performing statistical inference.
-For this setting, we proposed the Manifold Block Model, which is a type of GRDPG in which the communities lie on nonlinear manifolds in the latent space.
-We then proposed two algorithms, one in which the manifolds are disjoint and another in which the manifolds intersect
 
 \newpage
 
