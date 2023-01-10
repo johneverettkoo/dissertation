@@ -406,19 +406,18 @@ ggraph(A, layout = 'auto') +
 \begin{example}[Assortativity and disassortativity of the two-community SBM]
 \label{ex:sbm-assortativity}
 Let $P$ be the $n \times n$ probability matrix of a two-community SBM. 
-Then $rank(P) = 2$, and its two nonzero eigenvalues are:
-
+Then $P$ can be written as $P = Z \Theta Z^\top$ where $\Theta$ is the $2 \times 2$ matrix of the community edge probabilities $\{\theta_{k \ell}\}$, and $Z$ is an $n \times 2$ matrix such that $z_{ik} = 1$ if vertex $i$ is in community $k$ and $0$ otherwise. 
+The rank of $\Theta$ is 2, and  its two nonzero eigenvalues are:
 \begin{equation}
 \label{eq:sbm-eigenvalues}
-\lambda = \frac{n}{2} \bigg( 
+\lambda = \bigg( 
 \theta_{11} + \theta_{22} \pm 
 \sqrt{(\theta_{11} - \theta_{22})^2 + 4 \theta_{12}^2} 
 \bigg).
 \end{equation}
 The first eigenvalue is always positive. 
 The second eigenvalue is positive if $\theta_{11} \theta_{22} > \theta_{12}^2$. 
-Thus, $P$ describes an assortative SBM if $\theta_{11} \theta_{22} > \theta_{12}^2$ or 
-a disassortative SBM if $\theta_{11} \theta_{22} < \theta_{12}^2$. 
+Since the rank and positive semidefiniteness of $P$ is given by $\Theta$, $P$ is positive semidefiniteif $\theta_{11} \theta_{22} > \theta_{12}^2$, which correspond to assortative and disassortative SBMs. 
 This corresponds to the high-level understanding of assortativity and disassortativity based on whether within community edge probabilities are greater than the between community edge probabilities. 
 \end{example}
 
