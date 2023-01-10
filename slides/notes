@@ -1,0 +1,27 @@
+Thanks for coming to my dissertation defense. 
+The topic of my dissertation is community detection in the setting of generalized random dot product graphs.
+
+This presentation contains three sections. 
+First, I'll go through some preliminaries and introduce two families of random graph models and how they are related. 
+The second section is about the relationship between two types of random graphs, namely how the popularity adjusted block model is a generalized random dot product graph, and how that relationship can be exploited for community detection and parameter estimation.
+Third, I'll end by introducing a new type of random graph model, why it is of interest, and how we could perform statistical inference on this model.
+
+So, onto the preliminaries of random graph models. 
+Suppose we observe a graph with community structure. 
+In this example is a friendship network among faculty members at a university in the UK. 
+In this graph, the vertices represent the individual faculty and the edges represent whether pairs of faculty are friends. 
+This dataset also comes with school affiliation for each faculty member, but let's say we do not know this information and we want to be able to infer it. 
+This type of problem is called graph clustering or community detection. 
+
+To perform this task within the context of statistical inference, we first need to define a model. 
+One such type of model for undirected and unweighted graphs is called the bernoulli random graph. 
+If we describe this graph by an n by n adjacency matrix A, which contains entries 1 where there is an edge between its corresponding pair of vertices and 0 otherwise, we say A describes a bernoulli random graph if there is a corresponding n by n edge probability matrix P such that each A_ij is drawn as bernoulli P_ij.
+
+Let's build on this to graphs with community structure. 
+We begin by assigning each vertex of the graph community labels which can take on values from 1 to K. 
+Then if each P_ij is a function of z_i and z_j, alohg with some other parameters specific to vertices i and j, we call this a block model. 
+The simpliest and most popular example of this is the stochastic block model, which has a fixed edge probability for each pair of communities. 
+In this particular example, we have two communities, so K = 2 and each z_i can take on values 1 or 2. 
+Then we set each P_ij as p if both i and j are in community 1, q if they are both in community 2, or r if they are in different communities. 
+
+
