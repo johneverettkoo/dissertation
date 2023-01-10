@@ -178,12 +178,12 @@ Erdos-Renyi Model (1959)
 Stochastic Block Model (Lorrain and White, 1971)
 
 * $P_{ij} = \theta_{z_i z_j}$
-* $K (K + 1) / 2$ parameters $\theta_{kl}$
+* $K (K + 1) / 2$ parameters $\theta_{k \ell}$
 
 Degree Corrected Block Model (Karrer and Newman, 2011)
 
 * $P_{ij} = \theta_{z_i z_j} \omega_i \omega_j$
-* $K (K + 1) / 2 + n$ parameters $\theta_{kl}$, $\omega_i$
+* $K (K + 1) / 2 + n$ parameters $\theta_{k \ell}$, $\omega_i$
 
 Popularity Adjusted Block Model (Sengupta and Chen, 2017)
 
@@ -291,7 +291,7 @@ PABM $\to$ DCBM: $\lambda_{ik} = \sqrt{\theta_{z_i k}} \omega_i$
 
 DCBM $\to$ SBM: $\omega_i = 1$
 
-SBM $\to$ Erdos-Renyi: $\theta_{kl} = \theta$
+SBM $\to$ Erdos-Renyi: $\theta_{k \ell} = \theta$
 
 \begin{center}
 ```{r, out.width = '125px'}
@@ -619,14 +619,14 @@ gridExtra::grid.arrange(graph.plot, ase.plot, nrow = 1)
 
 $A$ is sampled from a PABM if $P$ can be described as:
 
-1. Let each $P^{(kl)}$ denote the $n_k \times n_l$ matrix of edge probabilities 
+1. Let each $P^{(k \ell)}$ denote the $n_k \times n_l$ matrix of edge probabilities 
 between communities $k$ and $l$. 
 2. Organize popularity parameters as vectors 
-$\lambda^{(kl)} \in \mathbb{R}^{n_k}$ 
-such that $\lambda^{(kl)}_i = \lambda_{k_i l}$ is the popularity parameter 
+$\lambda^{(k \ell)} \in \mathbb{R}^{n_k}$ 
+such that $\lambda^{(k \ell)}_i = \lambda_{k_i l}$ is the popularity parameter 
 of the $i$^th^ vertex of community $k$ towards community $l$. 
 3. Each block can be decomposed as 
-$P^{(kl)} = \lambda^{(kl)} (\lambda^{(lk)})^\top$.
+$P^{(k \ell)} = \lambda^{(k \ell)} (\lambda^{(lk)})^\top$.
 
 This result reveals that $P$ is rank $K^2$ and has a linear latent structure. 
 
@@ -678,7 +678,7 @@ $$U \in \mathbb{O}(K^2)$$
 
 :::
 
-$$A \sim \PABM(\{\lambda^{(kl)}\}_K) \iff A \sim \GRDPG_{p, q}(X U)$$
+$$A \sim \PABM(\{\lambda^{(k \ell)}\}_K) \iff A \sim \GRDPG_{p, q}(X U)$$
 
 **Remark 1** (orthogonality of subspaces):
 If $y_i^\top$ and $y_j^\top$ are two rows of $X U$ corresponding 
@@ -718,7 +718,7 @@ as $n \to \infty$.
 
 ## Sparse Subspace Clustering
 
-**Corollary**: The ASE of $A \sim \PABM(\{\lambda^{(kl)}\}_K)$ lies near a collection of $K$-dimensional subspaces in $K^2$ dimensions.
+**Corollary**: The ASE of $A \sim \PABM(\{\lambda^{(k \ell)}\}_K)$ lies near a collection of $K$-dimensional subspaces in $K^2$ dimensions.
 
 **Algorithm**: Sparse Subspace Clustering (Elhamifar & Vidal, 2009):
 
