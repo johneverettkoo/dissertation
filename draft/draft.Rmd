@@ -1071,9 +1071,10 @@ gridExtra::grid.arrange(sbm.ase, dcbm.ase, nrow = 1)
 ```
 \end{example}
 
-The PABM is also a Bernoulli random graph, so it is also a GRDPG. 
-The latent vectors of the PABM when viewed as a GRDPG form $K$ $K$-dimensional subspaces, which makes for an elegant parallel between the nested forms of the block models and the nested structures of the GRDPGs: The SBM consists of $K$ zero-dimensional subspaces, and DCBM consists of $K$ one-dimensional subspaces. 
-We explore this connection further the next section (section \@ref(sec:pabm-grdpg)). 
+The PABM is also a Bernoulli random graph, so it is also a GRDPG, and it has community-wise structure in the latent space like the SBM and DCBM. 
+We will show in section \@ref(sec:pabm-grdpg) that this structure is comprised of $K$ $K$-dimensional subspaces in $\mathbb{R}^{K^2}$. 
+This relationship leads to an elegant parallel between the nested form of block models \citep{Noroozi2022} and the nested structures of the GRDPG. 
+More specifically, the latent positions of an SBM form $K$ point masses (zero-dimensional subspaces), and the latent positions of a DCBM form $K$ rays (one-dimensional subspaces). 
 
 \newpage
 
@@ -2185,8 +2186,9 @@ Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
 
 \begin{theorem}[Community detection for the GRDPG for which the communities come from nonintersecting manifolds]
 \label{theorem:nonintersect-grdpg}
-Let $x_1, ..., x_n$ be points sampled on $K$ compact, connected manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \subset \mathbb{R}^d$ each with probability measures $F_1, ..., F_K$, and the manifolds are separated by distance at least $\delta = \min\limits_{k \neq \ell} \min\limits_{x_i \in \mathcal{M}_k, x_j \in \mathcal{M}_\ell} \| x_i - x_j \| > 0$. 
-Let $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and $A \sim \GRDPG_{p,q}(X; \rho_n)$ for some $p, q \in \mathbb{N}_0$ such that $p + q = d$ and sparsity parameter $\rho_n$ that satisfies $n \rho_n = \omega(\log^{4c} n)$ for some $c > 1$. 
+Let $A$ be a graph on $n$ vertices from the MBM model in
+definition \ref{def:mbm} wherein $n \rho_n = \omega(\log^{c}{n})$ for some $c > 1$ and the manifolds $\mathcal{M}_1, \dots, \mathcal{M}_{K}$ satisfy $\min_{k \neq \ell} \min_{x \in \mathcal{M}_k, y \in \mathcal{M}_{\ell}} \|x  - y\| \geq \delta$ for some $\delta > 0$ not depending on $n$ or $K$. 
+Let $\hat{X}$ be the ASE of $A$ onto $\mathbb{R}^{d}$. 
 Define $A_n(\eta)$ as the event that an $\eta$-neighborhood graph constructed from the ASE of $A$ consists of exactly $K$ disconnected subgraphs that map exactly to each manifold. 
 Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \infty} P(A_n(\eta)) = 1$. 
 \end{theorem}
