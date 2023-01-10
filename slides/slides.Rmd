@@ -305,7 +305,7 @@ knitr::include_graphics('../proposal/noroozi-pensky-hierarchy.png')
 
 Log-likelihood function for the SBM:
 
-$$\ell(z, \theta; A) = \sum_{i<j} \sum_{k, \ell} z_{ik} z_{j \ell} \Big(A_{ij} \log_{k \ell} + (1 - A_{ij}) \log(1 - \theta_{k \ell}) \Big)$$
+$$\ell(z, \theta; A) = \sum_{i<j} \sum_{k, \ell} z_{ik} z_{j \ell} \Big(A_{ij} \log \theta_{k \ell} + (1 - A_{ij}) \log(1 - \theta_{k \ell}) \Big)$$
 
 * Direct maximization is NP-hard.
 
@@ -1010,7 +1010,7 @@ DBLP & 0.028 & 0.072 & 0.059\\
 \end{tabular}
 \end{table}
 
-## Example: Karantaka Villages
+## Example: Karantaka Villages (Banerjee et al., 2013)
 
 \begin{figure}[H]
 {\centering \includegraphics[scale=.33]{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/unnamed-chunk-7-1}
