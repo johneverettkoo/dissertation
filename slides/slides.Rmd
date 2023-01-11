@@ -1403,7 +1403,7 @@ ggplot(loss.df) +
 
 $$L(z_1, ..., z_n, g_1, ..., g_K; X) = \frac{1}{n} \sum_{k=1}^K \sum_{i: z_i = k} \|x_i - g_k(t_i)\|^2$$
 
-**Theorem** (KKT):  
+**Theorem** (KTT):  
 Let $A \sim \MBM(\{\alpha_1, ..., \alpha_K\}, \{F, ..., F\}, \{g_1, ..., g_K\}; \rho_n)$ such that $F$ has support $[0, 1]$, and each $g_k(t) = g(t; p_k)$ is is a curve of order $R$ that does not self-intersect (for any $s \neq t$, $g_k(s) \neq g_k(t)$). 
 Suppose that for each community $k$, we have labels for at least $R + 1$ vertices. 
 Then if $n \rho_n = \omega(\log^{4c} n)$, as $n \to \infty$, the estimates outputted by $K$-curves clustering are such that 
