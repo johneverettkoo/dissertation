@@ -1703,7 +1703,7 @@ ase.r <- ggplot() +
 gridExtra::grid.arrange(ase.l, ase.r, nrow = 1)
 ```
 
-```{r mbconnectome-kcurves, fig.height = 2, fig.width = 8, cache = TRUE, out.width = '100%'}
+```{r mbconnectome-kcurves, fig.height = 2, fig.width = 8, cache = TRUE, out.width = '100%', fig.cap = 'Left and right hemispheres of the Drosophila connectome (top), ASEs (middle), and fitted curves (bottom).'}
 set.seed(123456)
 
 z.init.r <- sample.points(z.r, 6)
@@ -1741,3 +1741,19 @@ fitted.l <- plot.estimated.curves(Xhat.l, mbconnectome.out.l) +
 
 gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 ```
+
+## Expected Degree and Sparsity Factor
+
+Let $d_1, ..., d_n$ be the degrees of vertices $v_1, ..., v_n$. 
+For $P$ defined by a block model or GRDPG, $E[d_i] = O(n)$. 
+In most real networks, the degree does not scale linearly with the size of the network. 
+
+Introduce a sparsity factor $\rho_n$ such that $A \sim \BG(\rho_n P)$.
+
+* Sparse regime: $\lim\limits_{n \to \infty} \rho_n \to 0$
+* Dense regime: $\rho_n = 1$
+
+Most results still require $n \rho_n = \omega (\log^c n)$, i.e., 
+expected degree still diverges, but at a logarithmic rate. 
+
+## References

@@ -119,4 +119,43 @@ More explicitly, if we define capital Lambda^k as the n-sub-little-k by capital-
 This block diagonal nature lends itself nicely to our first result, which is that if we decompose P, the edge probability matrix, and construct an n by n outer product matrix using the eigenvectors and call that B, then for each pair of vertices i and j belonging to two different communities, B_ij is 0. 
 Note that this is a result for the edge probability matrix, not the adjacency matrix.
 But the consistency of the adjacency spectral embedding suggests that this is approximately true, which leads us to orthogonal spectral clustering. 
+This algorithm is pretty much applying this theorem on the eigenvectors of A instead of P. 
+Because the eigenvectors of A only approximate the eigenvectors of P, the B_ij^th entry for vertices i and j belonging to different communities won't necessarily be exactly 0, so there needs to be a final graph partitioning step, such as edge thresholding. 
+
+We were able to show that this algorithm is indeed consistent.
+In particular, let B-hat_ij be the outer product matrix of eigenvectors from orthogonal spectral clustering, and i and j be the indices for a pair of vertices belonging to different communities. 
+Then as n increases, the maximum size of B-hat_ij decreases with this rate, with high probabiity. 
+Then for a large enough n, orthogonal spectral clustering results in zero community detection error with probability 1. 
+Note that this is a statement on the number of mis-clustered vertices, not the mis-clustering error rate. 
+
+Next, we'll take a look at another algorithm for community detection on the pabm that exploits the latent configuration. 
+We already showed that the ASE of the PABM in K^2-dimensions consists of points lying near K K-dimensional subspaces. 
+As it turns out, there already is a family of clustering algorithms for data that lie on or near subspaces. 
+We'll focus on one particular one called sparse subspace clustering. 
+This algorithm essentially amounts to fitting a sparse regression for each vector using the other vectors as covariates. 
+The idea is that if x_i lives in a subspace with a few other vectors in X, then it can be expressed as a linear combination of them, with the other coefficients being 0. 
+Then if we combine all of these coefficients into a matrix B, B_ij will be 0 for i and j on different subspaces.
+In practice, the sparse regression fits are done via lasso, which requires us to choose the sparsity parameter lambda.
+
+We weren't the first to propose the use of sparse subspace clustering for this problem. 
+Noroozi, Rimal, and Pensky noticed that P is rank K^2 and the columns of P corresponding to each community are rank K to justify the use of SSC. 
+They showed that if you treat P as a data matrix for SSC, then the output obeys the subspace detection property, the details of which we won't get into here, but the subspace detection property is considered a success criterion for ssc.
+Our approach uses the geometry of the latent configuration to justify using ssc on the ASE. Actually, ssc works better the more orthogonal these subspaces are, and we saw that if we treat the rows of the eigenvector matrix as an embedding, we get exactly that. 
+
+This leads to our version of the sparse subspace clustering algorithm for the pabm. 
+First, we take the approximate spectral decomposition of A, then apply SSC on the rows of the eigenvector matrix. 
+Then we were able to prove that for a large yet finite n, the rows of V obey the subspace detection property, provided that we choose the correct sparsity parameter. 
+In some sense, this is a nicer result than the one for orthogonal spectral clustering, which has B_ij going to 0 asymptotically--for ssc, B_ij is exactly 0 if the conditions are just right. 
+
+We also ran a few simulations to test our algorithms empirically. 
+In this setup, the communities were drawn to be approximately equally sized, and the popularity parameters were drawn such that there are more within-community edges than between-community edges. 
+Here, we show the interquartile range of the community detection error rates of our simulations, with the x axis being the size of the graph. 
+There is some weird behavior going on for ssc with K = 2, but otherwise, all of these methods result in zero error for large n, with orthogonal spectral clustering and ssc on the eigenvectors performing better than ssc on the adjacency matrix.
+Note that the y axis here is error count, not error rate, as in the total number of mis-clustered vertices. 
+
+We modified this setup by drawing imbalanced communities, and again, we show error converging to zero for larger and larger graphs. 
+
+Finally, we tried a setup in which the popularity parameters were drawn such that there is usually a higher probability of drawing an edge between communities than within communities, and we achieved similar results from orthogonal spectral clustering and sparse subspace clustering. 
+Note that even though the graphs are disassortative, the application of OSC and SSC remain identical as in the assortative cases from before. 
+
 
