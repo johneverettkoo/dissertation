@@ -170,11 +170,6 @@ qgraph::qgraph(A, vsize = 4, groups = factor(z), legend = FALSE)
 
 ## Block Models
 
-Erdos-Renyi Model (1959)
-
-* $P_{ij} = \theta$ (not a block model)
-* 1 parameter $\theta$
-
 Stochastic Block Model (Lorrain and White, 1971)
 
 * $P_{ij} = \theta_{z_i z_j}$
@@ -185,7 +180,7 @@ Degree Corrected Block Model (Karrer and Newman, 2011)
 * $P_{ij} = \theta_{z_i z_j} \omega_i \omega_j$
 * $K (K + 1) / 2 + n$ parameters $\theta_{k \ell}$, $\omega_i$
 
-Popularity Adjusted Block Model (Sengupta and Chen, 2017)
+Popularity Adjusted Block Model (Sengupta and Chen, 2018)
 
 * $P_{ij} = \lambda_{i z_j} \lambda_{j z_i}$
 * $K n$ parameters $\lambda_{ik}$
@@ -638,7 +633,8 @@ $A \sim \GRDPG_{p, q}(X U)$ with
 * $p = K (K + 1) / 2$, $q = K (K - 1) / 2$;
 * $U$ is an orthogonal matrix;
 * $X \in \mathbb{R}^{n \times K^2}$ is a block diagonal matrix 
-composed of popularity vectors with each block corresponding to a community.  
+composed of popularity vectors with each block corresponding to a community. 
+* $P = (X U) I_{pq} (X U)^\top$.
 
 $$X = \begin{bmatrix}
 \Lambda^{(1)} & \cdots & 0 \\
@@ -653,42 +649,6 @@ $$\Lambda^{(k)} = \begin{bmatrix}
 \in \mathbb{R}^{n_k \times K}$$
 
 $$A \sim \PABM(\{\lambda_{ik}\}_K) \text{ iff } A \sim \GRDPG_{p, q}(X U)$$
-
-## PABMs are GRDPGs
-
-::: columns
-
-:::: column
-
-$$X = \begin{bmatrix}
-\Lambda^{(1)} & \cdots & 0 \\
-0 & \ddots & 0 \\
-0 & \cdots & \Lambda^{(K)}
-\end{bmatrix}$$
-
-::::
-
-:::: column
-
-\vspace*{2\baselineskip}
-
-$$U \in \mathbb{O}(K^2)$$
-
-::::
-
-:::
-
-$$A \sim \PABM(\{\lambda^{(k \ell)}\}_K) \iff A \sim \GRDPG_{p, q}(X U)$$
-
-**Remark 1** (orthogonality of subspaces):
-If $y_i^\top$ and $y_j^\top$ are two rows of $X U$ corresponding 
-to different communities, then $y_i^\top y_j = 0$.
-
-**Remark 2** (non-uniqueness of the latent configuration):  
-If $A \sim \GRDPG_{p, q}(Y)$, then $A \sim \GRDPG_{p, q}(Y Q)$ for any $Q$ in 
-the indefinite orthogonal group with signature $p, q$.
-
-**Remark 3**: Communities correspond to subspaces even with linear transformation $Q \in \mathbb{O}(p, q)$, but this may break the orthogonality property.
 
 ## Orthogonal Spectral Clustering
 
@@ -1032,6 +992,12 @@ Village 46 & 0.052 & 0.069 & 0.056\\
 \hline
 \end{tabular}
 \end{table}
+
+## PABMs are GRDPGs
+
+* Published in JCGS.
+* Code and preprint drafts available at https://github.com/johneverettkoo/pabm-grdpg
+* R package WIP at https://github.com/johneverettkoo/osc
 
 ## Overview of Block Models as GRDPGs
 
