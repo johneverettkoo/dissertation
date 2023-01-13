@@ -1216,6 +1216,13 @@ Then the following mixture model is a *manifold block model*:
 
 ## Manifold Block Model
 
+1. $z_1, ..., z_n \iid \Categorical(1/2, 1/2)$
+2. $t_1, ..., t_n \iid \Uniform(0, 1)$
+3. $x_i = g_{z_i}(t_i)$ 
+    * $g_1(t) = [t^2, 2 t (1-t)]^\top$
+    * $g_2(t) = [2 t (1-t), (1-t)^2]^\top$
+4. $A \sim \GRDPG_{2, 0}(X)$
+
 ```{r intersect-curves-example, fig.height = 2, fig.width = 8, fig.cap = 'Latent vectors on intersecting curves (left), along with an RDPG drawn from this configuration (center) and its ASE (right).', cache = TRUE, out.width='100%'}
 f1 <- function(t) {
   x1 <- t ^ 2
