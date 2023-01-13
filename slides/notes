@@ -3,23 +3,23 @@ The topic of my dissertation is community detection in the setting of generalize
 
 This presentation contains three sections. 
 First, I'll go through some preliminaries and introduce two families of random graph models and how they are related. 
-The second section is about the relationship between two types of random graphs, namely how the popularity adjusted block model is a generalized random dot product graph, and how that relationship can be exploited for community detection and parameter estimation.
+The second section is about the relationship between two types of random graphs, namely how the popularity adjusted block model is a generalized random dot product graph, and how that relationship can be exploited for community detection.
 Third, I'll end by introducing a new type of random graph model, why it is of interest, and how we could perform statistical inference on this model.
 
 So, onto the preliminaries of random graph models. 
 Suppose we observe a graph with community structure. 
 In this example is a friendship network among faculty members at a university in the UK. 
-In this graph, the vertices represent the individual faculty and the edges represent whether pairs of faculty are friends. 
+The vertices represent the individual faculty and the edges represent whether pairs of faculty are friends. 
 This dataset also comes with school affiliation for each faculty member, but let's say we do not know this information and we want to be able to infer it. 
 This type of problem is called graph clustering or community detection. 
 
-To perform this task within the context of statistical inference, we first need to define a model. 
+To perform this task within the context of statistical inference, we first need to define a random graph model. 
 One such type of model for undirected and unweighted graphs is called the bernoulli random graph. 
-We describe such a graph by an n by n adjacency matrix A, which contains entries 1 where there is an edge between its corresponding pair of vertices and 0 otherwise.
+We describe these graphs by an n by n adjacency matrix A, where n is the number of vertices, and A contains entries 1 where there is an edge between its corresponding pair of vertices and 0 otherwise.
 We say A describes a bernoulli random graph if there is a corresponding n by n edge probability matrix P such that each A_ij is an independent bernoulli trial with P_ij.
 
 Let's build on this to graphs with community structure. 
-We begin by assigning each vertex of the graph community label z_i which can take on values from 1 to K. 
+We begin by assigning to each vertex of the graph community label z_i which can take on values from 1 to K. 
 Then if each P_ij is a function of z_i and z_j, along with possibly some other parameters specific to vertices i and j, we call this a block model. 
 The simpliest and most popular example of this is the stochastic block model, which has a fixed edge probability for each pair of communities. 
 In this particular example, we have two communities, so K = 2 and each z_i can take on values 1 or 2. 
@@ -49,6 +49,7 @@ In reality, some users are very popular and make many connections while others a
 
 The DCBM allows us to model each user's popularity with other users via the degree correction factor omega_i. 
 If user i is not very popular, then they may have a low omega_i, or if they are popular and make many connections on the service, they may have a high omega_i. 
+
 However, the DCBM is unable to model each user's sexual orientation. 
 If we model this as a PABM, then each user has two popularity parameters that model that user's likelihood of connecting with members of each gender. 
 
@@ -68,16 +69,17 @@ The main takeaway here is that we have this family of block models that are all 
 Now we'll consider another family of bernoulli random graph models called the generalized random dot product graph. 
 We say that A is sampled from a generalized random dot product graph if each vertex has a corresponding vector in some latent space and the edge probability between vertices i and j as the indefinite inner product between latent vectors x_i and x_j, where the indefinite inner product is characterized by Ipq, which is a diagonal matrix of p positive ones and q negative ones. Then our edge probability matrix is X Ipq X^top. 
 
-Under this model, an inference task might be to estimate the latent positions X from one observation of the graph described by adjacency matrix A. 
+Under this model, an inference task might be to estimate the latent positions from one observation of the graph described by adjacency matrix A. 
 The adjacency spectral embedding does this by taking the spectral decomposition of A, and it has already been shown that the ASE asymoptotically approaches the true latent positions up to an indefinite orthogonal transformation. 
 
 So now we have two different models for graphs, one in which edges are drawn based on community structure and another where edges are drawn based on vectors in some latent space. 
 
 Now, we'll show how these two families of models are connected and how that connection is useful for estimation. 
 It can be easily shown that all bernoulli graphs are generalized random dot product graphs. 
-P can be decomposed, and that decomposition describes vectors in latent space. 
+P can be decomposed, and that decomposition can describe vectors in latent space. 
 To illustrate this more explicitly, let's return to the stochastic block model example from before. If we organize P by community, the upper left block is all p, the lower right is q, and the off diagonal blocks are r. 
-Then it's easy to find a two dimensional set of latent vectors that multiply to P that consists of two unique rows, resulting in two point masses, one at (sqrt(p), 0) and another at (sqrt(r^2 / p), sqrt(q - r^2 / p)). 
+Then it's easy to find a two dimensional set of latent vectors that multiply to P.
+Furthermore, the latent vectors lie on just two point masses, one at (sqrt(p), 0) and another at (sqrt(r^2 / p), sqrt(q - r^2 / p)). 
 
 This leads to a straightforward community detection method. 
 We just take the ASE of A, and we know that as n increases, the ASE converges to the latent configuration, that is, two point masses which correspond to the two communities, and we can apply a clustering technique on the ASE that is based on clusters aggregating around point masses, such as K-means or gaussian mixture models. 
@@ -87,7 +89,7 @@ This is equivalent to left and right multiplying P by big Omega, which is a diag
 Then it's straghtforward to see that each latent vector of the DCBM is the corresponding latent vector of the PABM multiplied by its degree correction factor. 
 This in effect stretches out the two point masses toward the origin to form rays. 
 
-Estimation for the DCBM then begins exactly the same way as in the SBM, but we can see that the embedding consists of two fuzzy line segments that meet at the origin. 
+Estimation for the DCBM then begins exactly the same way as in the SBM, but we can see that the embedding consists of two fuzzy line segments that meet at the origin instead of two fuzzy point masses. 
 A plausible clustering method for this is K-means clustering with the cosine kernel. 
 
 Viewing block models as GRDPGs isn't only just useful for inference but also for exploratory data analysis. 
@@ -99,10 +101,8 @@ Fitting a DCBM via an EM algorithm results in slightly lower 95% accuracy, but t
 
 So far, we saw that the SBM and DCBM are GRDPGs and that connection is useful for community detection. 
 This section's focus is on the connection between the PABM and GRDPG and the ways in which that connection is useful for statistical inference. 
-The paper related to this section was recently published in JCGS in 2022. 
 
 In order to make this connection, we first reframe the PABM by describing P as being composed of K^2 popularity vectors. 
-This is based on work by marianna pensky and her two graduate students at UCF. 
 If we sort P by community such that the kl^th block is the n_k by n_l matrix of edge probabilities, then that block is comprised of the outer product of two popularity vectors.
 Each popularity vector lambda^kl is the vector of popularity parameters belonging to vertices in community k toward community l. 
 As a reminder, lambda_il is the i^th vertex's popularity parameter to community l.
@@ -112,11 +112,12 @@ As a quick reminder, the edge probability matrices for SBMs and DCBMs are rank K
 
 Like we were able to show for the SBM and DCBM, we can view the PABM as a GRDPG and define a latent structure that is organized by community. 
 This latent structure is not unique, but the way in which we define it here is particularly useful. 
-In short, the latent structure is in K^2 dimensions and each vector is on one of K K-dimensional subspaces. 
+In short, the latent structure is in K^2 dimensions and and block diagonal with each block taking up K columns and corresponding to the K communities. 
+This means that each community takes up a K-dimensional subspace in the K^2-dimensional space. 
 Furthermore, these subspaces are mutually disjoint and orthogonal. 
 More explicitly, if we define capital Lambda^k as the n-sub-little-k by capital-K matrix of popularity parameters belonging to vertices in community little-k and then collect those into an n by K^2 block diagonal matrix, there is a K^2 by K^2 orthogonal matrix U such that X U I_pq (XU)^T results in the edge probability matrix for a PABM with these popularity parameters. 
 
-This block diagonal nature lends itself nicely to our first result, which is that if we decompose P, the edge probability matrix, and construct an n by n outer product matrix using the eigenvectors and call that B, then for each pair of vertices i and j belonging to two different communities, B_ij is 0. 
+This block diagonal nature lends itself nicely to our first result, which is that if we decompose P and construct an n by n outer product matrix using the eigenvectors and call that B, then for each pair of vertices i and j belonging to two different communities, B_ij is 0. 
 Note that this is a result for the edge probability matrix, not the adjacency matrix.
 But the consistency of the adjacency spectral embedding suggests that this is approximately true, which leads us to orthogonal spectral clustering. 
 This algorithm is pretty much applying this theorem on the eigenvectors of A instead of P. 
