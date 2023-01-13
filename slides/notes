@@ -176,10 +176,10 @@ You can also view all of the code on GitHub, and I am working on an R package fo
 
 So the story thus far has been that we have three easy to understand yet widely applicable block models for modeling networks with community structure, and we have another model called the generalized random dot product graph, and the connection between them is that block models are generalized random dot product graphs with various community-wise latent structures. 
 This makes community detection via fitting a block model to a network an easy and intuitive task--we first estimate the latent vectors via ASE, then we apply the appropriate clustering method for the particular structure for the block model of interest. 
-This approach is also a good way to determine which type of block model is most appropriate for the data--we can simply look at the structure of the estimated latent vectors and choose the corresponding block model. 
+This approach is also a good way of determining which type of block model is most appropriate for the data--we can simply look at the structure of the estimated latent vectors and choose the corresponding block model. 
 
 In our final section, we will talk about more general models with community structure. 
-We call these manifold block models, and the reason for this name will hopefully become clear in the next few slides. 
+We call this model the manifold block model.
 
 So first, a motivating example. 
 Here is a graph that represents brain areas and connections of the macaque monkey. 
@@ -194,10 +194,12 @@ As in the GRDPG, we start with a latent space, but we suppose that the latent ve
 The latent vectors are then drawn as follows: 
 First, the community labels are drawn from a categorical distribution. 
 Then the index points t_1 to t_n are drawn from some distribution on the unit hypercube. 
-Finally, each latent vector x_i is g_{z_i}(t_i), where g_{z_i}. 
+Finally, each latent vector x_i is g_{z_i}(t_i).
 Within this presentation, we only consider one dimensional manifolds, which are described by curves. 
 
-The ASE can approximate the original latent structure, so while our previous methods will not work in this setting, there is still some hope that we can identify the communities. 
+Here is a more concrete example of the model. 
+Here, the two manifolds are described by two quadratic curves, and we can clearly see that our previous approaches to community detection will not work here. 
+But the ASE can still approximate the original latent structure, so  there is still some hope that we can identify the communities. 
 
 The method we propose for this setting is called K curves clustering. 
 This is based on K means clustering, except instead of estimating means for each cluster, we estimate curves. 
@@ -208,12 +210,12 @@ Then for each label, we fit a curve by specifying some functional form and adjus
 Then once we fit the K curves, we reassign the labels based on distance to each curve. 
 
 Like with K-means clustering, K-curves clustering can be sensitive to initialization, and like how K-means clustering makes an implicit assumption about how the data are distributed, the choice of the types of curves is an assumption on how the communities are structured in the latent space. 
-In this example, we generated a manifold block model in which the communities map to two quadratic curves, as in the previous example, and we applied K-curves clustering on the ASE using various functional forms for the curves and various initializations. 
+In this example, we generated a manifold block model in which the communities map to two quadratic curves, and we applied K-curves clustering on the ASE using various functional forms for the curves and various initializations. 
 On the left, we started with a random initialization and assumed that the curves were quadratic, and we were able to recover the original latent curves, up to rotation. 
 In the middle, we again assumed that the curves are quadratic, but we started with labels assigned via normalized spectral clustering, and we obtained something that looks plausible but we know to be "incorrect" from our knowledge of the original latent configuration. 
 On the right, we again start with spectral clustering, but we fit cubic curves to the embedding, which again looks plausible and actually achieves a lower loss than the "true" solution, even though we know that this is "incorrect" based on the original latent configuration. 
 
-So I mentioned the loss function for K-means clustering, and here it is spelled out. 
+I mentioned the loss function for K-curves clustering, and here it is spelled out. 
 In effect, we are choosing labels and curves such that the distances between the embedding vectors and their assigned curves is small. 
 And so based on the choice of curve, we can have different solutions that minimize the loss. 
 Our theoretical result then needs some additional help. 
