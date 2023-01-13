@@ -1602,15 +1602,19 @@ Xhat <- embedding(A, p, q)
 scatterplot3d::scatterplot3d(X[, 1], X[, 2], X[, 3],
                              color = z, 
                              xlab = NA, ylab = NA, zlab = NA,
-                             pch = '.', asp = 1,
-                             tick.marks = FALSE)
+                             # pch = '.', 
+                             asp = 1,
+                             tick.marks = FALSE,
+                             mar = c(0, 0, 0, 0))
 
 scatterplot3d::scatterplot3d(Xhat[, 1], Xhat[, 2], Xhat[, 3], 
                              color = z, 
                              xlab = NA, ylab = NA, zlab = NA, 
-                             pch = '.', asp = 1, 
+                             # pch = '.', 
+                             asp = 1, 
                              tick.marks = FALSE,
-                             angle = 40)
+                             angle = 40,
+                             mar = c(0, 0, 0, 0))
 ```
 
 ## Simulation Results
