@@ -952,7 +952,7 @@ clustering.df %>%
 \begin{figure}[H]
 {\centering \includegraphics[scale=.33]{/home/johnkoo/dev/pabm-grdpg/summary_files/figure-latex/mp-1}
 }
-\caption{Adjacency matrices of (from left to right) the British MPs, Political Blogs, and DBLP networks after sorting by the clustering outputted by OSC.}\label{fig:mp}
+\caption{Adjacency matrices of (from left to right) the British MPs Twitter network (Greene and Cunningham, 2013), Political Blogs network (Adamic and Glance, 2005), and DBLP network (Gao et al., 2009) after sorting by the clustering outputted by OSC.}\label{fig:mp}
 \end{figure}
 
 \begin{table}[H]
@@ -996,7 +996,7 @@ Village 46 & 0.052 & 0.069 & 0.056\\
 ## PABMs are GRDPGs
 
 * Published in JCGS.
-* Code and preprint drafts available at https://github.com/johneverettkoo/pabm-grdpg
+* Code, data, and preprint drafts available at https://github.com/johneverettkoo/pabm-grdpg
 * R package WIP at https://github.com/johneverettkoo/osc
 
 ## Overview of Block Models as GRDPGs
@@ -1205,17 +1205,81 @@ gridExtra::grid.arrange(graph.plot, ase.plot, nrow = 1)
 
 Let $p, q \geq 0$, $d = p + q \geq 1$, $1 \leq r < d$, $K \geq 2$, and $n > K$ be integers. 
 Define manifolds $\mathcal{M}_1, ..., \mathcal{M}_K \in \mathcal{X}$ for $\mathcal{X} = \{x, y \in \mathbb{R}^d : x^\top I_{p,q} y \in [0, 1]\}$ each by continuous function $g_k : [0, 1]^r \to \mathcal{X}$. 
-Define probability distributions $F_1, ..., F_K$ each with support $[0, 1]^r$. 
+Define probability distribution $F$ with support $[0, 1]^r$. 
 Then the following mixture model is a *manifold block model*: 
 
 \begin{enumerate}
-\item Draw labels $z_1, ..., z_n \iid \Multinomial(\alpha_1, ..., \alpha_K)$.
-\item Draw latent vectors by first taking each $t_i \indep F_{z_i}$ and then computing each $x_i = g_{z_i}(t_i)$. 
+\item Draw labels $z_1, ..., z_n \iid \Categorical(\alpha_1, ..., \alpha_K)$.
+\item Draw latent vectors by first taking $t_1,..., t_n \iid F$ and then computing each $x_i = g_{z_i}(t_i)$. 
 \item Compile the latent vectors into data matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$ and define the adjacency matrix as $A \sim \GRDPG_{p,q}(X)$. 
 \end{enumerate}
 
-## $K$-Curves Clustering
+## Manifold Block Model
 
+```{r intersect-curves-example, fig.height = 2, fig.width = 8, fig.cap = 'Latent vectors on intersecting curves (left), along with an RDPG drawn from this configuration (center) and its ASE (right).', cache = TRUE, out.width='100%'}
+f1 <- function(t) {
+  x1 <- t ^ 2
+  x2 <- 2 * t - 2 * t ^ 2
+  return(cbind(x1, x2))
+}
+
+f2 <- function(t) {
+  x1 <- 2 * t - 2 * t ^ 2
+  x2 <- 1 - 2 * t + t ^ 2
+  return(cbind(x1, x2))
+}
+
+set.seed(314159)
+
+n1 <- 2 ** 7
+n2 <- n1
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+
+a <- 1
+b <- 1
+t1 <- rbeta(n1, a, b)
+t2 <- rbeta(n2, a, b)
+T <- rbind(t1, t2)
+
+X1 <- f1(t1)
+X2 <- f2(t2)
+X <- rbind(X1, X2)
+
+latent.vecs <- ggplot() + 
+  geom_point(aes(x = X[, 1], y = X[, 2], colour = factor(z)), size = .5) + 
+  # coord_fixed() + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  scale_colour_brewer(palette = 'Set1')
+
+P <- X %*% t(X)
+diag(P) <- 0
+A <- draw.graph(P)
+
+rdpg <- ggraph(A, layout = 'stress') + 
+  geom_edge_link(alpha = 1 / sqrt(n) / 2) + 
+  geom_node_point(aes(colour = factor(z)), 
+                  show.legend = FALSE) + 
+  labs(colour = NULL) + 
+  theme_void() + 
+  scale_colour_brewer(palette = 'Set1')
+
+Xhat <- embedding(A, 2, 0)
+
+ase <- ggplot() + 
+  geom_point(aes(x = Xhat[, 1], y = Xhat[, 2], colour = factor(z)), size = .5) + 
+  # coord_fixed() + 
+  labs(x = expression(x[1]), y = expression(x[2]), colour = NULL) + 
+  theme_bw() + 
+  theme(legend.position = 'none') + 
+  scale_colour_brewer(palette = 'Set1')
+
+gridExtra::grid.arrange(latent.vecs, rdpg, ase, nrow = 1)
+```
+
+## $K$-Curves Clustering
 
 \begin{algorithm}[H]
 \label{alg:kcurves}
@@ -1381,7 +1445,7 @@ $$L(\hat{z}_1, ..., \hat{z}_n, \hat{g}_1, ..., \hat{g}_K; X) \stackrel{p}{\to} 0
 2. Draw $t_1, ..., t_n \iid \Uniform(0, 1)$. 
 3. Let each $x_i = g_{z_i}(t_i)$ where  $g_1(t) = [ t^2, 2 t (1-t) ]^\top$ and $g_2(t) = [ 2 t (1-t), (1-t)^2 ]^\top$. 
 Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$. 
-4. Draw $A \sim \RDPG(X)$ . 
+4. Draw $A \sim \GRDPG_{2,0}(X)$ . 
 
 ```{r sim-curves, fig.height = 3, fig.width = 8, cache = TRUE, out.width = '100%'}
 n.vec <- 2 ^ c(7, 8, 9, 10, 11)
@@ -1494,12 +1558,12 @@ ggplot(repeat.df) +
     ii. $g_2(t) = [ 0, t^2, 2 t (t-1) ]^\top$
     iii. $g_3(t) = [2 t (t-1), t^2, 2 t (t-1) ]^\top$.
 4. Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$.
-5. Draw $A \sim \RDPG(X)$. 
+5. Draw $A \sim \GRDPG_{3,0}(X)$. 
 
 ```{r three-curves, cache = TRUE, fig.height = 4, fig.width = 15, fig.cap = 'Latent vectors (left) and ASE (right) of one realization of the mixture model in the simulation setup with $K=3$ manifolds.', out.width = '100%'}
 par(mfrow = c(1, 2))
 
-n <- 512
+n <- 1024
 
 p.list <- list(matrix(c(0, 1, 0, 
                         0, 0, 1,
@@ -1558,7 +1622,7 @@ scatterplot3d::scatterplot3d(Xhat[, 1], Xhat[, 2], Xhat[, 3],
     ii. $g_2(t) = [ 0, t^2, 2 t (t-1) ]^\top$
     iii. $g_3(t) = [2 t (t-1), t^2, 2 t (t-1) ]^\top$.
 4. Collect the latent vectors into matrix $X = [ x_1 \mid \cdots \mid x_n ]^\top$.
-5. Draw $A \sim \RDPG(X)$. 
+5. Draw $A \sim \GRDPG_{3,0}(X)$. 
 
 ```{r sim-curves-3, fig.height = 3, fig.width = 8, out.width = '100%', cache = TRUE}
 n.vec <- 2 ^ c(7, 8, 9, 10, 11)
@@ -1742,18 +1806,253 @@ fitted.l <- plot.estimated.curves(Xhat.l, mbconnectome.out.l) +
 gridExtra::grid.arrange(fitted.l, fitted.r, nrow = 1)
 ```
 
+# Additional Slides
+
 ## Expected Degree and Sparsity Factor
 
 Let $d_1, ..., d_n$ be the degrees of vertices $v_1, ..., v_n$. 
 For $P$ defined by a block model or GRDPG, $E[d_i] = O(n)$. 
 In most real networks, the degree does not scale linearly with the size of the network. 
 
-Introduce a sparsity factor $\rho_n$ such that $A \sim \BG(\rho_n P)$.
+Introduce a sparsity factor $\rho_n$ and draw $A \sim \BG(\rho_n P)$.
 
 * Sparse regime: $\lim\limits_{n \to \infty} \rho_n \to 0$
 * Dense regime: $\rho_n = 1$
 
 Most results still require $n \rho_n = \omega (\log^c n)$, i.e., 
-expected degree still diverges, but at a logarithmic rate. 
+expected degree still diverges, but at a logarithmic rate instead of linearly. 
+
+## Subspace Detection Property
+
+If $X$ obeys the *Subspace Detection Property*, then $B$ is sparse such that 
+$B_{ij} = 0$ for each $x_i$ and $x_j$ belonging to different subspaces.
+
+::: columns
+
+:::: column
+
+```{r, cache = TRUE, fig.height = 3, fig.width = 4, out.width = '50%'}
+set.seed(314159)
+
+n <- 64
+
+par(mar = rep(1, 4))
+
+x1 <- runif(n, 1 / sqrt(50), 1)
+y1 <- rep(0, n)
+x2 <- rep(0, n)
+y2 <- x1
+z <- c(rep(1, n), rep(2, n))
+X <- cbind(c(x1, x2), c(y1, y2))
+X <- X + cbind(runif(n * 2, 0, .025),
+               runif(n * 2, 0, .025))
+X <- X %*% rbind(c(cos(pi / 9), sin(pi / 9)),
+                 c(-sin(pi/ 9), cos(pi / 9)))
+plot(X, col = z * 2, asp = 1, xlab = NA, ylab = NA)
+```
+
+::::
+
+:::: column
+
+```{r, fig.height = 3, fig.width = 5, out.width = '75%'}
+Y <- t(X)
+Y <- sweep(Y, 2, apply(Y, 2, function(y) sqrt(sum(y ** 2))), `/`)
+Y[is.nan(Y)] <- 0
+lambda <- .05
+N <- ncol(Y)
+B <- plyr::aaply(seq(N), 1, function(i) {
+  y <- Y[, i]
+  X <- Y[, -i]
+  betahat <- glmnet::glmnet(X, y, lambda = lambda, intercept = FALSE) %>% 
+    coef() %>% 
+    as.numeric()
+  if (i != N) {
+    betahat <- c(betahat[seq(i)], 0, betahat[seq(i + 1, N)])
+  } else {
+    betahat <- c(betahat, 0)
+  }
+  betahat <- betahat[-1]
+  return(betahat)
+}, .parallel = TRUE) %>% 
+  abs()
+B <- sweep(B, 2, apply(B, 2, max), `/`)
+B[is.nan(B)] <- 0
+W <- B + t(B)
+
+qgraph::qgraph(sign(W), layout = 'spring', groups = factor(z), legend = FALSE)
+```
+
+::::
+
+:::
+
+**Theorem** (Wang and Xu, 2016): 
+If data matrix $X$ consists of points lying close to 
+low-dimensional subspaces such that:
+
+1. Each point's distance to its subspace is sufficiently small.
+2. The points corresponding to each subspace cover a sufficient amount of 
+that subspace.
+3. The cosine of the angles between pairs of subspaces is sufficiently small.
+
+Then $X$ obeys SDP.
+
+## Parameter Estimation
+
+1. Let $A^{(kl)}$ be the block of edges between communities $k$ and $l$. 
+2. For each $k, l \in [K]$, do:
+    i. Compute the SVD $A^{(kl)} = U \Sigma V^\top$.
+    ii. Assign $u^{(kl)}$ and $v^{(kl)}$ as the first columns of $U$ and $V$. 
+    Assign $\sigma^{(kl)} \leftarrow \Sigma_{11}^{1/2}$. 
+    iii. Assign $\hat{\lambda}^{(kl)} \leftarrow \pm \sigma^{(kl)} u^{(kl)}$ and 
+    $\hat{\lambda}^{(kl)} \leftarrow \pm \sigma^{(kl)} v^{(kl)}$.
+
+**Theorem** (KTT): 
+
+$$\max_{k, l} \|\hat{\lambda}^{(kl)} - \lambda^{(kl)}\| =
+O_P \Big( \frac{(\log n_k)^c}{\sqrt{n_k}} \Big)$$
+
+## Indefinite Orthogonal Group
+
+$$\mathbb{O}(p, q) = \{Q : Q I_{p, q} Q^\top = I_{p, q}\}$$
+
+* $Q^\top Q \neq I$
+* If $A \sim \GRDPG_{p, q}(X)$, then $A \sim \GRDPG_{p, q}(X Q)$
+* $(Q x)^\top (Q y) = x^\top Q^\top Q y \neq x^\top y$
+* $\|Q\| \neq 1$ $\implies$ $\|Q x - Q y\| \neq \|x - y\|$
+
+## Fitting Bezier Curves to Noisy Data
+
+Let $g(t; p) = \sum_{r=0}^R p^{(r)} \binom{R}{r} t^r (1-t)^{R-r}$ be a Bezier curve of order $R$ with coefficients $p = [p^{(0)} \mid \cdots \mid p^{(R)} ]^\top$. 
+
+Objective: minimize squared loss: $L(p, T; X) = \|X - T p\|^2$.
+
+$T$ is the $n \times (R+1)$ matrix of index points, i.e., $T_{ir} = \binom{R}{r} t_i^r (1-t_i)^{R-r}$.
+
+If we know $T$, we can fit $p$: $\hat{p} = (T^\top T)^{-1} T^\top X$.
+
+If we know $p$, we can fit each $t_1, ..., t_n$ by finding the roots of $\dot{L}(t_i; p, x_i) = \bigg(\sum_{r=0}^R \binom{R}{r} (-1)^r c_r t^r \bigg) \bigg(\sum_{r=0}^{R-1} \binom{R-1}{r} (-1)^r c_{r+1} t^r \bigg)$, where $c_R = \sum_{r=0}^R (-1)^{R-r} \binom{R}{r} p^{(r)}$.
+
+## ASE Clustering for Nonintersecting Communities
+
+\begin{algorithm}[H]
+\label{alg:ase-singlelink}
+\scriptsize
+\DontPrintSemicolon
+\SetAlgoLined
+\KwData{Adjacency matrix $A$, number of communities $K$, embedding dimensions $(p, q)$.}
+\KwResult{Community assignments $z_1, ..., z_n \in \{1, ..., K\}$.}
+Compute $\hat{X}$, the ASE of $A$ using the $p$ most positive and $q$ most negative eigenvalues and their corresponding eigenvectors.\;
+Apply single linkage clustering with $K$ communities on $\hat{X}$.\;
+\caption{Graph manifold clustering via single-linkage.}
+\end{algorithm}
+
+```{r two-curves, fig.cap = 'Manifold block model from two disjoint curves. The latent configuration is on the left, a random dot product graph drawn from the latent configuration is on the middle, and the ASE is on the right.', fig.height = 2, fig.width = 8, out.width='100%'}
+set.seed(123456)
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+u1 <- runif(n1)
+u2 <- runif(n2)
+x1 <- cos(pi / 3 * u1)
+y1 <- sin(pi / 3 * u1)
+x2 <- 1 + cos(pi / 3 * u2 + pi)
+y2 <- 1 + sin(pi / 3 * u2 + pi)
+data.matrix <- cbind(c(x1, x2), c(y1, y2))
+A <- draw.graph(data.matrix %*% t(data.matrix))
+Xhat <- embedding(A, 2, 0)
+
+par(mfrow = c(1, 3))
+# par(fig = c(0, .7, 0, 1))
+plot(data.matrix, col = z * 2, asp = 1,
+     xlab = NA, ylab = NA, 
+     # xaxt = 'n', yaxt = 'n',
+     xlim = c(-.1, 1.1), ylim = c(0, 1))
+# ggplot() +
+#   geom_point(aes(x = data.matrix[, 1], y = data.matrix[, 2], colour = factor(z))) +
+#   labs(x = NULL, y = NULL) +
+#   scale_colour_brewer(palette = 'Set1') +
+#   theme(legend.position = 'none') +
+#   coord_fixed()
+# par(fig = c(.3, 1, 0, 1))
+qgraph::qgraph(A, groups = factor(z), legend = FALSE)
+plot(Xhat, col = z * 2, asp = 1, 
+     # xaxt = 'n', yaxt = 'n', 
+     xlab = NA, ylab = NA)
+```
+
+## ASE Clustering for Nonintersecting Communities
+
+```{r fig.height = 2, fig.width = 8, out.width='100%'}
+set.seed(123456)
+n1 <- 2 ** 5
+n2 <- 2 ** 5
+n <- n1 + n2
+z <- c(rep(1, n1), rep(2, n2))
+u1 <- runif(n1)
+u2 <- runif(n2)
+x1 <- cos(pi / 3 * u1)
+y1 <- sin(pi / 3 * u1)
+x2 <- 1 + cos(pi / 3 * u2 + pi)
+y2 <- 1 + sin(pi / 3 * u2 + pi)
+data.matrix <- cbind(c(x1, x2), c(y1, y2))
+A <- draw.graph(data.matrix %*% t(data.matrix))
+Xhat <- embedding(A, 2, 0)
+
+par(mfrow = c(1, 3))
+# par(fig = c(0, .7, 0, 1))
+plot(data.matrix, col = z * 2, asp = 1,
+     xlab = NA, ylab = NA, 
+     # xaxt = 'n', yaxt = 'n',
+     xlim = c(-.1, 1.1), ylim = c(0, 1))
+# ggplot() +
+#   geom_point(aes(x = data.matrix[, 1], y = data.matrix[, 2], colour = factor(z))) +
+#   labs(x = NULL, y = NULL) +
+#   scale_colour_brewer(palette = 'Set1') +
+#   theme(legend.position = 'none') +
+#   coord_fixed()
+# par(fig = c(.3, 1, 0, 1))
+qgraph::qgraph(A, groups = factor(z), legend = FALSE)
+plot(Xhat, col = z * 2, asp = 1, 
+     # xaxt = 'n', yaxt = 'n', 
+     xlab = NA, ylab = NA)
+```
+
+**Theorem** (KTT): Let $A$ be a graph on $n$ vertices from the MBM model in wherein $n \rho_n = \omega(\log^{c}{n})$ for some $c > 1$ and the manifolds $\mathcal{M}_1, \dots, \mathcal{M}_{K}$ satisfy $\min_{k \neq \ell} \min_{x \in \mathcal{M}_k, y \in \mathcal{M}_{\ell}} \|x  - y\| \geq \delta$ for some $\delta > 0$ not depending on $n$ or $K$. 
+Let $\hat{X}$ be the ASE of $A$ onto $\mathbb{R}^{d}$. 
+Define $A_n(\eta)$ as the event that an $\eta$-neighborhood graph constructed from the ASE of $A$ consists of exactly $K$ disconnected subgraphs that map exactly to each manifold. 
+Then for some $C > 0$ and any $\eta \in (0, C \delta)$, $\lim\limits_{n \to \infty} P(A_n(\eta)) = 1$. 
 
 ## References
+
+* Adamic, L. A. and Glance, N. (2005). The political blogosphere and the 2004 U.S. election: Divided they blog. In *Proceedings of the 3rd International Workshop on Link Discovery*, LinkKDD '05. 
+* Banerjee, A., Chandrasekhar, A. G., Duflo, E., and Jackson, M. O. (2013). The diffusion of Microfinance. Harvard Dataverse. 
+* Eichler, K., Li, F., Litwin-Kumar, A., Park, Y., Andrade, I., Schneider-Mizell, C. M., Saumweber, T., Huser, A., Eschbach, C., Gerber, B., Fetter, R. D., Truman, J. W., Priebe, C. E., Abbot, L. F., Thum, A. S., Zlatic, M., and Cardona, A. (2017). The complete connectome of a learning and memory center in an insect brain. *bioRxiv*.
+
+## References 
+
+* Elhamifar, E. and Vidal, R. (2009). Sparse Subspace Clustering. *2009 IEEE Conference on Computer Vision and Pattern Recognition*. 
+* Gao, J., Liang, F., Fan, W., Sun, Y., and Han, J. (2009). Graph-based consensus maximization among multiple supervised and unsupervised models. *Advances in Neural Information Processing Systems 22*. 
+* Greene, D. and Cunningham, P. (2013). Producing a unified graph representation from multiple social network views. *CoRR*. 
+* Karrer, B. and Newman, M. E. J. (2011). Stochastic blockmodels and community structure in networks. *Physical Review E*. 
+* Koo, J., Tang, M., and Trosset, M. W. (2022). Popularity adjusted block models are generalized random dot product graphs. *Journal of Computational and Graphical Statistics*. 
+
+## References
+
+* Lorrain, F., and White, H. C. (1971). Structural equivalence of individuals in social networks. *The Journal of Mathematical Society*. 
+* Nepusz, T., Petroczi, A., Negyessy, L, and Bazso, F. (2008). Fuzzy communities and the concept of bridgeness in complex networks. *Phys. Rev. E*. 
+* Noroozi, M. and Pensky, M. (2022). The hierarchy of block models. *Sankhya A*.
+* Noroozi, M., Rimal, R., and Pensky, M. (2019). Estimation and clustering in the popularity adjusted block model. *Journal of the Royal Statistical Society: Series B (Statistical Methodology)*.
+
+## References
+
+* Negyessy, L., Nepusz, T., Kocsis, L., and Bazso, F. (2006). Prediction of the main cortical areas and connections involved in the tactile function of the visual cortex by network analysis. *European Journal of Neuroscience*. 
+* Rubin-Delanchy, P., Cape, J., Tang, M., and Priebe, C. E. (2022). A statistical interpretation of spectral embedding: The generalised random dot product graph. *Journal of the Royal Statistical Society: Series B (Statistical Methodology)*. 
+* Sengupta, S. and Chen, Y. (2018). A block model for node popularity in networks with community structure. *Journal of the Royal Statistical Society, Series B (Statistical Methodology)*. 
+* Sussman, D. L., Tang, M., Fishkind, D. E., and Priebe, C. E. (2012). A consistent adjacency spectral embedding for stochastic blockmodel graphs. *Journal of the American Statistical Association*. 
+
+## References
+
+* Wang, Y.-X. and Xu, H. (2016). Noisy sparse subspace clustering. *Journal of Machine Learning Research*. 

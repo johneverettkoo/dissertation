@@ -158,4 +158,85 @@ We modified this setup by drawing imbalanced communities, and again, we show err
 Finally, we tried a setup in which the popularity parameters were drawn such that there is usually a higher probability of drawing an edge between communities than within communities, and we achieved similar results from orthogonal spectral clustering and sparse subspace clustering. 
 Note that even though the graphs are disassortative, the application of OSC and SSC remain identical as in the assortative cases from before. 
 
+We also analyzed three real graphs which were used as examples in the original PABM paper, applying modularity maximization, which was the method proposed in that paper, SSC, and OSC. 
+Note that these are all algorithms for fitting a PABM. 
+While our methods performed worse than modularity maximization, they were much faster. 
+
+NOTE: DBLP = computer science citation network, "Digital Bibliography and Library Project"
+
+In another example, we looked at the Karnataka villages data. 
+These are household visitation networks of three villages.
+Here, all three methods achieve comparable performance. 
+
+NOTE: Karnataka = state in southwestern India
+
+The work I presented is joint work with my advisors Michael Trosset and Minh Tang, and it was recently published in JCGS. 
+You can also view all of the code on GitHub, and I am working on an R package for orthogonal spectral clustering, and its current state is also on GitHub. 
+
+So the story thus far has been that we have three easy to understand yet widely applicable block models for modeling networks with community structure, and we have another model called the generalized random dot product graph, and the connection between them is that block models are generalized random dot product graphs with various community-wise latent structures. 
+This makes community detection via fitting a block model to a network an easy and intuitive task--we first estimate the latent vectors via ASE, then we apply the appropriate clustering method for the particular structure for the block model of interest. 
+This approach is also a good way to determine which type of block model is most appropriate for the data--we can simply look at the structure of the estimated latent vectors and choose the corresponding block model. 
+
+In our final section, we will talk about more general models with community structure. 
+We call these manifold block models, and the reason for this name will hopefully become clear in the next few slides. 
+
+So first, a motivating example. 
+Here is a graph that represents brain areas and connections of the macaque monkey. 
+Two brain functions were mapped onto each area, one for visual responses and another for tactile responses. 
+At first, this appears to be a good candidate for analysis as a block model, since it is an unweighted and undirected graph with community structure. 
+However, the ASE shows that none of our clustering methods will work here. 
+In particular, the ASE suggests nonlinear latent structure. 
+A new type of block model is required for this analysis. 
+
+So here is our definition for the manifold block model. 
+As in the GRDPG, we start with a latent space, but we suppose that the latent vectors are restricted to K manifolds M_1, ..., M_K which are described by continuous functions g_1, ..., g_K. 
+The latent vectors are then drawn as follows: 
+First, the community labels are drawn from a categorical distribution. 
+Then the index points t_1 to t_n are drawn from some distribution on the unit hypercube. 
+Finally, each latent vector x_i is g_{z_i}(t_i), where g_{z_i}. 
+Within this presentation, we only consider one dimensional manifolds, which are described by curves. 
+
+The ASE can approximate the original latent structure, so while our previous methods will not work in this setting, there is still some hope that we can identify the communities. 
+
+The method we propose for this setting is called K curves clustering. 
+This is based on K means clustering, except instead of estimating means for each cluster, we estimate curves. 
+The procedure is as follows.
+First, we compute the ASE of an adjacency matrix. 
+Then we initialize the community labels, for example, randomly, or via some other clustering method.
+Then for each label, we fit a curve by specifying some functional form and adjusting the parameters of that function by minimizing the squared loss. 
+Then once we fit the K curves, we reassign the labels based on distance to each curve. 
+
+Like with K-means clustering, K-curves clustering can be sensitive to initialization, and like how K-means clustering makes an implicit assumption about how the data are distributed, the choice of the types of curves is an assumption on how the communities are structured in the latent space. 
+In this example, we generated a manifold block model in which the communities map to two quadratic curves, as in the previous example, and we applied K-curves clustering on the ASE using various functional forms for the curves and various initializations. 
+On the left, we started with a random initialization and assumed that the curves were quadratic, and we were able to recover the original latent curves, up to rotation. 
+In the middle, we again assumed that the curves are quadratic, but we started with labels assigned via normalized spectral clustering, and we obtained something that looks plausible but we know to be "incorrect" from our knowledge of the original latent configuration. 
+On the right, we again start with spectral clustering, but we fit cubic curves to the embedding, which again looks plausible and actually achieves a lower loss than the "true" solution, even though we know that this is "incorrect" based on the original latent configuration. 
+
+So I mentioned the loss function for K-means clustering, and here it is spelled out. 
+In effect, we are choosing labels and curves such that the distances between the embedding vectors and their assigned curves is small. 
+And so based on the choice of curve, we can have different solutions that minimize the loss. 
+Our theoretical result then needs some additional help. 
+In this theorem, we first assume that the curves are of some fixed order R and we already know for each community at least R+1 vertices that belong to it. 
+Then for larger and larger graphs, K-curves clustering will find labels and curves such that the loss function converges to zero with high probability. 
+
+To illustrate our results, we have a couple of simulations.
+In the first setup, we use the same two quadratic curves as before, and we start with 0, 4, and 8 known labels per community. 
+In all three settings, the community detection error rate decays to zero. 
+We also took a look at just one sample size, here n = 512, and we applied K-curves clustering many times with random initializations and visualized the results. 
+We can see in this case that a little more than half the time, it was able to find something close to the true latent curves. 
+
+In the second simulation example, we expanded both the number of curves and the dimensions of the latent space. 
+Here, we have three quadratic latent curves in three dimensions. 
+The results of these simulations are similar to that of the K=2 simulations in that the error rate appears to decay to zero as we draw larger and larger graphs. 
+
+Turning back to our original macaque brain areas network example, K-curves clustering with quadratic curves appears to do a decent job of identifying the latent structure, although it misses one label that has a outsized effect on the estimated curves. 
+In this example, K-curves clustering achieves an error rate of 4.4%.
+
+We also applied K-curves clustering to the drosophila connectome network. 
+The two graphs are for the left and right hemispheres of the brain. 
+In these graphs, the vertices are neurons, the edges represent whether the neurons are connected, and the communities are the four neuron types. 
+Again, K-curves clustering with quadratic curves appears to identify the structure reasonably well, and we get 72% and 84% accuracy for identifying the neuron type for the left and right hemispheres. 
+
+
+
 
