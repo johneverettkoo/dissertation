@@ -1,36 +1,38 @@
-\contentsline {section}{Contents}{1}{Doc-Start}%
-\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Graphs and Representations of Network Data}{3}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Probabilistic Models for Graphs}{7}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}Contributions of This Work}{10}{subsection.1.3}%
-\contentsline {section}{\numberline {2}Preliminaries}{12}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Block Models for Community Detection}{12}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}The Stochastic Block Model}{12}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Random Graph Models and Sparsity}{18}{subsection.2.3}%
-\contentsline {subsection}{\numberline {2.4}The Degree Corrected Block Model and the Popularity Adjusted Block Model}{19}{subsection.2.4}%
-\contentsline {subsection}{\numberline {2.5}A Hierarchy of Block Models}{26}{subsection.2.5}%
-\contentsline {subsection}{\numberline {2.6}The Generalized Random Dot Product Graph}{28}{subsection.2.6}%
-\contentsline {subsection}{\numberline {2.7}Connecting the SBM and DCBM to the GRDPG}{31}{subsection.2.7}%
-\contentsline {section}{\numberline {3}Popularity Adjusted Block Models are Generalized Random Dot Product Graphs}{37}{section.3}%
-\contentsline {subsection}{\numberline {3.1}The Geometry of PABMs}{37}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Algorithms}{42}{subsection.3.2}%
-\contentsline {subsubsection}{\numberline {3.2.1}Previous Work}{42}{subsubsection.3.2.1}%
-\contentsline {subsubsection}{\numberline {3.2.2}Algorithms for Community Detection}{45}{subsubsection.3.2.2}%
-\contentsline {subsubsection}{\numberline {3.2.3}Algorithm for Parameter Estimation}{49}{subsubsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.3}Simulation Study}{51}{subsection.3.3}%
-\contentsline {subsubsection}{\numberline {3.3.1}Balanced Communities}{53}{subsubsection.3.3.1}%
-\contentsline {subsubsection}{\numberline {3.3.2}Imbalanced Communities}{54}{subsubsection.3.3.2}%
-\contentsline {subsubsection}{\numberline {3.3.3}Disassortative Models}{57}{subsubsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.4}Applications}{59}{subsection.3.4}%
-\contentsline {section}{\numberline {4}Generalized Random Dot Product Graphs with Nonlinear Community Structure}{63}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Community Detection as Clustering in the Latent Space}{63}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}The Manifold Block Model}{65}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Previous Work}{67}{subsubsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.3}Algorithms}{68}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Simulation Study}{76}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Applications}{79}{subsection.4.5}%
-\contentsline {section}{\numberline {5}Discussion}{84}{section.5}%
-\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{87}{section.6}%
-\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{92}{section.7}%
-\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{96}{section.8}%
-\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{99}{section.9}%
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Graphs and Representations of Network Data}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Probabilistic Models for Graphs}{5}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Contributions of This Work}{8}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Preliminaries}{10}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Block Models for Community Detection}{10}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The Stochastic Block Model}{10}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Random Graph Models and Sparsity}{16}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}The Degree Corrected Block Model and the Popularity Adjusted Block Model}{17}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}A Hierarchy of Block Models}{24}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}The Generalized Random Dot Product Graph}{25}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Connecting the SBM and DCBM to the GRDPG}{28}{subsection.2.7}%
+\contentsline {section}{\numberline {3}Popularity Adjusted Block Models are Generalized Random Dot Product Graphs}{35}{section.3}%
+\contentsline {subsection}{\numberline {3.1}The Geometry of PABMs}{35}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Algorithms}{40}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}Previous Work}{40}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2}Algorithms for Community Detection}{43}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3}Algorithm for Parameter Estimation}{47}{subsubsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.3}Simulation Study}{49}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Balanced Communities}{51}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Imbalanced Communities}{52}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.3}Disassortative Models}{55}{subsubsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.4}Applications}{57}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Generalized Random Dot Product Graphs with Nonlinear Community Structure}{61}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Community Detection as Clustering in the Latent Space}{61}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}The Manifold Block Model}{63}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Previous Work}{65}{subsubsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.3}Algorithms}{66}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Simulation Study}{74}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Applications}{77}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Discussion}{82}{section.5}%
+\contentsline {section}{\numberline {6}Appendix A: Proofs of Theorems from Section 3}{85}{section.6}%
+\contentsline {section}{\numberline {7}Appendix B: Proofs of Theorems from Section 4}{90}{section.7}%
+\contentsline {section}{\numberline {8}Appendix C: Details on Fitting Bezier Curves to Noisy Data}{94}{section.8}%
+\contentsline {section}{\numberline {9}Appendix D: Supplementary Materials}{97}{section.9}%
+\contentsline {section}{References}{100}{section.9}
+\contentsline {section}{Curriculum Vitae}{}{section.9}
+\contentsfinish 

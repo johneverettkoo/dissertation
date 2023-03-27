@@ -1,0 +1,94 @@
+Remove asterisk from \newtheoremstyle{remark}
+
+Move \pagenumbering{arabic} below table of contents
+
+\renewcommand{\cfttoctitlefont}{\bf} before table of contents
+
+
+
+\newpage
+
+\pagenumbering{gobble}
+
+\section*{Curriculum Vitae}
+
+\begin{singlespace}
+
+\subsection*{Education}
+
+\begin{itemize}
+  \item Ph.D., Statistical Science, March 2023 \\
+        Indiana University, Bloomington, IN \\
+        Dissertation: \textit{Community Detection in the Setting of Generalized Random Dot Product Graphs} \\
+        Advisors: Michael W. Trosset and Minh Tang
+  \item M.S., Mathematics, August 2015 \\
+        Tarleton State University, Stephenville, TX \\
+        Thesis: \textit{Statistical Methods for Crop Yield Monitoring via Remote Sensing} \\
+        Advisors: Bert Little and Jesse Crawford
+  \item B.A., Mathematics, Physics, August 2012 \\
+        New York University, New York, NY
+\end{itemize}
+
+\subsection*{Research Interests}
+
+Statistical Inference on graphs and networks, computational statistics, dimensionality reduction, statistical pattern recognition, manifold learning
+
+\subsection*{Publications}
+
+\begin{itemize}
+  \item John Koo, Minh Tang, Michael W. Trosset (2023) Popularity Adjusted Block Models are Generalized Random Dot Product Graphs, \textit{Journal of Computational and Graphical Statistics}, 32:1, 131-144, DOI: 10.1080/10618600.2022.2081576
+\end{itemize}
+
+\subsection*{Talks and Presentations}
+
+\begin{itemize}
+  \item \textit{Popularity Adjusted Block Models are Generalized Random Dot Product Graphs}. Joint Statistical Meetings, Washington, DC. August 2023.
+  \item \textit{Popularity Adjusted Block Models are Generalized Random Dot Product Graphs}. MIDAS Future Leaders Summit, Ann Arbor, MI. April 2023.
+  \item \textit{Connecting the Popularity Adjusted Block Model to the Generalized Random Dot Product Graph}. Symposium on Data Science and Statistics, Virtual. June 2021. 
+  \item \textit{Introduction to Git and GitHub}. Machine Learning for Research Club at IU, Bloomington, IN. February 2021. 
+\end{itemize}
+
+\subsection*{Software}
+
+\begin{itemize}
+  \item R package \verb|osc|: An implementation of orthogonal spectral clustering for community detection in linear latent structure block models. Available at \verb|https://github.com/johneverettkoo/osc|.
+\end{itemize}
+
+\subsection*{Courses Taught}
+
+\begin{itemize}
+  \item Spring 2023. STAT-S 301: Applied Statistical Methods for Business. 
+  \item Spring 2018. STAT-S 301: Applied Statistical Methods for Business. 
+\end{itemize}
+
+\subsection*{Industry Experience}
+
+\begin{itemize}
+  \item Data Science Consultant \\
+        Freelance, Bloomington, IN \\
+        2020 - present
+  \item Data Science Intern \\
+        The Climate Corporation, Seattle, WA \\
+        May 2019 - August 2019
+  \item Data Science Intern \\
+        The Bee Corp, Bloomington, IN \\
+        May 2018 - August 2018
+  \item Data Analyst \\
+        The Climate Corporation, San Francisco, CA \\
+        September 2015 - July 2017
+  \item Research Intern \\
+        Center for Agribusiness Excellence, Stephenville, TX \\
+        June 2014 - August 2015
+  \item Software Test Engineer \\
+        DEKA Research, Manchester, NH \\
+        January 2014 - May 2014
+  \item Mathematics Teaching Fellow \\
+        Lawrence High School, Lawrence, MA \\
+        July 2012 - June 2013
+\end{itemize}
+
+\end{singlespace}
+
+\cftaddtitleline{toc}{section}{References}{100}
+
+\cftaddtitleline{toc}{section}{Curriculum Vitae}{}

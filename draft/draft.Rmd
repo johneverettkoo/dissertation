@@ -29,6 +29,9 @@ header-includes:
 - \usepackage{verbatim}
 - \usepackage{amsthm}
 - \usepackage{comment}
+- \usepackage{sectsty}
+- \usepackage{tocloft}
+- \usepackage{titletoc}
 - \DeclareMathOperator*{\argmax}{arg\,max}
 - \DeclareMathOperator*{\argmin}{arg\,min}
 bibliography: bibliography.bib
@@ -67,6 +70,8 @@ doMC::registerDoMC(parallel::detectCores())
 ```
 
 ```{=tex}
+\sectionfont{\fontsize{12}{12}\scshape}
+\subsectionfont{\fontsize{12}{12}\selectfont}
 \setlength{\parindent}{20.0pt}
 \newcommand{\diag}{\mathrm{diag}}
 \newcommand{\tr}{\mathrm{Tr}}
@@ -3564,5 +3569,3 @@ An R package implementing orthogonal spectral clustering (algorithm \ref{alg:osc
 The code for simulations and data analyses in section \@ref(sec:mbm) can be found at https://github.com/johneverettkoo/manifold-block-models. 
 
 \newpage
-
-# References
